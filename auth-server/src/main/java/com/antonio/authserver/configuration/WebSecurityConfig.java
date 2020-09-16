@@ -8,9 +8,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import com.antonio.authserver.repository.AppUserRepository;
-import com.antonio.authserver.service.DefaultAuthenticationProvider;
+import com.antonio.authserver.service.providers.DefaultAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity

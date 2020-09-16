@@ -1,4 +1,4 @@
-package com.antonio.authserver.service;
+package com.antonio.authserver.service.providers;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
