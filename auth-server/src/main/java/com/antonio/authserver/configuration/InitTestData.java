@@ -10,8 +10,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,8 +29,11 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {
         Role role = new Role("USER");
         roleRepository.save(role);
-        Set<Role> roles = new HashSet<>();
-        roles = roleRepository.findAll().stream().collect(Collectors.toSet());
+        List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ADMIN"),new Role("EDITOR"), new Role("VIEWER")));
+        roleList.stream().forEach(r -> roleRepository.save(r));
+
+        Set<Role> roles;
+        roles = new HashSet<>(roleRepository.findAll());
         System.out.println(roles);
 
 
