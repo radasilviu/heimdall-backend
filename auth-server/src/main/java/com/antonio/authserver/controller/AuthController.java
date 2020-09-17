@@ -21,7 +21,12 @@ public class AuthController {
     @PostMapping(path = "/client-login")
     public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
-        return ResponseEntity.ok().body(code);
+
+        if (code != null) {
+            return ResponseEntity.ok().body(code);
+        }
+        final ResponseMessage responseMessage = new ResponseMessage("Failed to generate JWT Code");
+        return ResponseEntity.unprocessableEntity().body(responseMessage);
     }
 
     @CrossOrigin("http://localhost:4201")

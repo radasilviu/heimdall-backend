@@ -8,9 +8,14 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.CodeRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +25,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
 import java.util.*;
 
 @Service
@@ -32,6 +40,11 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    Environment env;
+
+    private final long clientAuthCodeExpiration = 60000; // in milliseconds;
 
     private final AuthenticationManager authenticationManager;
 
@@ -46,8 +59,8 @@ public class AuthService {
             throw new RuntimeException("Bad credentials!");
         }
 
-        Code code = createOauthCode();
         final AppUser user = userOptional.get();
+        Code code = createOauthCode(user);
         saveUserWithNewCodeValue(user, code);
 
         return code;
@@ -59,24 +72,48 @@ public class AuthService {
 
     }
 
-    private Code createOauthCode() {
-        final Code code = new Code(generateCode());
+    private Code createOauthCode(AppUser user) {
+        String jwtCode = generateCode(user);
 
-        return code;
+        if (jwtCode != "") {
+            final Code code = new Code(jwtCode);
+            return code;
+        }
+        return null;
     }
 
-    private String generateCode() {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 6;
-        Random random = new Random();
+    private String generateCode(AppUser user) {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey"));
+        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
-        String generatedString = random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        long expireTime = nowMillis + clientAuthCodeExpiration;
+        Date exp = new Date(expireTime);
 
-        return generatedString;
+        String jsonString = convertUserToJSON(user);
+
+        JwtBuilder builder = Jwts.builder()
+                .setSubject(jsonString)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(signatureAlgorithm, signingKey);
+
+        return builder.compact();
+    }
+
+    private String convertUserToJSON(AppUser user) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = "";
+
+        try {
+            jsonString = mapper.writeValueAsString(user);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return jsonString;
     }
 
     public JwtObject login(LoginCredential loginCredential) {
