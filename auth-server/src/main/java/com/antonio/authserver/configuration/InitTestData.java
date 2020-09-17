@@ -38,7 +38,11 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
 
 
         AppUser appUser = new AppUser("admin","admin123",roleRepository.findAllByName("ADMIN"));
+        AppUser appUser1 = new AppUser("gabi","gabi",roleRepository.findAllByName("EDITOR"));
+        AppUser appUser2 = new AppUser("toni","toni",roleRepository.findAllByName("VIEWER"));
         appUserRepository.save(appUser);
+        appUserRepository.save(appUser1);
+        appUserRepository.save(appUser2);
     }
 
 
