@@ -3,6 +3,7 @@ package com.antonio.authserver.controller;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.repository.RoleRepository;
 import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,12 @@ public class UserController {
 
 
     private UserService userService;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping
@@ -49,7 +52,9 @@ public class UserController {
 
     @PostMapping("/{id}/addRole")
     public void addRoleToUser(@PathVariable Long id, @RequestBody Role role){
-        userService.addRole(id,role);
+            Role newRole = roleRepository.findByName(role.getName());
+            userService.addRole(id,newRole);
+
     }
 
 

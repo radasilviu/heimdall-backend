@@ -48,6 +48,7 @@ public class UserService {
 
         AppUser user = appUserRepository.getOne(userId);
         user.getRoles().add(role);
+        appUserRepository.save(user);
     }
 
     public AppUser getUserByUsername(String username) {
