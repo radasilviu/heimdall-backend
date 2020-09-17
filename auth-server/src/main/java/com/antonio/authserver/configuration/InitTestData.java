@@ -32,12 +32,12 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ADMIN"),new Role("EDITOR"), new Role("VIEWER")));
         roleList.stream().forEach(r -> roleRepository.save(r));
 
-        Set<Role> roles;
-        roles = new HashSet<>(roleRepository.findAll());
+        Set<Role> roles = new HashSet<>();
+        roles.add(new Role("ADMIN"));
         System.out.println(roles);
 
 
-        AppUser appUser = new AppUser("admin","admin123",roles);
+        AppUser appUser = new AppUser("admin","admin123",roleRepository.findAllByName("ADMIN"));
         appUserRepository.save(appUser);
     }
 
