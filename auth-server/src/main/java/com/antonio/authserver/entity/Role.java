@@ -1,6 +1,8 @@
 package com.antonio.authserver.entity;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Role {
 
     @Id
@@ -17,32 +20,12 @@ public class Role {
 
     private String name;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Role(String name) {
-        this.name = name;
-    }
 
     public Role() {
 
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public Role(String name) {
         this.name = name;
     }
-
-    public Long getId() {
-        return id;
-    }
-
 }

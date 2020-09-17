@@ -42,7 +42,7 @@ public class AuthService {
     public Code getCode(ClientLoginRequest request) {
         Optional<AppUser> userOptional = appUserRepository.findByUsernameAndPassword(request.getUsername(), request.getPassword());
 
-        if (userOptional.isEmpty()) {
+        if (!userOptional.isPresent()) {
             throw new RuntimeException("Bad credentials!");
         }
 
@@ -101,7 +101,7 @@ public class AuthService {
     private void verifyClientCredential(String clientCode) {
         final Optional<Code> codeOptional = codeRepository.findByCode(clientCode);
 
-        if (codeOptional.isEmpty()) {
+        if (!codeOptional.isPresent()) {
             throw new RuntimeException("Your client do not have permission to use this app");
         }
 
