@@ -49,7 +49,7 @@ public class UserController {
 
     @PostMapping("/{id}/addRole")
     public void addRoleToUser(@PathVariable Long id, @RequestBody Role role){
-        userService.addRole(idgi,role);
+        userService.addRole(id,role);
     }
 
 
