@@ -8,9 +8,11 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.CodeRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
+import com.auth0.jwt.JWTVerifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -95,6 +97,7 @@ public class AuthService {
         String jsonString = convertUserToJSON(user);
 
         JwtBuilder builder = Jwts.builder()
+                .setIssuer(user.)
                 .setSubject(jsonString)
                 .setIssuedAt(now)
                 .setExpiration(exp)
@@ -117,23 +120,24 @@ public class AuthService {
     }
 
     public JwtObject login(LoginCredential loginCredential) {
+        String code = loginCredential.getClientCode();
+        verifyClientCredential(code);
+        verifyTokenExpirationTime(code);
 
-        //  verifyClientCredential(loginCredential.getClientCode());
-
-        final Optional<AppUser> userOptional = appUserRepository.findByUsername(loginCredential.getUsername());
-        verifyUserCredentials(userOptional, loginCredential);
-
-        final Authentication authentication = authenticateUser(loginCredential);
-        setCurrentUserToSecurityContext(authentication);
-
-
-        final String token = createUserNameAndPasswordTokenAuth(authentication.getName(), authentication.getAuthorities());
+        final String token = createUserNameAndPasswordTokenAuth();
         final Long expireTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
         final JwtObject jwtObject = new JwtObject(expireTime, token);
 
         return jwtObject;
     }
 
+    private Claims decodeJWT(String jwt) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey")))
+                .parseClaimsJws(jwt)
+                .getBody();
+        return claims;
+    }
 
     private void verifyClientCredential(String clientCode) {
         final Optional<Code> codeOptional = codeRepository.findByCode(clientCode);
@@ -144,35 +148,15 @@ public class AuthService {
 
     }
 
-    private void setCurrentUserToSecurityContext(Authentication authentication) {
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+    private void verifyTokenExpirationTime(String jwt) {
+        long nowMillis = System.currentTimeMillis();
 
-    private Authentication authenticateUser(LoginCredential loginCredential) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginCredential.getUsername(),
-                        loginCredential.getPassword(), new ArrayList<>()));
+        Claims claims = decodeJWT(jwt);
+        long tokenMillis = claims.getExpiration().getTime();
 
-        return authentication;
-    }
-
-    private void verifyUserCredentials(Optional<AppUser> userOptional, LoginCredential loginCredential) {
-
-        if (!userOptional.isPresent()) {
-            throw new UsernameNotFoundException("User with username: " + loginCredential.getUsername() + " doesn't exist");
+        if (nowMillis > tokenMillis) {
+            throw new RuntimeException("Token expired");
         }
-
-        final AppUser user = userOptional.get();
-
-        if (!loginCredential.getClientCode().equals(user.getCode())) {
-            throw new RuntimeException("Client code is wrong");
-        }
-
-        if (!passwordEncoder.matches(loginCredential.getPassword(), user.getPassword())) {
-            throw new UsernameNotFoundException("Password is not correct!");
-        }
-
     }
 
     private String createUserNameAndPasswordTokenAuth(String username, Collection<? extends GrantedAuthority> authorities) {
