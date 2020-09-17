@@ -1,6 +1,6 @@
 package com.antonio.authserver.controller;
 
-import com.antonio.authserver.model.Code;
+import com.antonio.authserver.entity.Code;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;

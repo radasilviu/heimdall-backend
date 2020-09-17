@@ -1,6 +1,7 @@
 package com.antonio.authserver.entity;
 
 import lombok.Data;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ public class AppUser {
 
     private String username;
     private String password;
+    private String code;
 
     @ManyToMany
     @JoinTable(
@@ -54,5 +56,13 @@ public class AppUser {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }
