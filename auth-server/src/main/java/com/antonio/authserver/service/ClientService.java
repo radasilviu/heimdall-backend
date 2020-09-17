@@ -36,6 +36,7 @@ public class ClientService {
     }
 
     public List<Client> getAllClients() {
+        System.out.println(clientRepository.findAll());
         return clientRepository.findAll();
     }
 
