@@ -1,9 +1,13 @@
 package com.antonio.authserver.controller;
 
 import com.antonio.authserver.entity.Code;
+import com.antonio.authserver.model.JwtObject;
+import com.antonio.authserver.model.LoginCredential;
+import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +19,25 @@ public class AuthController {
 
     @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/client-login")
-    public Code generateCode(@RequestBody ClientLoginRequest loginRequest) {
+    public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
-        return code;
+        return ResponseEntity.ok().body(code);
     }
+
+    @CrossOrigin("http://localhost:4201")
+    @PostMapping(path = "/token")
+    public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
+        JwtObject jwtObject = authService.login(loginCredential);
+        return ResponseEntity.ok().body(jwtObject);
+    }
+
+    @CrossOrigin("http://localhost:4201")
+    @GetMapping(path = "/access")
+    public ResponseEntity<?> verifyToken() {
+
+        final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
+        return ResponseEntity.ok().body(responseMessage);
+    }
+
+
 }
