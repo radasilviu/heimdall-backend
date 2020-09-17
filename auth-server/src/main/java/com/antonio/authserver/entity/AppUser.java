@@ -19,6 +19,8 @@ public class AppUser {
 
     private String username;
     private String password;
+
+    @Column(columnDefinition = "TEXT")
     private String code;
 
     @ManyToMany

@@ -8,23 +8,12 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.CodeRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
-import com.auth0.jwt.JWTVerifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -39,9 +28,6 @@ public class AuthService {
 
     @Autowired
     private CodeRepository codeRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     Environment env;
@@ -97,7 +83,7 @@ public class AuthService {
         String jsonString = convertUserToJSON(user);
 
         JwtBuilder builder = Jwts.builder()
-                .setIssuer(user.)
+                .setIssuer(user.getUsername())
                 .setSubject(jsonString)
                 .setIssuedAt(now)
                 .setExpiration(exp)
@@ -121,55 +107,47 @@ public class AuthService {
 
     public JwtObject login(LoginCredential loginCredential) {
         String code = loginCredential.getClientCode();
-        verifyClientCredential(code);
-        verifyTokenExpirationTime(code);
+        Claims claims = decodeJWT(code);
 
-        final String token = createUserNameAndPasswordTokenAuth();
-        final Long expireTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
-        final JwtObject jwtObject = new JwtObject(expireTime, token);
+        verifyClientCredential(code);
+        Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
+
+        final String token = createAccessToken(claims.getIssuer(), expirationTime);
+        final JwtObject jwtObject = new JwtObject(expirationTime.getTime(), token);
 
         return jwtObject;
     }
 
-    private Claims decodeJWT(String jwt) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey")))
-                .parseClaimsJws(jwt)
-                .getBody();
-        return claims;
-    }
-
     private void verifyClientCredential(String clientCode) {
-        final Optional<Code> codeOptional = codeRepository.findByCode(clientCode);
+        final Optional<AppUser> userOptional = appUserRepository.findByCode(clientCode);
 
-        if (!codeOptional.isPresent()) {
+        if (!userOptional.isPresent()) {
             throw new RuntimeException("Your client do not have permission to use this app");
         }
 
     }
 
-    private void verifyTokenExpirationTime(String jwt) {
-        long nowMillis = System.currentTimeMillis();
-
-        Claims claims = decodeJWT(jwt);
-        long tokenMillis = claims.getExpiration().getTime();
-
-        if (nowMillis > tokenMillis) {
+    private Claims decodeJWT(String jwt) {
+        Claims claims = null;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey")))
+                    .parseClaimsJws(jwt)
+                    .getBody();
+        } catch(ExpiredJwtException e) {
             throw new RuntimeException("Token expired");
         }
+
+        return claims;
     }
 
-    private String createUserNameAndPasswordTokenAuth(String username, Collection<? extends GrantedAuthority> authorities) {
+    private String createAccessToken(String username, Date expirationTime) {
         String token = Jwts.builder()
                 .setSubject(username)
-                .claim("authorities", authorities)
-                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                .setExpiration(expirationTime)
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
 
         return token;
-
     }
-
-
 }
