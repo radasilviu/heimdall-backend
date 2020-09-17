@@ -56,5 +56,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors();
+        http.csrf().disable();
+        http.authorizeRequests().antMatchers("/**").fullyAuthenticated().and()
+                .httpBasic();
+    }
+
 
 }

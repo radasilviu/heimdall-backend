@@ -3,6 +3,7 @@ package com.antonio.authserver.controller;
 import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,16 +11,28 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/client")
+@CrossOrigin
 public class ClientController {
+
 
     private ClientService clientService;
 
+    @Autowired
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
+
+
+
+
 
     @GetMapping
-    public ResponseEntity<List<Client>> getAllClients() {
+    public List<Client> getAllClients() {
         List<Client> clients = clientService.getAllClients();
 
-        return ResponseEntity.ok().body(clients);
+//        return ResponseEntity.ok().body(clients);
+        return clients;
     }
 
     @GetMapping("/{clientId}")

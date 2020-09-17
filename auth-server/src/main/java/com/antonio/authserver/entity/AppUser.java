@@ -26,12 +26,14 @@ public class AppUser {
     )
     private Set<Role> roles;
 
-    public Long getId() {
-        return id;
+    public AppUser(String username, String password, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public AppUser() {
+
     }
 
     public String getUsername() {
@@ -58,11 +60,11 @@ public class AppUser {
         this.roles = roles;
     }
 
-    public String getCode() {
-        return code;
+    public Long getId() {
+        return id;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setId(Long id) {
+        this.id = id;
     }
 }

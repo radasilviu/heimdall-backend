@@ -1,7 +1,9 @@
 package com.antonio.authserver.controller;
 
 import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.repository.RoleRepository;
 import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +13,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin
 public class UserController {
 
-    @Autowired
+
     private UserService userService;
+    private RoleRepository roleRepository;
+
+    @Autowired
+    public UserController(UserService userService, RoleRepository roleRepository) {
+        this.userService = userService;
+        this.roleRepository = roleRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<AppUser>> getUsers() {
@@ -39,6 +49,22 @@ public class UserController {
 
         return ResponseEntity.ok().body(responseMessage);
     }
+
+    @PostMapping("/{id}/addRole")
+    public void addRoleToUser(@PathVariable Long id, @RequestBody Role role){
+            Role newRole = roleRepository.findByName(role.getName());
+            userService.addRole(id,newRole);
+
+    }
+
+    @DeleteMapping("/{id}/removeRole")
+    public void removeRoleFromUser(@PathVariable Long id, @RequestBody Role role){
+        Role newRole = roleRepository.findByName(role.getName());
+        userService.removeRole(id,newRole);
+
+    }
+
+
 
 
 }

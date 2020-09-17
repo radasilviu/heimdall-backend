@@ -11,13 +11,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/role")
+@CrossOrigin
 public class RoleController {
 
-    @Autowired
+
     private RoleService roleService;
 
+    @Autowired
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
+
     @GetMapping
-    public ResponseEntity<List<Role>> getUsers() {
+    public ResponseEntity<List<Role>> getRoles() {
 
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok().body(roles);

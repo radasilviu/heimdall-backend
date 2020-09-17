@@ -48,7 +48,23 @@ public class UserService {
 
         AppUser user = appUserRepository.getOne(userId);
         user.getRoles().add(role);
+        appUserRepository.save(user);
     }
+
+    public void removeRole(Long userId, Role role) {
+        if (!checkIfUserExist(userId)) {
+            throw new RuntimeException("User with id: " + userId + "doesn't exist");
+        }
+
+        if (!checkIfRoleExist(role.getId())) {
+            throw new RuntimeException("Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly");
+        }
+
+        AppUser user = appUserRepository.getOne(userId);
+        user.getRoles().remove(role);
+        appUserRepository.save(user);
+    }
+
 
     public AppUser getUserByUsername(String username) {
 
