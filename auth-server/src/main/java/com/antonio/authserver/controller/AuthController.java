@@ -36,12 +36,10 @@ public class AuthController {
         return ResponseEntity.ok().body(jwtObject);
     }
 
-    @CrossOrigin("http://localhost:4201")
+    @CrossOrigin("http://localhost:8080")
     @GetMapping(path = "/access")
     public ResponseEntity<?> verifyToken() {
-
-        final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
-        return ResponseEntity.ok().body(responseMessage);
+        return ResponseEntity.ok().body("Valid Token");
     }
 
 

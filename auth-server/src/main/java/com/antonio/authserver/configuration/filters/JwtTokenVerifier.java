@@ -6,12 +6,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -19,11 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
@@ -48,18 +38,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                     .parseClaimsJws(token);
             Claims body = claimsJws.getBody();
             String username = body.getSubject();
-
-            final List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities");
-            final Set<GrantedAuthority> grantedAuthorities = authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
-            authentication = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
-
         } catch (
                 JwtException e) {
             throw new IllegalStateException("Token could not be trusted: " + token);
         }
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
