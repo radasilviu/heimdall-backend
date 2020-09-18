@@ -2,6 +2,8 @@ package com.antonio.authserver.configuration;
 
 import com.antonio.authserver.configuration.auth_providers.UsernameAndPasswordAuthProvider;
 import com.antonio.authserver.configuration.filters.JwtTokenVerifier;
+import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
+import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-
+    private RestAccessDeniedHandler accessDeniedHandler;
+    private RestAuthenticationEntryPoint unauthorizedHandler;
     @Autowired
     private UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
 
@@ -37,6 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 authorizeRequests()
                 .antMatchers("/oauth/token", "/oauth/client-login", "/oauth/access").permitAll()
                 .anyRequest().authenticated()
+                .and()
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .addFilterAfter(new JwtTokenVerifier(), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
