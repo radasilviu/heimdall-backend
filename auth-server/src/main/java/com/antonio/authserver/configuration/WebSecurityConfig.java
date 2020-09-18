@@ -38,7 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // @formatter:off
         http.csrf().disable().
                 authorizeRequests()
-                .antMatchers("/oauth/**").permitAll()
+                .antMatchers("/oauth/**", "/admin/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)

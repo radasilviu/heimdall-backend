@@ -7,6 +7,7 @@ import com.antonio.authserver.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(AdminCredential adminCredential) {
+    public ResponseEntity<?> login(@RequestBody AdminCredential adminCredential) {
         adminService.validateAdminService(adminCredential);
 
         final ResponseMessage responseMessage = new ResponseMessage("Logged In");
