@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.RoleService;
@@ -23,17 +24,17 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Role>> getRoles() {
+    public ResponseEntity<List<RoleDto>> getRoles() {
 
-        List<Role> roles = roleService.getAllRoles();
+        List<RoleDto> roles = roleService.getAllRoles();
         return ResponseEntity.ok().body(roles);
     }
 
 
     @DeleteMapping
-    public ResponseEntity<ResponseMessage> deleteRole(Long id) {
+    public ResponseEntity<ResponseMessage> deleteRole(String name) {
 
-        roleService.deleteRoleById(id);
+        roleService.deleteRoleByName(name);
         final ResponseMessage responseMessage = new ResponseMessage("Role successfully deleted");
         return ResponseEntity.ok().body(responseMessage);
 
@@ -41,7 +42,7 @@ public class RoleController {
 
 
     @PostMapping
-    public ResponseEntity<ResponseMessage> createRole(@RequestBody Role role) {
+    public ResponseEntity<ResponseMessage> createRole(@RequestBody RoleDto role) {
 
         roleService.saveRole(role);
         final ResponseMessage responseMessage = new ResponseMessage("Role successfully saved");

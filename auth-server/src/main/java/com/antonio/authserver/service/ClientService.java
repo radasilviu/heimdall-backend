@@ -1,6 +1,8 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
+import com.antonio.authserver.mapper.ClientMapper;
 import com.antonio.authserver.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,34 +16,37 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
-    public void saveClient(Client client) {
-        clientRepository.save(client);
+    @Autowired
+    private ClientMapper clientMapper;
+
+    public void saveClient(ClientDto client) {
+        clientRepository.save(clientMapper.toClientDao(client));
     }
 
-    public void deleteClientById(Long clientId) {
-        if (!checkIfClientExist(clientId)) {
-            throw new RuntimeException("Client with id [+ " + clientId + "] doesn't exist");
+    public void deleteClientByName(String clientName) {
+        if (!checkIfClientExist(clientName)) {
+            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
         }
-        clientRepository.deleteById(clientId);
+        clientRepository.delete(clientRepository.findByClientName(clientName).get());
     }
 
 
-    public Client getClientById(Long clientId) {
-        if (!checkIfClientExist(clientId)) {
-            throw new RuntimeException("Client with id [+ " + clientId + "] doesn't exist");
+    public ClientDto getClientByName(String clientName) {
+        if (!checkIfClientExist(clientName)) {
+            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
         }
 
-        return clientRepository.findById(clientId).get();
+        return clientMapper.toClientDto(clientRepository.findByClientName(clientName).get());
 
     }
 
-    public List<Client> getAllClients() {
+    public List<ClientDto> getAllClients() {
         System.out.println(clientRepository.findAll());
-        return clientRepository.findAll();
+        return clientMapper.toClientDtoList(clientRepository.findAll());
     }
 
-    private boolean checkIfClientExist(Long clientId) {
-        Optional<Client> clientOptional = clientRepository.findById(clientId);
+    private boolean checkIfClientExist(String clientName) {
+        Optional<Client> clientOptional = clientRepository.findByClientName(clientName);
 
         return clientOptional.isPresent();
 
