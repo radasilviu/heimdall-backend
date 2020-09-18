@@ -46,7 +46,7 @@ public class AdminService {
 
         final AppUser user = userOptional.get();
 
-        if (passwordEncoder.matches(adminCredential.getPassword(), user.getPassword())) {
+        if (!adminCredential.getPassword().equals(user.getPassword())) {
             throw new UsernameNotFoundException("Invalid Credentials! Password Wrong");
         }
 

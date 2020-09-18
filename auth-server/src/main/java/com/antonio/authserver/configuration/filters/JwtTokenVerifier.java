@@ -78,7 +78,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         boolean shouldNotFilter = false;
 
         final String path = "/oauth";
-        if (request.getServletPath().startsWith(path))
+        if (request.getServletPath().startsWith(path) || request.getServletPath().startsWith("/admin/login"))
             shouldNotFilter = true;
 
         if (request.getServletPath().endsWith("access"))
