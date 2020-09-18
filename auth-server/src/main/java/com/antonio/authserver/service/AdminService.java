@@ -54,21 +54,21 @@ public class AdminService {
         Authentication authentication = getAuthentication(adminCredential);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
+        final long expirationTime = System.currentTimeMillis() / 1000 + SecurityConstants.EXPIRATION_TIME;
         final String accessToken = createAccessToken(user.getUsername(), expirationTime, authentication.getAuthorities());
 
-        final JwtObject jwtObject = new JwtObject(expirationTime.getTime(), accessToken);
+        final JwtObject jwtObject = new JwtObject(expirationTime, accessToken);
 
 
         return jwtObject;
     }
 
-    private String createAccessToken(String username, Date expirationTime, Collection<? extends GrantedAuthority> authorities) {
+    private String createAccessToken(String username, long expirationTime, Collection<? extends GrantedAuthority> authorities) {
 
         String token = Jwts.builder()
                 .setSubject(username)
                 .claim("authorities", authorities)
-                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                .setExpiration(new Date(expirationTime))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
 

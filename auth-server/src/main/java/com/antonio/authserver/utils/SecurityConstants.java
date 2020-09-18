@@ -3,7 +3,7 @@ package com.antonio.authserver.utils;
 public class SecurityConstants {
 
 
-    public static final Long EXPIRATION_TIME = 86400000L;
+    public static final Long EXPIRATION_TIME = 1800000L; // 30 MIN
     public static final String BEARER_TOKEN_PREFIX = "Bearer ";
     public static final String BASIC_TOKEN_PREFIX = "Basic ";
     public static final String HEADER_AUTHORIZATION = "Authorization";

@@ -32,7 +32,7 @@ public class AuthService {
     @Autowired
     Environment env;
 
-    private final long clientAuthCodeExpiration = 60000; // in milliseconds;
+    private final long clientAuthCodeExpiration = 60000; // 1 MIN
 
     private final AuthenticationManager authenticationManager;
 
@@ -110,10 +110,10 @@ public class AuthService {
         Claims claims = decodeJWT(code);
 
         verifyClientCredential(code);
-        Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
+        long expirationTime = System.currentTimeMillis() / 1000 + SecurityConstants.EXPIRATION_TIME;
 
         final String token = createAccessToken(claims.getIssuer(), expirationTime);
-        final JwtObject jwtObject = new JwtObject(expirationTime.getTime(), token);
+        final JwtObject jwtObject = new JwtObject(expirationTime, token);
 
         return jwtObject;
     }
@@ -141,10 +141,10 @@ public class AuthService {
         return claims;
     }
 
-    private String createAccessToken(String username, Date expirationTime) {
+    private String createAccessToken(String username, long expirationTime) {
         String token = Jwts.builder()
                 .setSubject(username)
-                .setExpiration(expirationTime)
+                .setExpiration(new Date(expirationTime))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
 
