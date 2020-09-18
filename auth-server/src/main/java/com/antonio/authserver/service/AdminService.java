@@ -50,22 +50,25 @@ public class AdminService {
             throw new UsernameNotFoundException("Invalid Credentials! Password Wrong");
         }
 
-        Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
-        final String accessToken = createAccessToken(user.getUsername(), expirationTime);
+
+        Authentication authentication = getAuthentication(adminCredential);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        final Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
+        final String accessToken = createAccessToken(user.getUsername(), expirationTime, authentication.getAuthorities());
 
         final JwtObject jwtObject = new JwtObject(expirationTime.getTime(), accessToken);
 
 
-        // Authentication authentication = getAuthentication(adminCredential);
-        // SecurityContextHolder.getContext().setAuthentication(authentication);
-
         return jwtObject;
     }
 
-    private String createAccessToken(String username, Date expirationTime) {
+    private String createAccessToken(String username, Date expirationTime, Collection<? extends GrantedAuthority> authorities) {
+
         String token = Jwts.builder()
                 .setSubject(username)
-                .setExpiration(expirationTime)
+                .claim("authorities", authorities)
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
 

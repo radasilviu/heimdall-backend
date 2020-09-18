@@ -31,12 +31,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
 
 
-        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX) || !authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
+        if (Strings.isNullOrEmpty(authorizationHeader)) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
 
-        if (!authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
+        if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
 
 
             String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
@@ -53,7 +53,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             }
         }
 
-        if (!authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
+        if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
             String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
 
