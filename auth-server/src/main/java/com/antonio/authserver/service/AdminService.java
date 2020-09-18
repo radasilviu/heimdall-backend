@@ -3,7 +3,11 @@ package com.antonio.authserver.service;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.AdminCredential;
+import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.repository.AppUserRepository;
+import com.antonio.authserver.utils.SecurityConstants;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,10 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,7 @@ public class AdminService {
         this.authenticationManager = authenticationManager;
     }
 
-    public void validateAdminService(AdminCredential adminCredential) {
+    public JwtObject validateAdminService(AdminCredential adminCredential) {
 
         final Optional<AppUser> userOptional = appUserRepository.findByUsername(adminCredential.getUsername());
 
@@ -49,9 +50,26 @@ public class AdminService {
             throw new UsernameNotFoundException("Invalid Credentials! Password Wrong");
         }
 
+        Date expirationTime = new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME);
+        final String accessToken = createAccessToken(user.getUsername(), expirationTime);
 
-        Authentication authentication = getAuthentication(adminCredential);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        final JwtObject jwtObject = new JwtObject(expirationTime.getTime(), accessToken);
+
+
+        // Authentication authentication = getAuthentication(adminCredential);
+        // SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return jwtObject;
+    }
+
+    private String createAccessToken(String username, Date expirationTime) {
+        String token = Jwts.builder()
+                .setSubject(username)
+                .setExpiration(expirationTime)
+                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
+                .compact();
+
+        return token;
     }
 
     private Authentication getAuthentication(AdminCredential adminCredential) {

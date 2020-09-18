@@ -2,7 +2,7 @@ package com.antonio.authserver.controller;
 
 
 import com.antonio.authserver.model.AdminCredential;
-import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +23,9 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(AdminCredential adminCredential) {
-        adminService.validateAdminService(adminCredential);
+        JwtObject jwtObject = adminService.validateAdminService(adminCredential);
 
-        final ResponseMessage responseMessage = new ResponseMessage("Logged In");
 
-        return ResponseEntity.ok().body(responseMessage);
+        return ResponseEntity.ok().body(jwtObject);
     }
 }
