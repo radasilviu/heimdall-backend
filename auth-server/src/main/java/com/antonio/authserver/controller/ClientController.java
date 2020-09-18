@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.ClientService;
@@ -22,38 +23,29 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-
-
-
-
-
-    @GetMapping
-    public List<Client> getAllClients() {
-        List<Client> clients = clientService.getAllClients();
-
-//        return ResponseEntity.ok().body(clients);
-        return clients;
-    }
-
-    @GetMapping("/{clientId}")
-    public ResponseEntity<Client> getClientById(@PathVariable Long clientId) {
-        Client client = clientService.getClientById(clientId);
-
-        return ResponseEntity.ok().body(client);
-    }
-
     @PostMapping
-    public ResponseEntity<ResponseMessage> saveClient(@RequestBody Client client) {
+    public ResponseEntity<ResponseMessage> saveClient(@RequestBody ClientDto client) {
 
         clientService.saveClient(client);
         final ResponseMessage responseMessage = new ResponseMessage("Client successfully saved");
         return ResponseEntity.ok().body(responseMessage);
     }
-
     @DeleteMapping("/{clientId}")
     public ResponseEntity<ResponseMessage> deleteClient(@PathVariable Long clientId) {
         clientService.deleteClientById(clientId);
         final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
         return ResponseEntity.ok().body(responseMessage);
     }
+
+    @GetMapping
+    public List<ClientDto> getAllClients() {
+//        return ResponseEntity.ok().body(clients);
+        return clientService.getAllClients();
+    }
+
+    @GetMapping("/{clientId}")
+    public ResponseEntity<ClientDto> getClientById(@PathVariable Long clientId) {
+        return ResponseEntity.ok().body(clientService.getClientById(clientId));
+
+}
 }

@@ -1,7 +1,9 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.exceptions.AuthorizationServerError;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
@@ -24,6 +26,8 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    private AppUserMapper appUserMapper;
+
 
     public void deleteUser(AppUser appUser) {
 
@@ -36,8 +40,8 @@ public class UserService {
     }
 
 
-    public void save(AppUser appUser) {
-        appUserRepository.save(appUser);
+    public void save(AppUserDto appUser) {
+        appUserRepository.save(appUserMapper.toAppUserDao(appUser));
     }
 
 
@@ -74,18 +78,18 @@ public class UserService {
     }
 
 
-    public AppUser getUserByUsername(String username) {
+    public AppUserDto getUserByUsername(String username) {
 
         Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("Incorrect username: " + username);
         }
 
-        return userOptional.get();
+        return appUserMapper.toAppUserDto(userOptional.get());
     }
 
-    public List<AppUser> getAllUsers() {
-        return appUserRepository.findAll();
+    public List<AppUserDto> getAllUsers() {
+        return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
     }
 
     private boolean checkIfRoleExist(Long roleId) {
