@@ -1,7 +1,9 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.exceptions.AuthorizationServerError;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
@@ -24,11 +26,14 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private AppUserMapper appUserMapper;
+
 
     public void deleteUser(AppUser appUser) {
 
-        if (!checkIfUserExist(appUser.getId())) {
-            throw new RuntimeException("User with id: " + appUser.getId() + "doesn't exist");
+        if (!checkIfUserExist(appUser.getUsername())) {
+            throw new RuntimeException("User with the username: " + appUser.getUsername() + "doesn't exist");
         }
 
         appUserRepository.delete(appUser);
@@ -36,37 +41,37 @@ public class UserService {
     }
 
 
-    public void save(AppUser appUser) {
-        appUserRepository.save(appUser);
+    public void save(AppUserDto appUser) {
+        appUserRepository.save(appUserMapper.toAppUserDao(appUser));
     }
 
 
-    public ResponseEntity<?> addRole(Long userId, Role role) {
-        if (!checkIfUserExist(userId)) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "User with id: " + userId + "doesn't exist"));
+    public ResponseEntity<?> addRole(String username, Role role) {
+        if (!checkIfUserExist(username)) {
+            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "User with username: " + username + "doesn't exist"));
         }
 
-        if (!checkIfRoleExist(role.getId())) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly"));
+        if (!checkIfRoleExist(role.getName())) {
+            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly"));
         }
 
-        AppUser user = appUserRepository.getOne(userId);
+        AppUser user = appUserRepository.findByUsername(username).get();
         user.getRoles().add(role);
         appUserRepository.save(user);
 
         return ResponseEntity.ok().body(user);
     }
 
-    public void removeRole(Long userId, Role role) {
-        if (!checkIfUserExist(userId)) {
-            throw new RuntimeException("User with id: " + userId + "doesn't exist");
+    public void removeRole(String username, Role role) {
+        if (!checkIfUserExist(username)) {
+            throw new RuntimeException("User with username: " + username + "doesn't exist");
         }
 
-        if (!checkIfRoleExist(role.getId())) {
-            throw new RuntimeException("Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly");
+        if (!checkIfRoleExist(role.getName())) {
+            throw new RuntimeException("Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly");
         }
 
-        AppUser user = appUserRepository.getOne(userId);
+        AppUser user = appUserRepository.findByUsername(username).get();
         user.getRoles().remove(role);
         appUserRepository.save(user);
 
@@ -74,29 +79,29 @@ public class UserService {
     }
 
 
-    public AppUser getUserByUsername(String username) {
+    public AppUserDto getUserByUsername(String username) {
 
         Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("Incorrect username: " + username);
         }
 
-        return userOptional.get();
+        return appUserMapper.toAppUserDto(userOptional.get());
     }
 
-    public List<AppUser> getAllUsers() {
-        return appUserRepository.findAll();
+    public List<AppUserDto> getAllUsers() {
+        return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
     }
 
-    private boolean checkIfRoleExist(Long roleId) {
-        Optional<Role> roleOptional = roleRepository.findById(roleId);
+    private boolean checkIfRoleExist(String name) {
+        Optional<Role> roleOptional = roleRepository.findByName(name);
 
         return roleOptional.isPresent();
 
     }
 
-    private boolean checkIfUserExist(Long userId) {
-        Optional<AppUser> userOptional = appUserRepository.findById(userId);
+    private boolean checkIfUserExist(String username) {
+        Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
         return userOptional.isPresent();
 
