@@ -68,7 +68,7 @@ public class AdminService {
         String token = Jwts.builder()
                 .setSubject(username)
                 .claim("authorities", authorities)
-                .setExpiration(new Date(expirationTime))
+                .setExpiration(new Date(expirationTime * 1000))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
 
