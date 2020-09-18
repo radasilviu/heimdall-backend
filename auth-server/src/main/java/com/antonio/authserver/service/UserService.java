@@ -51,7 +51,7 @@ public class UserService {
         }
 
         if (!checkIfRoleExist(role.getName())) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly"));
+            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly"));
         }
 
         AppUser user = appUserRepository.findByUsername(username).get();
@@ -67,7 +67,7 @@ public class UserService {
         }
 
         if (!checkIfRoleExist(role.getName())) {
-            throw new RuntimeException("Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly");
+            throw new RuntimeException("Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly");
         }
 
         AppUser user = appUserRepository.findByUsername(username).get();
