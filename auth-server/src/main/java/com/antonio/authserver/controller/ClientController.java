@@ -30,9 +30,9 @@ public class ClientController {
         final ResponseMessage responseMessage = new ResponseMessage("Client successfully saved");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @DeleteMapping("/{clientId}")
-    public ResponseEntity<ResponseMessage> deleteClient(@PathVariable Long clientId) {
-        clientService.deleteClientById(clientId);
+    @DeleteMapping("/{clientName}")
+    public ResponseEntity<ResponseMessage> deleteClient(@PathVariable String clientName) {
+        clientService.deleteClientByName(clientName);
         final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
         return ResponseEntity.ok().body(responseMessage);
     }
@@ -43,9 +43,9 @@ public class ClientController {
         return clientService.getAllClients();
     }
 
-    @GetMapping("/{clientId}")
-    public ResponseEntity<ClientDto> getClientById(@PathVariable Long clientId) {
-        return ResponseEntity.ok().body(clientService.getClientById(clientId));
+    @GetMapping("/{clientName}")
+    public ResponseEntity<ClientDto> getClientByName(@PathVariable String clientName) {
+        return ResponseEntity.ok().body(clientService.getClientByName(clientName));
 
 }
 }

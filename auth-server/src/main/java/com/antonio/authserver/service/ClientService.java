@@ -22,20 +22,20 @@ public class ClientService {
         clientRepository.save(clientMapper.toClientDao(client));
     }
 
-    public void deleteClientById(Long clientId) {
-        if (!checkIfClientExist(clientId)) {
-            throw new RuntimeException("Client with id [+ " + clientId + "] doesn't exist");
+    public void deleteClientByName(String clientName) {
+        if (!checkIfClientExist(clientName)) {
+            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
         }
-        clientRepository.deleteById(clientId);
+        clientRepository.delete(clientRepository.findByClientName(clientName).get());
     }
 
 
-    public ClientDto getClientById(Long clientId) {
-        if (!checkIfClientExist(clientId)) {
-            throw new RuntimeException("Client with id [+ " + clientId + "] doesn't exist");
+    public ClientDto getClientByName(String clientName) {
+        if (!checkIfClientExist(clientName)) {
+            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
         }
 
-        return clientMapper.toClientDto(clientRepository.findById(clientId).get());
+        return clientMapper.toClientDto(clientRepository.findByClientName(clientName).get());
 
     }
 
@@ -44,8 +44,8 @@ public class ClientService {
         return clientMapper.toClientDtoList(clientRepository.findAll());
     }
 
-    private boolean checkIfClientExist(Long clientId) {
-        Optional<Client> clientOptional = clientRepository.findById(clientId);
+    private boolean checkIfClientExist(String clientName) {
+        Optional<Client> clientOptional = clientRepository.findByClientName(clientName);
 
         return clientOptional.isPresent();
 
