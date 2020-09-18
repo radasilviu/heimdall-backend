@@ -31,8 +31,8 @@ public class UserService {
 
     public void deleteUser(AppUser appUser) {
 
-        if (!checkIfUserExist(appUser.getId())) {
-            throw new RuntimeException("User with id: " + appUser.getId() + "doesn't exist");
+        if (!checkIfUserExist(appUser.getUsername())) {
+            throw new RuntimeException("User with the username: " + appUser.getUsername() + "doesn't exist");
         }
 
         appUserRepository.delete(appUser);
@@ -45,32 +45,32 @@ public class UserService {
     }
 
 
-    public ResponseEntity<?> addRole(Long userId, Role role) {
-        if (!checkIfUserExist(userId)) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "User with id: " + userId + "doesn't exist"));
+    public ResponseEntity<?> addRole(String username, Role role) {
+        if (!checkIfUserExist(username)) {
+            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "User with username: " + username + "doesn't exist"));
         }
 
-        if (!checkIfRoleExist(role.getId())) {
+        if (!checkIfRoleExist(role.getName())) {
             return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly"));
         }
 
-        AppUser user = appUserRepository.getOne(userId);
+        AppUser user = appUserRepository.findByUsername(username).get();
         user.getRoles().add(role);
         appUserRepository.save(user);
 
         return ResponseEntity.ok().body(user);
     }
 
-    public void removeRole(Long userId, Role role) {
-        if (!checkIfUserExist(userId)) {
-            throw new RuntimeException("User with id: " + userId + "doesn't exist");
+    public void removeRole(String username, Role role) {
+        if (!checkIfUserExist(username)) {
+            throw new RuntimeException("User with username: " + username + "doesn't exist");
         }
 
-        if (!checkIfRoleExist(role.getId())) {
+        if (!checkIfRoleExist(role.getName())) {
             throw new RuntimeException("Role  with id: " + role.getId() + "can not be added to user, it need to be saved firstly");
         }
 
-        AppUser user = appUserRepository.getOne(userId);
+        AppUser user = appUserRepository.findByUsername(username).get();
         user.getRoles().remove(role);
         appUserRepository.save(user);
 
@@ -92,15 +92,15 @@ public class UserService {
         return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
     }
 
-    private boolean checkIfRoleExist(Long roleId) {
-        Optional<Role> roleOptional = roleRepository.findById(roleId);
+    private boolean checkIfRoleExist(String name) {
+        Optional<Role> roleOptional = roleRepository.findByName(name);
 
         return roleOptional.isPresent();
 
     }
 
-    private boolean checkIfUserExist(Long userId) {
-        Optional<AppUser> userOptional = appUserRepository.findById(userId);
+    private boolean checkIfUserExist(String username) {
+        Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
         return userOptional.isPresent();
 

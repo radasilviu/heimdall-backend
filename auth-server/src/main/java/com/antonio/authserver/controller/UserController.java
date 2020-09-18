@@ -52,17 +52,17 @@ public class UserController {
         return ResponseEntity.ok().body(responseMessage);
     }
 
-    @PostMapping("/{id}/addRole")
-    public void addRoleToUser(@PathVariable Long id, @RequestBody RoleDto role){
-            Role newRole = roleRepository.findByName(role.getName());
-            userService.addRole(id,newRole);
+    @PostMapping("/{username}/addRole")
+    public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role){
+            Role newRole = roleRepository.findByName(role.getName()).get();
+            userService.addRole(username,newRole);
 
     }
 
-    @DeleteMapping("/{id}/removeRole")
-    public void removeRoleFromUser(@PathVariable Long id, @RequestBody RoleDto role){
-        Role newRole = roleRepository.findByName(role.getName());
-        userService.removeRole(id,newRole);
+    @DeleteMapping("/{username}/removeRole")
+    public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role){
+        Role newRole = roleRepository.findByName(role.getName()).get();
+        userService.removeRole(username,newRole);
 
     }
 
