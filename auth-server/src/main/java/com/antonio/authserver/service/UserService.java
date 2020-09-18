@@ -26,6 +26,7 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
     private AppUserMapper appUserMapper;
 
 

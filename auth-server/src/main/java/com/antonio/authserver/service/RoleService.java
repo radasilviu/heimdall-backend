@@ -15,6 +15,7 @@ public class RoleService {
 
     private RoleRepository roleRepository;
 
+    @Autowired
     private RoleMapper roleMapper;
 
     @Autowired

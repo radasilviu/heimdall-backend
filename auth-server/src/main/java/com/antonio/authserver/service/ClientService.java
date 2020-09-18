@@ -16,6 +16,7 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
     private ClientMapper clientMapper;
 
     public void saveClient(ClientDto client) {

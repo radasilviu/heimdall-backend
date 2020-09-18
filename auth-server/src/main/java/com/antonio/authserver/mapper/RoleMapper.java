@@ -2,10 +2,12 @@ package com.antonio.authserver.mapper;
 
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class RoleMapper {
 
     public Role toRoleDao(RoleDto roleDto){

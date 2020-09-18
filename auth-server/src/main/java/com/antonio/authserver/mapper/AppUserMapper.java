@@ -2,10 +2,12 @@ package com.antonio.authserver.mapper;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class AppUserMapper {
 
     public AppUser toAppUserDao(AppUserDto appUserDto){
