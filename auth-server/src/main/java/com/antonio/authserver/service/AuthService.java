@@ -63,7 +63,7 @@ public class AuthService {
     private Code createOauthCode(AppUser user) {
         String jwtCode = generateCode(user);
 
-        if (jwtCode != "") {
+        if (!jwtCode.equals("")) {
             final Code code = new Code(jwtCode);
             return code;
         }

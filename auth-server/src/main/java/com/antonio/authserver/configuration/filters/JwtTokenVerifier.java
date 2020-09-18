@@ -6,7 +6,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -23,14 +22,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
 
 
-        Authentication authentication;
-
-        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+        if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
 
-        String token = authorizationHeader.replace(SecurityConstants.TOKEN_PREFIX, "");
+        String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
         try {
 
             Jws<Claims> claimsJws = Jwts.parser()
@@ -48,15 +45,16 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        boolean shouldFilter = false;
+        boolean shouldNotFilter = false;
 
         final String path = "/oauth";
         if (request.getServletPath().startsWith(path))
-            shouldFilter = true;
+            shouldNotFilter = true;
 
         if (request.getServletPath().endsWith("access"))
-            shouldFilter = false;
+            shouldNotFilter = false;
 
-        return shouldFilter;
+
+        return shouldNotFilter;
     }
 }

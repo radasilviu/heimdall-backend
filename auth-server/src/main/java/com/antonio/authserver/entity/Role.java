@@ -1,6 +1,5 @@
 package com.antonio.authserver.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

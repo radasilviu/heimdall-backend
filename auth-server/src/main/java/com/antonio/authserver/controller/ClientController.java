@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/client")
+@RequestMapping("api/client")
 @CrossOrigin
 public class ClientController {
 
@@ -21,11 +21,6 @@ public class ClientController {
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
-
-
-
-
-
 
     @GetMapping
     public List<Client> getAllClients() {

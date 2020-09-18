@@ -38,13 +38,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // @formatter:off
         http.csrf().disable().
                 authorizeRequests()
-                .antMatchers("/oauth/token", "/oauth/client-login", "/oauth/access").permitAll()
+                .antMatchers("/oauth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .addFilterAfter(new JwtTokenVerifier(), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
         // @formatter:on
     }
 
@@ -60,16 +61,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-
-   /* @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors();
-        http.csrf().disable();
-        http.authorizeRequests().antMatchers("/**").fullyAuthenticated().and()
-                .httpBasic();
-    }
-
-    */
 
 
 }

@@ -7,12 +7,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
+
 
 @Component
+
 public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
 
     @Autowired
@@ -20,21 +22,19 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+
     @Override
+    @Transactional
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final String username = authentication.getName();
-        final String password = (String) authentication.getCredentials();
+
 
         UserDetails user = userDetailsService.loadUserByUsername(username);
 
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new UsernameNotFoundException("Password is not correct!");
-        }
-
-
         return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
     }
+
 
     @Override
     public boolean supports(Class<?> aClass) {
