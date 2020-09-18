@@ -32,9 +32,9 @@ public class RoleController {
 
 
     @DeleteMapping
-    public ResponseEntity<ResponseMessage> deleteRole(Long id) {
+    public ResponseEntity<ResponseMessage> deleteRole(String name) {
 
-        roleService.deleteRoleById(id);
+        roleService.deleteRoleByName(name);
         final ResponseMessage responseMessage = new ResponseMessage("Role successfully deleted");
         return ResponseEntity.ok().body(responseMessage);
 

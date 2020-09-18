@@ -31,8 +31,8 @@ public class RoleService {
         return roleMapper.toRoleDtoList(roleRepository.findAll());
     }
 
-    public void deleteRoleById(Long id) {
+    public void deleteRoleByName(String name) {
         
-        roleRepository.deleteById(id);
+        roleRepository.delete(roleRepository.findByName(name));
     }
 }
