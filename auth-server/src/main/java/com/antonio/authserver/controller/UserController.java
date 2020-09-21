@@ -45,7 +45,7 @@ public class UserController {
 	}
 
 	@PutMapping("/{username}")
-	public ResponseEntity<ResponseMessage> updateUserByName(@PathVariable String username,
+	public ResponseEntity<ResponseMessage> updateUserByUsername(@PathVariable String username,
 			@RequestBody AppUserDto appUserDto) {
 		userService.updateUserByUsername(username, appUserDto);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully updated");
