@@ -10,8 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientDto {
-
     private String clientName;
 
-    private String clientSecret;
 }

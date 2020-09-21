@@ -31,9 +31,9 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER")));
         roleRepository.saveAll(roleList);
 
-        AppUser appUser = new AppUser("admin", "admin", roleRepository.findAllByName("ADMIN"));
-        AppUser appUser1 = new AppUser("gabi", "gabi", roleRepository.findAllByName("EDITOR"));
-        AppUser appUser2 = new AppUser("toni", "toni", roleRepository.findAllByName("VIEWER"));
+        AppUser appUser = new AppUser("admin", "admin", roleRepository.findAllByName("ROLE_ADMIN"));
+        AppUser appUser1 = new AppUser("gabi", "gabi", roleRepository.findAllByName("ROLE_ADMIN"));
+        AppUser appUser2 = new AppUser("toni", "toni", roleRepository.findAllByName("ROLE_ADMIN"));
         appUserRepository.save(appUser);
         appUserRepository.save(appUser1);
         appUserRepository.save(appUser2);
