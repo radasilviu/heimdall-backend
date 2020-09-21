@@ -6,11 +6,13 @@ import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -40,19 +42,24 @@ public class RoleService {
 
     public void deleteRoleByName(String name) {
         Set<Role> roles = roleRepository.findAllByName(name);
-        List<AppUser> users = appUserRepository.findByRolesIn(roles).orElseThrow(() -> new RuntimeException("Users not found"));
-        users.forEach(p -> {
-            Iterator iter = roles.iterator();
-            if(p.getRoles().contains(iter.next())){
-                AppUser appUser = appUserRepository.findByUsername(p.getUsername()).get();
-                Set<Role> rolesFromUser = appUser.getRoles();
-                rolesFromUser.removeAll(roles);
-                appUser.setRoles(rolesFromUser);
-                appUserRepository.deleteByUsername(appUser.getUsername());
-                appUserRepository.save(appUser);
+        Optional<List<AppUser>> users = appUserRepository.findByRolesIn(roles);
+        if(users.isPresent()){
+            for(AppUser i : users.get()) {
+                Iterator iter = roles.iterator();
+                if (i.getRoles().contains(iter.next())) {
+                    AppUser appUser = appUserRepository.findByUsername(i.getUsername()).get();
+                    Set<Role> rolesFromUser = appUser.getRoles();
+                    rolesFromUser.removeAll(roles);
+                    appUser.setRoles(rolesFromUser);
+                    appUserRepository.deleteById(appUser.getId());
+                    appUserRepository.save(appUser);
+                }
             }
-        });
+        }
         roleRepository.delete(roleRepository.findByName(name).orElseThrow(() -> new RuntimeException("Role not found")));
-
     }
+
+
+
+
 }
