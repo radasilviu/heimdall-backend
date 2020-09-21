@@ -12,7 +12,7 @@ import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
-import com.antonio.authserver.model.exceptions.controllerexceptions.NullRole;
+import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
 import com.antonio.authserver.model.exceptions.controllerexceptions.RoleAlreadyExists;
 import com.antonio.authserver.model.exceptions.controllerexceptions.RoleNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
@@ -33,12 +33,12 @@ public class RoleService {
 		this.appUserRepository = appUserRepository;
 	}
 
-	public void saveRole(RoleDto role) throws RoleAlreadyExists {
+	public void saveRole(RoleDto role) throws RoleAlreadyExists, NullResource {
 		Optional<Role> byName = roleRepository.findByName(role.getName());
 		if (byName.isPresent())
 			throw new RoleAlreadyExists(role.getName());
 		else if (byName.get().getName() == null) {
-			throw new NullRole("Role");
+			throw new NullResource("Role");
 		} else {
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}

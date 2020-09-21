@@ -59,9 +59,9 @@ public class ExceptionAdvice {
 	}
 
 	@ResponseBody
-	@ExceptionHandler(NullClient.class)
+	@ExceptionHandler(NullResource.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String nullClient(NullClient e) {
+	public String nullClient(NullResource e) {
 		return e.getMessage();
 	}
 

@@ -11,7 +11,7 @@ import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.mapper.ClientMapper;
 import com.antonio.authserver.model.exceptions.controllerexceptions.ClientAlreadyExists;
 import com.antonio.authserver.model.exceptions.controllerexceptions.ClientNotFound;
-import com.antonio.authserver.model.exceptions.controllerexceptions.NullClient;
+import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
 import com.antonio.authserver.repository.ClientRepository;
 
 @Service
@@ -23,12 +23,12 @@ public class ClientService {
 	@Autowired
 	private ClientMapper clientMapper;
 
-	public void saveClient(ClientDto client) throws ClientAlreadyExists, NullClient {
+	public void saveClient(ClientDto client) throws ClientAlreadyExists, NullResource {
 		Optional<Client> byClientName = clientRepository.findByClientName(client.getClientName());
 		if (byClientName.isPresent())
 			throw new ClientAlreadyExists(client.getClientName());
 		else if (byClientName.get().getClientName() == null) {
-			throw new NullClient("Client");
+			throw new NullResource("Client");
 		} else {
 			clientRepository.save(clientMapper.toClientDao(client));
 		}

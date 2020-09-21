@@ -12,7 +12,7 @@ import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.exceptions.controllerexceptions.CannotAddRole;
-import com.antonio.authserver.model.exceptions.controllerexceptions.NullUser;
+import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
 import com.antonio.authserver.model.exceptions.controllerexceptions.UserAlreadyExists;
 import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
@@ -30,12 +30,12 @@ public class UserService {
 	@Autowired
 	private AppUserMapper appUserMapper;
 
-	public void save(AppUserDto appUser) throws UserAlreadyExists {
+	public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
 		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
 		else if (byUsername.get().getUsername() == null) {
-			throw new NullUser("User");
+			throw new NullResource("User");
 		} else {
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
 		}
