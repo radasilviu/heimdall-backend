@@ -9,6 +9,7 @@ import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +42,8 @@ public class RoleService {
         Set<Role> roles = roleRepository.findAllByName(name);
         List<AppUser> users = appUserRepository.findByRolesIn(roles).orElseThrow(() -> new RuntimeException("Users not found"));
         users.forEach(p -> {
-            if(p.getRoles().contains(roles)){
+            Iterator iter = roles.iterator();
+            if(p.getRoles().contains(iter.next())){
                 AppUser appUser = appUserRepository.findByUsername(p.getUsername()).get();
                 Set<Role> rolesFromUser = appUser.getRoles();
                 rolesFromUser.removeAll(roles);
