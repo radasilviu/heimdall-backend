@@ -1,19 +1,23 @@
 package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.RoleDto;
+import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
+import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class RoleService {
 
 
     private RoleRepository roleRepository;
+    private AppUserRepository appUserRepository;
 
     @Autowired
     private RoleMapper roleMapper;
@@ -33,7 +37,19 @@ public class RoleService {
     }
 
     public void deleteRoleByName(String name) {
-        
-        roleRepository.delete(roleRepository.findByName(name).get());
+        Set<Role> roles = roleRepository.findAllByName(name);
+        List<AppUser> users = appUserRepository.findByRoles(roles).orElseThrow(() -> new RuntimeException("Users not found"));
+        users.forEach(p -> {
+            if(p.getRoles().contains(roles)){
+                AppUser appUser = appUserRepository.findByUsername(p.getUsername()).get();
+                Set<Role> rolesFromUser = appUser.getRoles();
+                rolesFromUser.removeAll(roles);
+                appUser.setRoles(rolesFromUser);
+                appUserRepository.deleteByName(appUser.getUsername());
+                appUserRepository.save(appUser);
+            }
+        });
+        roleRepository.delete(roleRepository.findByName(name).orElseThrow(() -> new RuntimeException("Role not found")));
+
     }
 }

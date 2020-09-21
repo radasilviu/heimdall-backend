@@ -2,10 +2,13 @@ package com.antonio.authserver.repository;
 
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Client;
+import com.antonio.authserver.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
@@ -15,4 +18,8 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsernameAndPassword(String username, String password);
 
     Optional<AppUser> findByCode(String code);
-}
+
+    Optional<List<AppUser>> findByRoles(Set<Role> role);
+
+    void deleteByName(String name);
+    }
