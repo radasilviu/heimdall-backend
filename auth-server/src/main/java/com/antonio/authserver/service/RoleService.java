@@ -44,20 +44,25 @@ public class RoleService {
         Set<Role> roles = roleRepository.findAllByName(name);
         Optional<List<AppUser>> users = appUserRepository.findByRolesIn(roles);
         if(users.isPresent()){
-            for(AppUser i : users.get()) {
-                Iterator iter = roles.iterator();
-                if (i.getRoles().contains(iter.next())) {
-                    AppUser appUser = appUserRepository.findByUsername(i.getUsername()).get();
-                    Set<Role> rolesFromUser = appUser.getRoles();
-                    rolesFromUser.removeAll(roles);
-                    appUser.setRoles(rolesFromUser);
-                    appUserRepository.deleteById(appUser.getId());
-                    appUserRepository.save(appUser);
-                }
-            }
+            deleteRoleFromUsers(users,roles);
         }
         roleRepository.delete(roleRepository.findByName(name).orElseThrow(() -> new RuntimeException("Role not found")));
     }
+
+    private void deleteRoleFromUsers(Optional<List<AppUser>> users, Set<Role> roles){
+        for(AppUser i : users.get()) {
+            Iterator iter = roles.iterator();
+            if (i.getRoles().contains(iter.next())) {
+                AppUser appUser = appUserRepository.findByUsername(i.getUsername()).get();
+                Set<Role> rolesFromUser = appUser.getRoles();
+                rolesFromUser.removeAll(roles);
+                appUser.setRoles(rolesFromUser);
+                appUserRepository.deleteById(appUser.getId());
+                appUserRepository.save(appUser);
+            }
+        }
+    }
+    
 
 
 
