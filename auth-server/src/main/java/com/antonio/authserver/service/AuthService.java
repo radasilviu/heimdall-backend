@@ -82,22 +82,10 @@ public class AuthService {
         return token;
     }
 
-    private String convertUserToJSON(AppUser user) {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString = "";
-
-        try {
-            jsonString = mapper.writeValueAsString(user);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return jsonString;
-    }
 
     public JwtObject login(LoginCredential loginCredential) {
         String code = loginCredential.getClientCode();
-        JwClaims claims = jwtService.decodeJWT(code);
+        Claims claims = jwtService.decodeJWT(code);
 
         verifyClientCredential(code);
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;

@@ -27,11 +27,15 @@ import java.util.stream.Collectors;
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
+    private final JwtService jwtService;
+
+    public JwtTokenVerifier(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
-
-        JwtService jwtService = new JwtService();
 
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
@@ -50,18 +54,25 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
             final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
-
-            Claims claims = jwtService.decodeJWT(token);
-            String username = claims.getSubject();
-
+            final Claims claims = jwtService.decodeJWT(token);
+            final String username = claims.getSubject();
 
             final List<Map<String, String>> authorities = (List<Map<String, String>>) claims.get("authorities");
-            final Set<GrantedAuthority> grantedAuthorities = authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
+            setAuthentication(username, grantedAuthorities);
+
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+    private Set<GrantedAuthority> getGrantedAuthoritySet(List<Map<String, String>> authorities) {
+        return authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
+    }
+
+    private void setAuthentication(String username, Set<GrantedAuthority> grantedAuthorities) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @Override
