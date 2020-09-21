@@ -4,6 +4,7 @@ import com.antonio.authserver.configuration.auth_providers.UsernameAndPasswordAu
 import com.antonio.authserver.configuration.filters.JwtTokenVerifier;
 import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
 import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
+import com.antonio.authserver.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,10 +30,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
-    }
+
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -43,12 +44,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
-                .addFilterAfter(new JwtTokenVerifier(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenVerifier(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // @formatter:on
     }
 
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
