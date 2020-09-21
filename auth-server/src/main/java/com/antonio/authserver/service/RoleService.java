@@ -39,14 +39,14 @@ public class RoleService {
 
     public void deleteRoleByName(String name) {
         Set<Role> roles = roleRepository.findAllByName(name);
-        List<AppUser> users = appUserRepository.findByRoles(roles).orElseThrow(() -> new RuntimeException("Users not found"));
+        List<AppUser> users = appUserRepository.findByRolesIn(roles).orElseThrow(() -> new RuntimeException("Users not found"));
         users.forEach(p -> {
             if(p.getRoles().contains(roles)){
                 AppUser appUser = appUserRepository.findByUsername(p.getUsername()).get();
                 Set<Role> rolesFromUser = appUser.getRoles();
                 rolesFromUser.removeAll(roles);
                 appUser.setRoles(rolesFromUser);
-                appUserRepository.deleteByName(appUser.getUsername());
+                appUserRepository.deleteByUsername(appUser.getUsername());
                 appUserRepository.save(appUser);
             }
         });
