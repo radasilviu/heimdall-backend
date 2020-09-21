@@ -32,12 +32,13 @@ public class UserService {
 
 	public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
 		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
+		appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
-		else if (appUser.getUsername().replaceAll("\\s+", "").equals("")) {
+		else if (appUser.getUsername().equals("")) {
 			throw new NullResource("User");
 		} else {
-			appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
+
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
 		}
 	}
