@@ -37,7 +37,7 @@ public class UserService {
 		else if (appUser.getUsername().trim().equals("")) {
 			throw new NullResource("User");
 		} else {
-			appUser.setUsername(appUser.getUsername().trim());
+			appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
 		}
 	}
