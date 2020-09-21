@@ -23,6 +23,17 @@ public class ClientService {
 	@Autowired
 	private ClientMapper clientMapper;
 
+	public List<ClientDto> getAllClients() {
+		System.out.println(clientRepository.findAll());
+		return clientMapper.toClientDtoList(clientRepository.findAll());
+	}
+
+	public ClientDto getClientByName(String clientName) throws ClientNotFound {
+		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
+		return clientMapper.toClientDto(client);
+
+	}
+
 	public void saveClient(ClientDto client) throws ClientAlreadyExists, NullResource {
 		client.setClientName(client.getClientName().replaceAll("\\s+", ""));
 		Optional<Client> byClientName = clientRepository.findByClientName(client.getClientName());
@@ -36,20 +47,15 @@ public class ClientService {
 		}
 	}
 
+	public void updateClientByName(String name, ClientDto clientDto) throws ClientNotFound {
+		Client client = clientRepository.findByClientName(name).orElseThrow(() -> new ClientNotFound(name));
+		client.setClientName(clientDto.getClientName());
+		clientRepository.save(client);
+	}
+
 	public void deleteClientByName(String clientName) throws ClientNotFound {
 		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
 		clientRepository.delete(client);
-	}
-
-	public ClientDto getClientByName(String clientName) throws ClientNotFound {
-		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
-		return clientMapper.toClientDto(client);
-
-	}
-
-	public List<ClientDto> getAllClients() {
-		System.out.println(clientRepository.findAll());
-		return clientMapper.toClientDtoList(clientRepository.findAll());
 	}
 
 }

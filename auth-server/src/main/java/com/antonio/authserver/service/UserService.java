@@ -30,6 +30,14 @@ public class UserService {
 	@Autowired
 	private AppUserMapper appUserMapper;
 
+	public List<AppUserDto> getAllUsers() {
+		return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
+	}
+
+	public AppUserDto getUserByUsername(String username) throws UserNotFound {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+		return appUserMapper.toAppUserDto(appUser);
+	}
 	public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
 		appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
 		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
@@ -41,6 +49,12 @@ public class UserService {
 
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
 		}
+	}
+	public void updateUserByUsername(String username, AppUserDto appUserDto) throws UserNotFound {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+		appUser.setUsername(appUserDto.getUsername());
+		appUser.setPassword(appUser.getPassword());
+		appUserRepository.save(appUser);
 	}
 
 	public ResponseEntity<?> addRole(String username, Role role) throws UserNotFound, CannotAddRole {
@@ -60,15 +74,6 @@ public class UserService {
 		appUser.getRoles().remove(role);
 		appUserRepository.save(appUser);
 
-	}
-
-	public AppUserDto getUserByUsername(String username) throws UserNotFound {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		return appUserMapper.toAppUserDto(appUser);
-	}
-
-	public List<AppUserDto> getAllUsers() {
-		return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
 	}
 
 	public void deleteUser(String username) throws UserNotFound {

@@ -50,6 +50,17 @@ public class RoleService {
 		return roleMapper.toRoleDtoList(roleRepository.findAll());
 	}
 
+	public RoleDto getRoleByName(String name) throws RoleNotFound {
+		Role role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound(name));
+		return roleMapper.toRoleDto(role);
+	}
+
+	public void updateRoleByName(String name, RoleDto roleDto) throws RoleNotFound {
+		Role role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound(name));
+		role.setName(roleDto.getName());
+		roleRepository.save(role);
+	}
+
 	public void deleteRoleByName(String name) throws RoleNotFound {
 		Set<Role> roles = roleRepository.findAllByName(name);
 		Optional<List<AppUser>> users = appUserRepository.findByRolesIn(roles);
