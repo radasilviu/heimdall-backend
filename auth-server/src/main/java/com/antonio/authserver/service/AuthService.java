@@ -10,16 +10,15 @@ import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -30,9 +29,11 @@ public class AuthService {
     private CodeRepository codeRepository;
 
     @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     Environment env;
 
-    private final long clientAuthCodeExpiration = 60000; // 1 MIN
 
     private final AuthenticationManager authenticationManager;
 
@@ -71,48 +72,26 @@ public class AuthService {
     }
 
     private String generateCode(AppUser user) {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey"));
-        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
-        long nowMillis = System.currentTimeMillis();
-        Date now = new Date(nowMillis);
-        long expireTime = nowMillis + clientAuthCodeExpiration;
-        Date exp = new Date(expireTime);
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        Date expDate = new Date(expirationTime);
 
-        String jsonString = convertUserToJSON(user);
 
-        JwtBuilder builder = Jwts.builder()
-                .setIssuer(user.getUsername())
-                .setSubject(jsonString)
-                .setIssuedAt(now)
-                .setExpiration(exp)
-                .signWith(signatureAlgorithm, signingKey);
+        String token = jwtService.createAccessToken(user.getUsername(), expDate, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
 
-        return builder.compact();
+        return token;
     }
 
-    private String convertUserToJSON(AppUser user) {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString = "";
-
-        try {
-            jsonString = mapper.writeValueAsString(user);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return jsonString;
-    }
 
     public JwtObject login(LoginCredential loginCredential) {
         String code = loginCredential.getClientCode();
-        Claims claims = decodeJWT(code);
+        Claims claims = jwtService.decodeJWT(code);
 
         verifyClientCredential(code);
-        long expirationTime = System.currentTimeMillis() / 1000 + SecurityConstants.EXPIRATION_TIME;
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        Date expDate = new Date(expirationTime);
 
-        final String token = createAccessToken(claims.getIssuer(), expirationTime);
+        final String token = jwtService.createAccessToken(claims.getIssuer(), expDate, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(expirationTime, token);
 
         return jwtObject;
@@ -125,29 +104,5 @@ public class AuthService {
             throw new RuntimeException("Your client do not have permission to use this app");
         }
 
-    }
-
-    private Claims decodeJWT(String jwt) {
-        Claims claims = null;
-        try {
-            claims = Jwts.parser()
-                    .setSigningKey(DatatypeConverter.parseBase64Binary(this.env.getProperty("JWTSecretKey")))
-                    .parseClaimsJws(jwt)
-                    .getBody();
-        } catch(ExpiredJwtException e) {
-            throw new RuntimeException("Token expired");
-        }
-
-        return claims;
-    }
-
-    private String createAccessToken(String username, long expirationTime) {
-        String token = Jwts.builder()
-                .setSubject(username)
-                .setExpiration(new Date(expirationTime))
-                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
-                .compact();
-
-        return token;
     }
 }

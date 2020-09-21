@@ -1,5 +1,6 @@
 package com.antonio.authserver.configuration.filters;
 
+import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
@@ -26,6 +27,12 @@ import java.util.stream.Collectors;
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
+    private final JwtService jwtService;
+
+    public JwtTokenVerifier(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
@@ -39,38 +46,33 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
 
 
-            String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
-            try {
+            final String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
+            jwtService.decodeJWT(token);
 
-                Jws<Claims> claimsJws = Jwts.parser()
-                        .setSigningKey(SecurityConstants.TOKEN_SECRET)
-                        .parseClaimsJws(token);
-                Claims body = claimsJws.getBody();
-                String username = body.getSubject();
-            } catch (
-                    JwtException e) {
-                throw new IllegalStateException("Token could not be trusted: " + token);
-            }
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
-            String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
+            final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
+            final Claims claims = jwtService.decodeJWT(token);
+            final String username = claims.getSubject();
 
-            Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(SecurityConstants.TOKEN_SECRET)
-                    .parseClaimsJws(token);
-            Claims body = claimsJws.getBody();
-            String username = body.getSubject();
+            final List<Map<String, String>> authorities = (List<Map<String, String>>) claims.get("authorities");
+            final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
+            setAuthentication(username, grantedAuthorities);
 
-
-            final List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities");
-            final Set<GrantedAuthority> grantedAuthorities = authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+    private Set<GrantedAuthority> getGrantedAuthoritySet(List<Map<String, String>> authorities) {
+        return authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
+    }
+
+    private void setAuthentication(String username, Set<GrantedAuthority> grantedAuthorities) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @Override
