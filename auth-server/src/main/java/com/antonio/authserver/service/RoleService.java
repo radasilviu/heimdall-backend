@@ -37,10 +37,10 @@ public class RoleService {
 		Optional<Role> byName = roleRepository.findByName(role.getName());
 		if (byName.isPresent())
 			throw new RoleAlreadyExists(role.getName());
-		else if (role.getName().trim().equals("")) {
+		else if (role.getName().replaceAll("\\s+", "").equals("")) {
 			throw new NullResource("Role");
 		} else {
-			role.setName(role.getName().trim());
+			role.setName(role.getName().replaceAll("\\s+", ""));
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}
 	}

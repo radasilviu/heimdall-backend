@@ -34,7 +34,7 @@ public class UserService {
 		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
-		else if (appUser.getUsername().trim().equals("")) {
+		else if (appUser.getUsername().replaceAll("\\s+", "").equals("")) {
 			throw new NullResource("User");
 		} else {
 			appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
