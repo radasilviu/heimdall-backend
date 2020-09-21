@@ -30,15 +30,7 @@ public class UserService {
     private AppUserMapper appUserMapper;
 
 
-    public void deleteUser(AppUser appUser) {
 
-        if (!checkIfUserExist(appUser.getUsername())) {
-            throw new RuntimeException("User with the username: " + appUser.getUsername() + "doesn't exist");
-        }
-
-        appUserRepository.delete(appUser);
-
-    }
 
 
     public void save(AppUserDto appUser) {
@@ -104,6 +96,12 @@ public class UserService {
         Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
         return userOptional.isPresent();
+
+    }
+
+    public void deleteUser(String username) {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("no user found"));
+        appUserRepository.delete(appUser);
 
     }
 }

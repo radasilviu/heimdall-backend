@@ -59,6 +59,11 @@ public class UserController {
 
     }
 
+    @DeleteMapping("/{username}")
+    public void deleteUser(@PathVariable String username){
+        userService.deleteUser(username);
+    }
+
     @DeleteMapping("/{username}/removeRole")
     public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role){
         Role newRole = roleRepository.findByName(role.getName()).get();

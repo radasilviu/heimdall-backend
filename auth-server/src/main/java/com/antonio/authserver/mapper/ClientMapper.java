@@ -13,14 +13,13 @@ public class ClientMapper {
     public Client toClientDao(ClientDto clientDto){
         Client client = new Client();
         client.setClientName(clientDto.getClientName());
-        client.setClientSecret(clientDto.getClientSecret());
         return client;
     }
     public ClientDto toClientDto(Client client){
-        return new ClientDto(client.getClientName(),client.getClientSecret());
+        return new ClientDto(client.getClientName());
     }
     public List<ClientDto> toClientDtoList(List<Client> list){
-        return list.stream().map(client -> new ClientDto(client.getClientName(), client.getClientSecret()))
+        return list.stream().map(client -> new ClientDto(client.getClientName()))
                 .collect(Collectors.toList());
     }
 }
