@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -21,16 +20,16 @@ import java.util.List;
 public class InitTestData implements ApplicationListener<ApplicationContextEvent> {
 
 
-    @Autowired
     private AppUserRepository appUserRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
-
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.appUserRepository = appUserRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {

@@ -20,18 +20,17 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
 
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-
     @Override
-    @Transactional
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final String username = authentication.getName();
         final String password = (String) authentication.getCredentials();
 
         UserDetails user = userDetailsService.loadUserByUsername(username);
+
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new UsernameNotFoundException("Password is not correct!");
