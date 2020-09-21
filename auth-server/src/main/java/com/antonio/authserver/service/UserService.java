@@ -10,6 +10,7 @@ import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,21 +21,23 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    @Autowired
     private AppUserRepository appUserRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
+    private AppUserMapper appUserMapper;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private AppUserMapper appUserMapper;
+    public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository, AppUserMapper appUserMapper, BCryptPasswordEncoder passwordEncoder) {
+        this.appUserRepository = appUserRepository;
+        this.roleRepository = roleRepository;
+        this.appUserMapper = appUserMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-
-
-
-
-    public void save(AppUserDto appUser) {
-        appUserRepository.save(appUserMapper.toAppUserDao(appUser));
+    public void save(AppUserDto appUserDTO) {
+        AppUser appUser = appUserMapper.toAppUserDao(appUserDTO);
+        appUser.setPassword(passwordEncoder.encode(appUserDTO.getPassword()));
+        appUserRepository.save(appUser);
     }
 
 

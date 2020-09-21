@@ -6,8 +6,6 @@ import com.antonio.authserver.model.AdminCredential;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.utils.SecurityConstants;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,12 +24,12 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private AppUserRepository appUserRepository;
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
 
     @Autowired
-    public AdminService(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AdminService(AppUserRepository appUserRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -48,8 +46,8 @@ public class AdminService {
 
         final AppUser user = userOptional.get();
 
-        if (!adminCredential.getPassword().equals(user.getPassword())) {
-            throw new UsernameNotFoundException("Invalid Credentials! Password Wrong");
+        if (!passwordEncoder.matches(adminCredential.getPassword(), user.getPassword())) {
+            throw new UsernameNotFoundException("Password is not correct!");
         }
 
 
