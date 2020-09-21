@@ -65,17 +65,4 @@ public class ExceptionAdvice {
 		return e.getMessage();
 	}
 
-	@ResponseBody
-	@ExceptionHandler(NullRole.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String nullRole(NullRole e) {
-		return e.getMessage();
-	}
-
-	@ResponseBody
-	@ExceptionHandler(NullUser.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String nullUser(NullUser e) {
-		return e.getMessage();
-	}
 }
