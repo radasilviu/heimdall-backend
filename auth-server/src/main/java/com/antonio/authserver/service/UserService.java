@@ -34,7 +34,7 @@ public class UserService {
 		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
-		else if (byUsername.get().getUsername() == null) {
+		else if (appUser.getUsername().trim().equals("")) {
 			throw new NullResource("User");
 		} else {
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
