@@ -23,7 +23,7 @@ public class JwtService {
         this.userService = userService;
     }
 
-    public String createAccessToken(String issuer, Date expirationTime, Collection<? extends GrantedAuthority> authorities, String secretKey) {
+    public String createAccessToken(String issuer, long expirationTime, Collection<? extends GrantedAuthority> authorities, String secretKey) {
 
         final AppUserDto user = userService.getUserByUsername(issuer);
 
@@ -31,7 +31,7 @@ public class JwtService {
                 .setIssuer(issuer)
                 .setSubject(user.toString())
                 .claim("authorities", authorities)
-                .setExpiration(expirationTime)
+                .setExpiration(new Date(expirationTime))
                 .signWith(SignatureAlgorithm.HS512, secretKey)
                 .compact();
 

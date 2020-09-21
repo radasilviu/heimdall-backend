@@ -74,10 +74,8 @@ public class AuthService {
     private String generateCode(AppUser user) {
 
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
-        Date expDate = new Date(expirationTime);
 
-
-        String token = jwtService.createAccessToken(user.getUsername(), expDate, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+        String token = jwtService.createAccessToken(user.getUsername(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
 
         return token;
     }
@@ -89,9 +87,8 @@ public class AuthService {
 
         verifyClientCredential(code);
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
-        Date expDate = new Date(expirationTime);
 
-        final String token = jwtService.createAccessToken(claims.getIssuer(), expDate, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+        final String token = jwtService.createAccessToken(claims.getIssuer(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(expirationTime, token);
 
         return jwtObject;
