@@ -31,8 +31,8 @@ public class UserService {
 	private AppUserMapper appUserMapper;
 
 	public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
-		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
 		appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
+		Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
 		else if (appUser.getUsername().equals("")) {

@@ -24,8 +24,8 @@ public class ClientService {
 	private ClientMapper clientMapper;
 
 	public void saveClient(ClientDto client) throws ClientAlreadyExists, NullResource {
-		Optional<Client> byClientName = clientRepository.findByClientName(client.getClientName());
 		client.setClientName(client.getClientName().replaceAll("\\s+", ""));
+		Optional<Client> byClientName = clientRepository.findByClientName(client.getClientName());
 		if (byClientName.isPresent())
 			throw new ClientAlreadyExists(client.getClientName());
 		else if (client.getClientName().equals("")) {
