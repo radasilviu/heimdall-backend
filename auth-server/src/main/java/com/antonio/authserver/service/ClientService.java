@@ -3,12 +3,13 @@ package com.antonio.authserver.service;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.mapper.ClientMapper;
+import com.antonio.authserver.model.exceptions.controllerexceptions.ClientAlreadyExists;
+import com.antonio.authserver.model.exceptions.controllerexceptions.ClientNotFound;
 import com.antonio.authserver.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClientService {
@@ -19,24 +20,23 @@ public class ClientService {
     @Autowired
     private ClientMapper clientMapper;
 
-    public void saveClient(ClientDto client) {
-        clientRepository.save(clientMapper.toClientDao(client));
+    public void saveClient(ClientDto client) throws ClientAlreadyExists {
+        if (clientRepository.findByClientName(client.getClientName()).isPresent())
+            throw new ClientAlreadyExists(client.getClientName());
+        else {
+            clientRepository.save(clientMapper.toClientDao(client));
+        }
     }
 
-    public void deleteClientByName(String clientName) {
-        if (!checkIfClientExist(clientName)) {
-            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
-        }
-        clientRepository.delete(clientRepository.findByClientName(clientName).get());
+    public void deleteClientByName(String clientName) throws ClientNotFound {
+        Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
+        clientRepository.delete(client);
     }
 
 
-    public ClientDto getClientByName(String clientName) {
-        if (!checkIfClientExist(clientName)) {
-            throw new RuntimeException("Client with the name [+ " + clientName + "] doesn't exist");
-        }
-
-        return clientMapper.toClientDto(clientRepository.findByClientName(clientName).get());
+    public ClientDto getClientByName(String clientName) throws ClientNotFound {
+        Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
+        return clientMapper.toClientDto(client);
 
     }
 
@@ -44,11 +44,5 @@ public class ClientService {
         System.out.println(clientRepository.findAll());
         return clientMapper.toClientDtoList(clientRepository.findAll());
     }
-
-    private boolean checkIfClientExist(String clientName) {
-        Optional<Client> clientOptional = clientRepository.findByClientName(clientName);
-
-        return clientOptional.isPresent();
-
-    }
+    
 }
