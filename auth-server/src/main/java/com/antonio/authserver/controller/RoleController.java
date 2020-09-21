@@ -31,8 +31,8 @@ public class RoleController {
     }
 
 
-    @DeleteMapping
-    public ResponseEntity<ResponseMessage> deleteRole(String name) {
+    @DeleteMapping("/{name}")
+    public ResponseEntity<ResponseMessage> deleteRole(@PathVariable String name) {
 
         roleService.deleteRoleByName(name);
         final ResponseMessage responseMessage = new ResponseMessage("Role successfully deleted");
