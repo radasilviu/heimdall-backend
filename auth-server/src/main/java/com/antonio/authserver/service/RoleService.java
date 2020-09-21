@@ -38,7 +38,7 @@ public class RoleService {
 		if (byName.isPresent())
 			throw new RoleAlreadyExists(role.getName());
 		else if (byName.get().getName() == null) {
-			throw new NullRole();
+			throw new NullRole("Role");
 		} else {
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}

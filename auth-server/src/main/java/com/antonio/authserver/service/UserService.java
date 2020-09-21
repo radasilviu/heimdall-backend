@@ -35,7 +35,7 @@ public class UserService {
 		if (byUsername.isPresent())
 			throw new UserAlreadyExists(appUser.getUsername());
 		else if (byUsername.get().getUsername() == null) {
-			throw new NullUser();
+			throw new NullUser("User");
 		} else {
 			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
 		}

@@ -28,7 +28,7 @@ public class ClientService {
 		if (byClientName.isPresent())
 			throw new ClientAlreadyExists(client.getClientName());
 		else if (byClientName.get().getClientName() == null) {
-			throw new NullClient();
+			throw new NullClient("Client");
 		} else {
 			clientRepository.save(clientMapper.toClientDao(client));
 		}
