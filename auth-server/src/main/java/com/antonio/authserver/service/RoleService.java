@@ -40,6 +40,7 @@ public class RoleService {
 		else if (role.getName().trim().equals("")) {
 			throw new NullResource("Role");
 		} else {
+			role.setName(role.getName().trim());
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}
 	}

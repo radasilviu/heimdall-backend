@@ -30,6 +30,7 @@ public class ClientService {
 		else if (client.getClientName().trim().equals("")) {
 			throw new NullResource("Client");
 		} else {
+			client.setClientName(client.getClientName().trim());
 			clientRepository.save(clientMapper.toClientDao(client));
 		}
 	}
