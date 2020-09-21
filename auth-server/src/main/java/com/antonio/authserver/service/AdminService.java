@@ -28,12 +28,14 @@ public class AdminService {
     private AppUserRepository appUserRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
 
     @Autowired
-    public AdminService(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AdminService(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     public JwtObject validateAdminService(AdminCredential adminCredential) {
@@ -55,7 +57,8 @@ public class AdminService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         final long expirationTime = System.currentTimeMillis() / 1000 + SecurityConstants.EXPIRATION_TIME;
-        final String accessToken = createAccessToken(user.getUsername(), expirationTime, authentication.getAuthorities());
+        Date expDate = new Date(expirationTime);
+        final String accessToken = jwtService.createAccessToken(user.getUsername(), expDate, authentication.getAuthorities(), SecurityConstants.TOKEN_SECRET);
 
         final JwtObject jwtObject = new JwtObject(expirationTime, accessToken);
 
@@ -63,17 +66,6 @@ public class AdminService {
         return jwtObject;
     }
 
-    private String createAccessToken(String username, long expirationTime, Collection<? extends GrantedAuthority> authorities) {
-
-        String token = Jwts.builder()
-                .setSubject(username)
-                .claim("authorities", authorities)
-                .setExpiration(new Date(expirationTime * 1000))
-                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
-                .compact();
-
-        return token;
-    }
 
     private Authentication getAuthentication(AdminCredential adminCredential) {
         Authentication authentication = authenticationManager.authenticate(
