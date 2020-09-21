@@ -23,8 +23,9 @@ public class RoleService {
     private RoleMapper roleMapper;
 
     @Autowired
-    public RoleService(RoleRepository roleRepository) {
+    public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository) {
         this.roleRepository = roleRepository;
+        this.appUserRepository = appUserRepository;
     }
 
 
