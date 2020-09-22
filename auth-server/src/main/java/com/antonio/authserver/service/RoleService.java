@@ -38,22 +38,16 @@ public class RoleService {
         return roleMapper.toRoleDtoList(roleRepository.findAll());
     }
 
-    public String deleteRoleByName(String name) {
+    public void deleteRoleByName(String name){
         Optional<Role> role = roleRepository.findByName(name);
         Set<Role> roles = new HashSet<>();
         roles.add(role.get());
-        List<AppUser> usersWithRole = new ArrayList<>();
-        if (appUserRepository.findByRolesIn(roles).isPresent()) {
-            usersWithRole = appUserRepository.findByRolesIn(roles).get();
-        } else {
-            throw new RuntimeException("dsdaf");
-        }
-        if (usersWithRole.isEmpty()) {
+        List<AppUser> users = appUserRepository.findAllByRolesIn(roles);
+        if(users.isEmpty()){
             roleRepository.deleteByName(name);
-            return "Delete succesfully";
-        } else {
-            return "Blabla";
         }
-
+        else{
+            throw new RoleAssignedException(name, users);
+        }
     }
 }
