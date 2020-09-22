@@ -4,6 +4,7 @@ import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
+import com.antonio.authserver.model.exceptions.RoleAssignedException;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import org.apache.catalina.User;
@@ -42,10 +43,10 @@ public class RoleService {
         Set<Role> roles = new HashSet<>();
         roles.add(role.get());
         List<AppUser> usersWithRole = appUserRepository.findByRolesIn(roles).get();
-        if(usersWithRole.isEmpty()){
+        if (usersWithRole.isEmpty()) {
             roleRepository.deleteByName(name);
-        }else{
-            throw new RuntimeException("Please make sure that all users doesn't have the role " + name + "assigned to it /n" + "Users that might have the roles: " + usersWithRole.toString());
+        } else {
+            throw new RoleAssignedException(name, usersWithRole);
         }
 
     }
