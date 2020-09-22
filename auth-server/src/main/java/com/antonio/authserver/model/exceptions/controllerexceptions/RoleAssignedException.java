@@ -1,4 +1,4 @@
-package com.antonio.authserver.model.exceptions;
+package com.antonio.authserver.model.exceptions.controllerexceptions;
 
 import com.antonio.authserver.entity.AppUser;
 

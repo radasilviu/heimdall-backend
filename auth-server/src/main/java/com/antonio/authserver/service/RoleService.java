@@ -4,10 +4,9 @@ import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
-import com.antonio.authserver.model.exceptions.RoleAssignedException;
+import com.antonio.authserver.model.exceptions.controllerexceptions.RoleAssignedException;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

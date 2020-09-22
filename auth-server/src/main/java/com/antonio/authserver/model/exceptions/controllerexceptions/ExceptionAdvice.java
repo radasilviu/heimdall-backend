@@ -65,4 +65,12 @@ public class ExceptionAdvice {
 		return e.getMessage();
 	}
 
+
+	@ResponseBody
+	@ExceptionHandler(RoleAlreadyExists.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String roleAlreadyExist(RoleAlreadyExists e) {
+		return e.getMessage();
+	}
+
 }
