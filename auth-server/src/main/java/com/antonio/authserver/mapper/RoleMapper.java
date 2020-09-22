@@ -1,23 +1,20 @@
 package com.antonio.authserver.mapper;
+import java.util.List;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Mapper(componentModel = "spring")
+public interface RoleMapper {
 
-@Component
-public class RoleMapper {
+	RoleMapper INSTANCE = Mappers.getMapper(RoleMapper.class);
 
-    public Role toRoleDao(RoleDto roleDto){
-        return new Role(roleDto.getName());
-    }
-    public RoleDto toRoleDto(Role role){
-        return new RoleDto(role.getName());
-    }
-    public List<RoleDto> toRoleDtoList(List<Role> list){
-        return list.stream().map(role -> new RoleDto(role.getName()))
-                .collect(Collectors.toList());
-    }
+	@Mapping(source = "name", target = "name")
+	Role toRoleDao(RoleDto roleDto);
+	@Mapping(source = "name", target = "name")
+	RoleDto toRoleDto(Role role);
+	List<RoleDto> toRoleDtoList(List<Role> list);
 }

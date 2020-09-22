@@ -1,72 +1,73 @@
 package com.antonio.authserver.controller;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.repository.RoleRepository;
 import com.antonio.authserver.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/user")
 @CrossOrigin
 public class UserController {
 
+	private UserService userService;
+	private RoleRepository roleRepository;
 
-    private UserService userService;
-    private RoleRepository roleRepository;
+	@Autowired
+	public UserController(UserService userService, RoleRepository roleRepository) {
+		this.userService = userService;
+		this.roleRepository = roleRepository;
+	}
 
+	@GetMapping
+	public ResponseEntity<List<AppUserDto>> getUsers() {
 
-    @Autowired
-    public UserController(UserService userService, RoleRepository roleRepository) {
-        this.userService = userService;
-        this.roleRepository = roleRepository;
-    }
+		List<AppUserDto> users = userService.getAllUsers();
+		return ResponseEntity.ok().body(users);
+	}
 
-    @GetMapping
-    public ResponseEntity<List<AppUserDto>> getUsers() {
+	@GetMapping("/{username}")
+	public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String username) {
+		return ResponseEntity.ok().body(userService.getUserByUsername(username));
+	}
 
-        List<AppUserDto> users = userService.getAllUsers();
-        return ResponseEntity.ok().body(users);
-    }
+	@PostMapping
+	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user) {
+		userService.save(user);
+		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
-    @GetMapping("/{username}")
-    public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String username) {
+	@PutMapping("/{username}")
+	public ResponseEntity<ResponseMessage> updateUserByUsername(@PathVariable String username,
+			@RequestBody AppUserDto appUserDto) {
+		userService.updateUserByUsername(username, appUserDto);
+		final ResponseMessage responseMessage = new ResponseMessage("User successfully updated");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
-        return ResponseEntity.ok().body(userService.getUserByUsername(username));
-    }
+	@PostMapping("/{username}/addRole")
+	public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
+		Role newRole = roleRepository.findByName(role.getName()).get();
+		userService.addRole(username, newRole);
+	}
 
-    @PostMapping
-    public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user) {
+	@DeleteMapping("/{username}")
+	public void deleteUser(@PathVariable String username) {
+		userService.deleteUser(username);
+	}
 
-        userService.save(user);
-        final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
+	@DeleteMapping("/{username}/removeRole")
+	public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
+		Role newRole = roleRepository.findByName(role.getName()).get();
+		userService.removeRole(username, newRole);
 
-        return ResponseEntity.ok().body(responseMessage);
-    }
-
-    @PostMapping("/{username}/addRole")
-    public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
-        userService.addRole(username, newRole);
-
-    }
-
-    @DeleteMapping("/{username}")
-    public void deleteUser(@PathVariable String username){
-        userService.deleteUser(username);
-    }
-
-    @DeleteMapping("/{username}/removeRole")
-    public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
-        userService.removeRole(username, newRole);
-
-    }
+	}
 
 }
