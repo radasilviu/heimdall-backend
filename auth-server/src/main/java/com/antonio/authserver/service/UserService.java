@@ -40,25 +40,36 @@ public class UserService {
         return AppUserMapper.INSTANCE.toAppUserDto(appUser);
     }
 
-    public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
-        appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
-        Optional<AppUser> byUsername = appUserRepository.findByUsername(appUser.getUsername());
-        if (byUsername.isPresent())
-            throw new UserAlreadyExists(appUser.getUsername());
-        else if (appUser.getUsername().equals("")) {
+    public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
+
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername()).orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
+
+        if (appUser != null)
+            throw new UserAlreadyExists(appUserDto.getUsername());
+        else if (appUserDto.getUsername().equals("")) {
             throw new NullResource("User");
         } else {
-
-            appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUser));
+            appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
         }
     }
 
-    public void updateUserByUsername(String username, AppUserDto appUserDto) throws UserNotFound {
-        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-        appUser.setUsername(appUserDto.getUsername());
-        appUser.setPassword(appUser.getPassword());
-        appUserRepository.save(appUser);
+    public void update(AppUserDto appUserDto) {
+
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername()).orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
+
+        final AppUser userToUpdate = AppUserMapper.INSTANCE.toAppUserDao(appUserDto);
+
+        if (appUserDto.getUsername().equals("")) {
+            throw new NullResource("User");
+        }
+
+        userToUpdate.setId(appUser.getId());
+        appUserRepository.save(userToUpdate);
+
     }
+
 
     public AppUser addRole(String username, Role role) throws UserNotFound, CannotAddRole {
         AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));

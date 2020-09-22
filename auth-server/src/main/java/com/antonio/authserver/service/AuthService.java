@@ -41,7 +41,8 @@ public class AuthService {
 
     public Code getCode(ClientLoginRequest clientLoginRequest) {
 
-        verifyClientCredential(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
+        final ClientDto client = clientService.getClientByName(clientLoginRequest.getClientId());
+        verifyClientCredential(clientLoginRequest.getClientSecret(), client.getClientSecret());
 
         final AppUserDto user = userService.findByUsernameAndPassword(clientLoginRequest.getUsername(), clientLoginRequest.getPassword());
 
@@ -51,18 +52,17 @@ public class AuthService {
         return code;
     }
 
-    private void verifyClientCredential(String clientName, String clientSecret) {
-        final ClientDto client = clientService.getClientByName(clientName);
+    private void verifyClientCredential(String currentPassword, String storedPassword) {
 
-        if (!passwordEncoder.matches(clientSecret, client.getClientSecret())) {
-            throw new IncorrectPassword(clientSecret);
+        if (!passwordEncoder.matches(currentPassword, storedPassword)) {
+            throw new IncorrectPassword(currentPassword);
         }
     }
 
 
     private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
         user.setCode(code.getCode());
-        userService.save(user);
+        userService.update(user);
 
     }
 
@@ -76,11 +76,11 @@ public class AuthService {
         return null;
     }
 
-    private String generateCode(AppUserDto user) {
+    private String generateCode(AppUserDto userDto) {
 
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
 
-        String token = jwtService.createAccessToken(user.getUsername(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+        String token = jwtService.createAccessToken(userDto.getUsername(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
 
         return token;
     }
@@ -93,7 +93,6 @@ public class AuthService {
         verifyClientCode(code);
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
 
-
         final String token = jwtService.createAccessToken(claims.getIssuer(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(expirationTime, token);
 
@@ -105,7 +104,7 @@ public class AuthService {
 
     private void setJwtToUserAndSave(AppUserDto userDto, String token) {
         userDto.setToken(token);
-        userService.save(userDto);
+        userService.update(userDto);
     }
 
     private void verifyClientCode(String clientCode) {
@@ -116,7 +115,7 @@ public class AuthService {
         final AppUserDto appUserDto = userService.findByUsername(username);
         appUserDto.setToken(null);
 
-        userService.save(appUserDto);
+        userService.update(appUserDto);
 
     }
 }
