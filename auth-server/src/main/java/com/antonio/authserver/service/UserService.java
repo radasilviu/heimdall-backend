@@ -1,12 +1,10 @@
 package com.antonio.authserver.service;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
@@ -27,16 +25,13 @@ public class UserService {
 	@Autowired
 	private RoleRepository roleRepository;
 
-	@Autowired
-	private AppUserMapper appUserMapper;
-
 	public List<AppUserDto> getAllUsers() {
-		return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
+		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
 	}
 
 	public AppUserDto getUserByUsername(String username) throws UserNotFound {
 		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		return appUserMapper.toAppUserDto(appUser);
+		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
 	public void save(AppUserDto appUser) throws UserAlreadyExists, NullResource {
 		appUser.setUsername(appUser.getUsername().replaceAll("\\s+", ""));
@@ -47,7 +42,7 @@ public class UserService {
 			throw new NullResource("User");
 		} else {
 
-			appUserRepository.save(appUserMapper.toAppUserDao(appUser));
+			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUser));
 		}
 	}
 	public void updateUserByUsername(String username, AppUserDto appUserDto) throws UserNotFound {

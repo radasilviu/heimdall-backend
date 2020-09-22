@@ -61,7 +61,7 @@ public class ExceptionAdvice {
 	@ResponseBody
 	@ExceptionHandler(NullResource.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String nullClient(NullResource e) {
+	public String nullResource(NullResource e) {
 		return e.getMessage();
 	}
 

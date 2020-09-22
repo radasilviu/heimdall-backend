@@ -1,5 +1,4 @@
 package com.antonio.authserver.service;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +6,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
@@ -25,9 +23,6 @@ public class RoleService {
 	private AppUserRepository appUserRepository;
 
 	@Autowired
-	private RoleMapper roleMapper;
-
-	@Autowired
 	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
@@ -42,17 +37,17 @@ public class RoleService {
 			throw new NullResource("Role");
 		} else {
 
-			roleRepository.save(roleMapper.toRoleDao(role));
+			roleRepository.save(RoleMapper.INSTANCE.toRoleDao(role));
 		}
 	}
 
 	public List<RoleDto> getAllRoles() {
-		return roleMapper.toRoleDtoList(roleRepository.findAll());
+		return RoleMapper.INSTANCE.toRoleDtoList(roleRepository.findAll());
 	}
 
 	public RoleDto getRoleByName(String name) throws RoleNotFound {
 		Role role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound(name));
-		return roleMapper.toRoleDto(role);
+		return RoleMapper.INSTANCE.toRoleDto(role);
 	}
 
 	public void updateRoleByName(String name, RoleDto roleDto) throws RoleNotFound {

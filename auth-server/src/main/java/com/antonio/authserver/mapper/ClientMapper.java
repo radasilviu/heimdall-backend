@@ -1,25 +1,20 @@
 package com.antonio.authserver.mapper;
+import java.util.List;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Mapper(componentModel = "spring")
+public interface ClientMapper {
 
-@Component
-public class ClientMapper {
+	ClientMapper INSTANCE = Mappers.getMapper(ClientMapper.class);
 
-    public Client toClientDao(ClientDto clientDto){
-        Client client = new Client();
-        client.setClientName(clientDto.getClientName());
-        return client;
-    }
-    public ClientDto toClientDto(Client client){
-        return new ClientDto(client.getClientName());
-    }
-    public List<ClientDto> toClientDtoList(List<Client> list){
-        return list.stream().map(client -> new ClientDto(client.getClientName()))
-                .collect(Collectors.toList());
-    }
+	@Mapping(source = "clientName", target = "clientName")
+	Client toClientDao(ClientDto clientDto);
+	@Mapping(source = "clientName", target = "clientName")
+	ClientDto toClientDto(Client client);
+	List<ClientDto> toClientDtoList(List<Client> list);
 }

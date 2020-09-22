@@ -1,27 +1,23 @@
 package com.antonio.authserver.mapper;
+import java.util.List;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
-import org.springframework.stereotype.Component;
+@Mapper(componentModel = "spring")
+public interface AppUserMapper {
 
-import java.util.List;
-import java.util.stream.Collectors;
+	AppUserMapper INSTANCE = Mappers.getMapper(AppUserMapper.class);
 
-@Component
-public class AppUserMapper {
-
-    public AppUser toAppUserDao(AppUserDto appUserDto){
-        AppUser appUser = new AppUser();
-        appUser.setUsername(appUserDto.getUsername());
-        appUser.setPassword(appUserDto.getPassword());
-        appUser.setRoles(appUserDto.getRoles());
-        return appUser;
-    }
-    public AppUserDto toAppUserDto(AppUser appUser){
-        return new AppUserDto(appUser.getUsername(), appUser.getPassword(), appUser.getRoles());
-    }
-    public List<AppUserDto> toAppUserDtoList(List<AppUser> list){
-        return list.stream().map(appUser -> new AppUserDto(appUser.getUsername(), appUser.getUsername(), appUser.getRoles()))
-                .collect(Collectors.toList());
-    }
+	@Mapping(source = "username", target = "username")
+	@Mapping(source = "password", target = "password")
+	@Mapping(source = "roles", target = "roles")
+	AppUser toAppUserDao(AppUserDto appUserDto);
+	@Mapping(source = "username", target = "username")
+	@Mapping(source = "password", target = "password")
+	@Mapping(source = "roles", target = "roles")
+	AppUserDto toAppUserDto(AppUser appUser);
+	List<AppUserDto> toAppUserDtoList(List<AppUser> list);
 }

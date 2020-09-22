@@ -1,11 +1,9 @@
 package com.antonio.authserver.service;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.mapper.ClientMapper;
@@ -20,17 +18,14 @@ public class ClientService {
 	@Autowired
 	private ClientRepository clientRepository;
 
-	@Autowired
-	private ClientMapper clientMapper;
-
 	public List<ClientDto> getAllClients() {
 		System.out.println(clientRepository.findAll());
-		return clientMapper.toClientDtoList(clientRepository.findAll());
+		return ClientMapper.INSTANCE.toClientDtoList(clientRepository.findAll());
 	}
 
 	public ClientDto getClientByName(String clientName) throws ClientNotFound {
 		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new ClientNotFound(clientName));
-		return clientMapper.toClientDto(client);
+		return ClientMapper.INSTANCE.toClientDto(client);
 
 	}
 
@@ -43,7 +38,7 @@ public class ClientService {
 			throw new NullResource("Client");
 		} else {
 
-			clientRepository.save(clientMapper.toClientDao(client));
+			clientRepository.save(ClientMapper.INSTANCE.toClientDao(client));
 		}
 	}
 
