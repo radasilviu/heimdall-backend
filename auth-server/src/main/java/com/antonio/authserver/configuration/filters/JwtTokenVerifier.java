@@ -54,17 +54,17 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             final String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
             final Claims claims = jwtService.decodeJWT(token);
-            final String username = claims.getSubject();
+            final String username = claims.getIssuer();
             final AppUserDto user = userService.getUserByUsername(username);
 
-            verifyToken(token, user.getToken());
+            verifyBearerToken(token, user.getToken());
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
             final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
             final Claims claims = jwtService.decodeJWT(token);
-            final String username = claims.getSubject();
+            final String username = claims.getIssuer();
 
             final List<Map<String, String>> authorities = (List<Map<String, String>>) claims.get("authorities");
             final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
@@ -75,7 +75,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
-    private void verifyToken(String currentToken, String userToken) {
+    private void verifyBearerToken(String currentToken, String userToken) {
         if (!currentToken.equals(userToken)) {
             throw new TokenNotFound(currentToken);
         }

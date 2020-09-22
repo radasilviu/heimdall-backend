@@ -1,6 +1,7 @@
 package com.antonio.authserver.controller;
 import java.util.List;
 
+import com.antonio.authserver.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +17,14 @@ import com.antonio.authserver.service.UserService;
 @CrossOrigin
 public class UserController {
 
-	private UserService userService;
-	private RoleRepository roleRepository;
+    private UserService userService;
+    private RoleService roleService;
 
-	@Autowired
-	public UserController(UserService userService, RoleRepository roleRepository) {
-		this.userService = userService;
-		this.roleRepository = roleRepository;
-	}
+    @Autowired
+    public UserController(UserService userService,RoleService roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
+    }
 
 	@GetMapping
 	public ResponseEntity<List<AppUserDto>> getUsers() {
@@ -52,21 +53,21 @@ public class UserController {
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@PostMapping("/{username}/addRole")
-	public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
-		Role newRole = roleRepository.findByName(role.getName()).get();
-		userService.addRole(username, newRole);
-	}
+    @PostMapping("/{username}/addRole")
+    public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
+        Role newRole = roleService.findRoleByNameDAO(role.getName());
+        userService.addRole(username, newRole);
+    }
 
 	@DeleteMapping("/{username}")
 	public void deleteUser(@PathVariable String username) {
 		userService.deleteUser(username);
 	}
 
-	@DeleteMapping("/{username}/removeRole")
-	public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
-		Role newRole = roleRepository.findByName(role.getName()).get();
-		userService.removeRole(username, newRole);
+    @DeleteMapping("/{username}/removeRole")
+    public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
+        Role newRole = roleService.findRoleByNameDAO(role.getName());
+        userService.removeRole(username, newRole);
 
 	}
 
