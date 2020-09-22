@@ -39,17 +39,13 @@ public class UserService {
 	}
 
 	public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
-
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-		final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername())
-				.orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
-
-		if (appUser != null)
+		if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
 			throw new UserAlreadyExists(appUserDto.getUsername());
 		else if (appUserDto.getUsername().equals("")) {
 			throw new NullResource("User");
 		} else {
-			appUser.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
+			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
 			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 		}
 	}
