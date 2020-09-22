@@ -42,7 +42,7 @@ public class UserService {
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
 		if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
 			throw new UserAlreadyExists(appUserDto.getUsername());
-		else if (appUserDto.getUsername().equals("") && appUserDto.getPassword().equals("")) {
+		else if (appUserDto.getUsername().equals("")) {
 			throw new NullResource("User");
 		} else {
 			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
