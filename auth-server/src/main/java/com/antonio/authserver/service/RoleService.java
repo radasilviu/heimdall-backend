@@ -69,4 +69,8 @@ public class RoleService {
             throw new RoleAssignedException(name, users);
         }
     }
+
+    public Role findRoleByNameDAO(String name){
+		return roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound("Role not found with name " + name));
+	}
 }
