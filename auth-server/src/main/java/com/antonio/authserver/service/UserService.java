@@ -131,4 +131,5 @@ public class UserService {
 
         return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
     }
+
 }

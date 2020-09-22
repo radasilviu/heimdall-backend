@@ -2,6 +2,7 @@ package com.antonio.authserver.controller;
 
 import java.util.List;
 
+import com.antonio.authserver.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,12 @@ import com.antonio.authserver.service.UserService;
 public class UserController {
 
     private UserService userService;
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
     @Autowired
-    public UserController(UserService userService, RoleRepository roleRepository) {
+    public UserController(UserService userService,RoleService roleService) {
         this.userService = userService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping
@@ -54,7 +55,7 @@ public class UserController {
 
     @PostMapping("/{username}/addRole")
     public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
+        Role newRole = roleService.findRoleByNameDAO(role.getName());
         userService.addRole(username, newRole);
     }
 
@@ -65,7 +66,7 @@ public class UserController {
 
     @DeleteMapping("/{username}/removeRole")
     public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
+        Role newRole = roleService.findRoleByNameDAO(role.getName());
         userService.removeRole(username, newRole);
 
     }

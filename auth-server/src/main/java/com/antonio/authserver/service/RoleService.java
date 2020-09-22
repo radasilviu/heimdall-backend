@@ -6,6 +6,7 @@ import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
 import com.antonio.authserver.model.exceptions.controllerexceptions.RoleAlreadyExists;
+import com.antonio.authserver.model.exceptions.controllerexceptions.RoleAssignedException;
 import com.antonio.authserver.model.exceptions.controllerexceptions.RoleNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
@@ -66,4 +67,8 @@ public class RoleService {
             throw new RoleAssignedException(name, users);
         }
     }
+
+    public Role findRoleByNameDAO(String name){
+		return roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound("Role not found with name " + name));
+	}
 }
