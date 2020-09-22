@@ -65,4 +65,12 @@ public class ExceptionAdvice {
 		return e.getMessage();
 	}
 
+
+	@ResponseBody
+	@ExceptionHandler(RoleAssignedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String roleAssignedException(RoleAssignedException e) {
+		return e.getMessage();
+	}
+
 }

@@ -1,11 +1,5 @@
 package com.antonio.authserver.service;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
@@ -15,6 +9,10 @@ import com.antonio.authserver.model.exceptions.controllerexceptions.RoleAlreadyE
 import com.antonio.authserver.model.exceptions.controllerexceptions.RoleNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class RoleService {
@@ -56,27 +54,16 @@ public class RoleService {
 		roleRepository.save(role);
 	}
 
-	public void deleteRoleByName(String name) throws RoleNotFound {
-		Set<Role> roles = roleRepository.findAllByName(name);
-		Optional<List<AppUser>> users = appUserRepository.findByRolesIn(roles);
-		if (users.isPresent()) {
-			deleteRoleFromUsers(users, roles);
-		}
-		roleRepository.delete(roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound(name)));
-	}
-
-	private void deleteRoleFromUsers(Optional<List<AppUser>> users, Set<Role> roles) {
-		for (AppUser i : users.get()) {
-			Iterator iter = roles.iterator();
-			if (i.getRoles().contains(iter.next())) {
-				AppUser appUser = appUserRepository.findByUsername(i.getUsername()).get();
-				Set<Role> rolesFromUser = appUser.getRoles();
-				rolesFromUser.removeAll(roles);
-				appUser.setRoles(rolesFromUser);
-				appUserRepository.deleteById(appUser.getId());
-				appUserRepository.save(appUser);
-			}
-		}
-	}
-
+    public void deleteRoleByName(String name){
+        Optional<Role> role = roleRepository.findByName(name);
+        Set<Role> roles = new HashSet<>();
+        roles.add(role.get());
+        List<AppUser> users = appUserRepository.findAllByRolesIn(roles);
+        if(users.isEmpty()){
+            roleRepository.deleteByName(name);
+        }
+        else{
+            throw new RoleAssignedException(name, users);
+        }
+    }
 }

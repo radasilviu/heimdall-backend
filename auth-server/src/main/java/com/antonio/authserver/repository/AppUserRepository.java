@@ -18,7 +18,7 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     Optional<AppUser> findByCode(String code);
 
-    Optional<List<AppUser>> findByRolesIn(Set<Role> roles);
+    List<AppUser> findAllByRolesIn(Set<Role> roles);
 
     void deleteByUsername(String username);
 }
