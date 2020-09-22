@@ -5,11 +5,14 @@ import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.exceptions.AuthorizationServerError;
+import com.antonio.authserver.model.exceptions.controllerexceptions.RoleNotFound;
+import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,13 +45,8 @@ public class UserService {
 
 
     public ResponseEntity<?> addRole(String username, Role role) {
-        if (!checkIfUserExist(username)) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "User with username: " + username + "doesn't exist"));
-        }
-
-        if (!checkIfRoleExist(role.getName())) {
-            return ResponseEntity.badRequest().body(new AuthorizationServerError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), "Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly"));
-        }
+        checkIfUserExist(username);
+        checkIfRoleExist(role.getName());
 
         AppUser user = appUserRepository.findByUsername(username).get();
         user.getRoles().add(role);
@@ -59,11 +57,11 @@ public class UserService {
 
     public void removeRole(String username, Role role) {
         if (!checkIfUserExist(username)) {
-            throw new RuntimeException("User with username: " + username + "doesn't exist");
+            throw new UserNotFound(username);
         }
 
         if (!checkIfRoleExist(role.getName())) {
-            throw new RuntimeException("Role  with the name: " + role.getName() + "can not be added to user, it need to be saved firstly");
+            throw new RoleNotFound(role.getName());
         }
 
         AppUser user = appUserRepository.findByUsername(username).get();
@@ -78,7 +76,7 @@ public class UserService {
 
         Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
         if (!userOptional.isPresent()) {
-            throw new RuntimeException("Incorrect username: " + username);
+            throw new UserNotFound(username);
         }
 
         return appUserMapper.toAppUserDto(userOptional.get());
@@ -103,8 +101,38 @@ public class UserService {
     }
 
     public void deleteUser(String username) {
-        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("no user found"));
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
         appUserRepository.delete(appUser);
 
+    }
+
+    public AppUserDto findByUsernameAndPassword(String username, String password) {
+        Optional<AppUser> userOptional = appUserRepository.findByUsernameAndPassword(username, password);
+
+        if (!userOptional.isPresent()) {
+            throw new UserNotFound(username);
+        }
+
+        return appUserMapper.toAppUserDto(userOptional.get());
+    }
+
+    public AppUserDto findByCode(String code) {
+        final Optional<AppUser> userOptional = appUserRepository.findByCode(code);
+
+        if (!userOptional.isPresent()) {
+            throw new AccessDeniedException("Your client do not have permission to use this app");
+        }
+
+        return appUserMapper.toAppUserDto(userOptional.get());
+    }
+
+    public AppUserDto findByUsername(String username) {
+        final Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
+
+        if (!userOptional.isPresent()) {
+            throw new UserNotFound(username);
+        }
+
+        return appUserMapper.toAppUserDto(userOptional.get());
     }
 }

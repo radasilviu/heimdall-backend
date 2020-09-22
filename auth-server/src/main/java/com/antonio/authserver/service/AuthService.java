@@ -1,15 +1,12 @@
 package com.antonio.authserver.service;
 
-import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
-import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.CodeRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -17,13 +14,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class AuthService {
     @Autowired
-    private AppUserRepository appUserRepository;
+    private UserService userService;
 
     @Autowired
     private CodeRepository codeRepository;
@@ -42,26 +37,21 @@ public class AuthService {
     }
 
     public Code getCode(ClientLoginRequest request) {
-        Optional<AppUser> userOptional = appUserRepository.findByUsernameAndPassword(request.getUsername(), request.getPassword());
+        AppUserDto user = userService.findByUsernameAndPassword(request.getUsername(), request.getPassword());
 
-        if (!userOptional.isPresent()) {
-            throw new RuntimeException("Bad credentials!");
-        }
-
-        final AppUser user = userOptional.get();
         Code code = createOauthCode(user);
         saveUserWithNewCodeValue(user, code);
 
         return code;
     }
 
-    private void saveUserWithNewCodeValue(AppUser user, Code code) {
+    private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
         user.setCode(code.getCode());
-        appUserRepository.save(user);
+        userService.save(user);
 
     }
 
-    private Code createOauthCode(AppUser user) {
+    private Code createOauthCode(AppUserDto user) {
         String jwtCode = generateCode(user);
 
         if (!jwtCode.equals("")) {
@@ -71,7 +61,7 @@ public class AuthService {
         return null;
     }
 
-    private String generateCode(AppUser user) {
+    private String generateCode(AppUserDto user) {
 
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
 
@@ -88,18 +78,30 @@ public class AuthService {
         verifyClientCredential(code);
         long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
 
+
         final String token = jwtService.createAccessToken(claims.getIssuer(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(expirationTime, token);
+
+        final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
+        setJwtToUserAndSave(user, token);
 
         return jwtObject;
     }
 
-    private void verifyClientCredential(String clientCode) {
-        final Optional<AppUser> userOptional = appUserRepository.findByCode(clientCode);
+    private void setJwtToUserAndSave(AppUserDto userDto, String token) {
+        userDto.setToken(token);
+        userService.save(userDto);
+    }
 
-        if (!userOptional.isPresent()) {
-            throw new RuntimeException("Your client do not have permission to use this app");
-        }
+    private void verifyClientCredential(String clientCode) {
+        userService.findByCode(clientCode);
+    }
+
+    public void logout(String username) {
+        final AppUserDto appUserDto = userService.findByUsername(username);
+        appUserDto.setToken(null);
+
+        userService.save(appUserDto);
 
     }
 }

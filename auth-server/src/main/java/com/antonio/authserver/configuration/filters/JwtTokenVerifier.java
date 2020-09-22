@@ -1,6 +1,10 @@
 package com.antonio.authserver.configuration.filters;
 
+import com.antonio.authserver.dto.AppUserDto;
+import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.model.exceptions.controllerexceptions.TokenNotFound;
 import com.antonio.authserver.service.JwtService;
+import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
@@ -21,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,9 +33,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
     private final JwtService jwtService;
+    private final UserService userService;
 
-    public JwtTokenVerifier(JwtService jwtService) {
+    public JwtTokenVerifier(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @Override
@@ -45,10 +52,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
 
-
             final String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
-            jwtService.decodeJWT(token);
+            final Claims claims = jwtService.decodeJWT(token);
+            final String username = claims.getSubject();
+            final AppUserDto user = userService.getUserByUsername(username);
 
+            verifyToken(token, user.getToken());
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
@@ -64,6 +73,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+    private void verifyToken(String currentToken, String userToken) {
+        if (!currentToken.equals(userToken)) {
+            throw new TokenNotFound(currentToken);
+        }
     }
 
     private Set<GrantedAuthority> getGrantedAuthoritySet(List<Map<String, String>> authorities) {

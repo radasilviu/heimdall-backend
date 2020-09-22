@@ -16,6 +16,8 @@ public class AppUserDto {
 
     private String username;
     private String password;
+    private String token;
+    private String code;
     private Set<Role> roles;
 
     @Override
@@ -24,5 +26,12 @@ public class AppUserDto {
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public AppUserDto(String username, String password, String token, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.token = token;
+        this.roles = roles;
     }
 }

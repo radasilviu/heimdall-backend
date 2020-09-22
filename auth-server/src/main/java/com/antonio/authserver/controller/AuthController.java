@@ -36,6 +36,14 @@ public class AuthController {
         return ResponseEntity.ok().body(jwtObject);
     }
 
+    @CrossOrigin("http://localhost:4201")
+    @PutMapping(path = "/token/{username}")
+    public ResponseEntity<?> getToken(@PathVariable String username) {
+        authService.logout(username);
+        final ResponseMessage responseMessage = new ResponseMessage("User logged out");
+        return ResponseEntity.unprocessableEntity().body(responseMessage);
+    }
+
     @CrossOrigin("http://localhost:8080")
     @GetMapping(path = "/access")
     public ResponseEntity<?> verifyToken() {

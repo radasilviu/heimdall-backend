@@ -21,6 +21,10 @@ public class AppUser {
     private String password;
 
     @Column(columnDefinition = "TEXT")
+    private String token;
+
+
+    @Column(columnDefinition = "TEXT")
     private String code;
 
     @ManyToMany
@@ -41,27 +45,4 @@ public class AppUser {
         this.roles = roles;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 }
