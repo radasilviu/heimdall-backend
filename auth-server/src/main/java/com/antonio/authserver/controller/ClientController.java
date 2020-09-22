@@ -39,9 +39,10 @@ public class ClientController {
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@PutMapping
-	public ResponseEntity<ResponseMessage> updateClientByName(@RequestBody ClientDto clientDto) {
-		clientService.updateClientByName(clientDto);
+	@PutMapping("/{clientName}")
+	public ResponseEntity<ResponseMessage> updateClientByName(@PathVariable String clientName,
+			@RequestBody ClientDto clientDto) {
+		clientService.updateClientByName(clientName, clientDto);
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully updated");
 		return ResponseEntity.ok().body(responseMessage);
 	}

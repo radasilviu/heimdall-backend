@@ -42,9 +42,8 @@ public class ClientService {
 		}
 	}
 
-	public void updateClientByName(ClientDto clientDto) throws ClientNotFound {
-		Client client = clientRepository.findByClientName(clientDto.getClientName())
-				.orElseThrow(() -> new ClientNotFound(clientDto.getClientName()));
+	public void updateClientByName(String name, ClientDto clientDto) throws ClientNotFound {
+		Client client = clientRepository.findByClientName(name).orElseThrow(() -> new ClientNotFound(name));
 		client.setClientName(clientDto.getClientName());
 		clientRepository.save(client);
 	}
