@@ -67,9 +67,9 @@ public class ExceptionAdvice {
 
 
 	@ResponseBody
-	@ExceptionHandler(RoleAlreadyExists.class)
+	@ExceptionHandler(RoleAssignedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String roleAlreadyExist(RoleAlreadyExists e) {
+	public String roleAssignedException(RoleAssignedException e) {
 		return e.getMessage();
 	}
 
