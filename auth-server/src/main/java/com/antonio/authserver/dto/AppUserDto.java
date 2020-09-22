@@ -17,4 +17,12 @@ public class AppUserDto {
     private String username;
     private String password;
     private Set<Role> roles;
+
+    @Override
+    public String toString() {
+        return "AppUserDto{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

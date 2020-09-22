@@ -22,4 +22,4 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<List<AppUser>> findByRolesIn(Set<Role> roles);
 
     void deleteByUsername(String username);
-    }
+}

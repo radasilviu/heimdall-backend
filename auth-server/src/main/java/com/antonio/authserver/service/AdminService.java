@@ -6,8 +6,6 @@ import com.antonio.authserver.model.AdminCredential;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.utils.SecurityConstants;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,14 +24,16 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private AppUserRepository appUserRepository;
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
 
     @Autowired
-    public AdminService(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AdminService(AppUserRepository appUserRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     public JwtObject validateAdminService(AdminCredential adminCredential) {
@@ -46,16 +46,16 @@ public class AdminService {
 
         final AppUser user = userOptional.get();
 
-        if (!adminCredential.getPassword().equals(user.getPassword())) {
-            throw new UsernameNotFoundException("Invalid Credentials! Password Wrong");
+        if (!passwordEncoder.matches(adminCredential.getPassword(), user.getPassword())) {
+            throw new UsernameNotFoundException("Password is not correct!");
         }
 
 
         Authentication authentication = getAuthentication(adminCredential);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final long expirationTime = System.currentTimeMillis() / 1000 + SecurityConstants.EXPIRATION_TIME;
-        final String accessToken = createAccessToken(user.getUsername(), expirationTime, authentication.getAuthorities());
+        final long expirationTime = System.currentTimeMillis()  + SecurityConstants.EXPIRATION_TIME;
+        final String accessToken = jwtService.createAccessToken(user.getUsername(), expirationTime, authentication.getAuthorities(), SecurityConstants.TOKEN_SECRET);
 
         final JwtObject jwtObject = new JwtObject(expirationTime, accessToken);
 
@@ -63,17 +63,6 @@ public class AdminService {
         return jwtObject;
     }
 
-    private String createAccessToken(String username, long expirationTime, Collection<? extends GrantedAuthority> authorities) {
-
-        String token = Jwts.builder()
-                .setSubject(username)
-                .claim("authorities", authorities)
-                .setExpiration(new Date(expirationTime * 1000))
-                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
-                .compact();
-
-        return token;
-    }
 
     private Authentication getAuthentication(AdminCredential adminCredential) {
         Authentication authentication = authenticationManager.authenticate(

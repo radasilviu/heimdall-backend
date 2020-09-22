@@ -43,9 +43,9 @@ public class RoleService {
         Set<Role> roles = new HashSet<>();
         roles.add(role.get());
         List<AppUser> usersWithRole = new ArrayList<>();
-        if(appUserRepository.findByRolesIn(roles).isPresent()) {
+        if (appUserRepository.findByRolesIn(roles).isPresent()) {
             usersWithRole = appUserRepository.findByRolesIn(roles).get();
-        }else{
+        } else {
             throw new RuntimeException("dsdaf");
         }
         if (usersWithRole.isEmpty()) {
@@ -56,6 +56,4 @@ public class RoleService {
         }
 
     }
-
-
 }
