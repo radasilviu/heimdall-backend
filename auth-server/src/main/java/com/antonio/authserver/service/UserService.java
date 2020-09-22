@@ -49,6 +49,7 @@ public class UserService {
 		else if (appUserDto.getUsername().equals("")) {
 			throw new NullResource("User");
 		} else {
+			appUser.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
 			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 		}
 	}
