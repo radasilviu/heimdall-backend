@@ -1,5 +1,4 @@
 package com.antonio.authserver.controller;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,57 +16,58 @@ import com.antonio.authserver.service.UserService;
 @CrossOrigin
 public class UserController {
 
-    private UserService userService;
-    private RoleRepository roleRepository;
+	private UserService userService;
+	private RoleRepository roleRepository;
 
-    @Autowired
-    public UserController(UserService userService, RoleRepository roleRepository) {
-        this.userService = userService;
-        this.roleRepository = roleRepository;
-    }
+	@Autowired
+	public UserController(UserService userService, RoleRepository roleRepository) {
+		this.userService = userService;
+		this.roleRepository = roleRepository;
+	}
 
-    @GetMapping
-    public ResponseEntity<List<AppUserDto>> getUsers() {
+	@GetMapping
+	public ResponseEntity<List<AppUserDto>> getUsers() {
 
-        List<AppUserDto> users = userService.getAllUsers();
-        return ResponseEntity.ok().body(users);
-    }
+		List<AppUserDto> users = userService.getAllUsers();
+		return ResponseEntity.ok().body(users);
+	}
 
-    @GetMapping("/{username}")
-    public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String username) {
-        return ResponseEntity.ok().body(userService.getUserByUsername(username));
-    }
+	@GetMapping("/{username}")
+	public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String username) {
+		return ResponseEntity.ok().body(userService.getUserByUsername(username));
+	}
 
-    @PostMapping
-    public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user) {
-        userService.create(user);
-        final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
-        return ResponseEntity.ok().body(responseMessage);
-    }
+	@PostMapping
+	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user) {
+		userService.create(user);
+		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
-    @PutMapping
-    public ResponseEntity<ResponseMessage> updateUserByUsername(@RequestBody AppUserDto appUserDto) {
-        userService.update(appUserDto);
-        final ResponseMessage responseMessage = new ResponseMessage("User successfully updated");
-        return ResponseEntity.ok().body(responseMessage);
-    }
+	@PutMapping("/{username}")
+	public ResponseEntity<ResponseMessage> updateUserByUsername(@PathVariable String username,
+			@RequestBody AppUserDto appUserDto) {
+		userService.updateUserByUsername(username, appUserDto);
+		final ResponseMessage responseMessage = new ResponseMessage("User successfully updated");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
-    @PostMapping("/{username}/addRole")
-    public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
-        userService.addRole(username, newRole);
-    }
+	@PostMapping("/{username}/addRole")
+	public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
+		Role newRole = roleRepository.findByName(role.getName()).get();
+		userService.addRole(username, newRole);
+	}
 
-    @DeleteMapping("/{username}")
-    public void deleteUser(@PathVariable String username) {
-        userService.deleteUser(username);
-    }
+	@DeleteMapping("/{username}")
+	public void deleteUser(@PathVariable String username) {
+		userService.deleteUser(username);
+	}
 
-    @DeleteMapping("/{username}/removeRole")
-    public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
-        Role newRole = roleRepository.findByName(role.getName()).get();
-        userService.removeRole(username, newRole);
+	@DeleteMapping("/{username}/removeRole")
+	public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
+		Role newRole = roleRepository.findByName(role.getName()).get();
+		userService.removeRole(username, newRole);
 
-    }
+	}
 
 }
