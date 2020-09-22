@@ -11,8 +11,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class AppUserDto {
 
     private Long id;
@@ -29,6 +27,9 @@ public class AppUserDto {
                 "username='" + username + '\'' +
                 ", roles=" + roles +
                 '}';
+    }
+
+    public AppUserDto() {
     }
 
     public AppUserDto(String username, String password, String code, String token, Set<Role> roles) {
