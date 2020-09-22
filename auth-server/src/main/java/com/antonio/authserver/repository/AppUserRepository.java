@@ -1,7 +1,6 @@
 package com.antonio.authserver.repository;
 
 import com.antonio.authserver.entity.AppUser;
-import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

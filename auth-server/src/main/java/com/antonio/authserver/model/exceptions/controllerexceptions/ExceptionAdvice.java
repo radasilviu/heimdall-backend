@@ -1,7 +1,10 @@
 package com.antonio.authserver.model.exceptions.controllerexceptions;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -45,6 +48,14 @@ public class ExceptionAdvice {
     @ExceptionHandler(UserNotFound.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String userNotFound(UserNotFound e) {
+        return e.getMessage();
+    }
+
+
+    @ResponseBody
+    @ExceptionHandler(IncorrectPassword.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String incorrectPassword(IncorrectPassword e) {
         return e.getMessage();
     }
 

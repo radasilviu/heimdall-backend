@@ -1,6 +1,5 @@
 package com.antonio.authserver.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +18,10 @@ public class Client {
     private Long id;
     private String clientName;
 
+    public Client() {
+    }
+
+    public Client(String clientName) {
+        this.clientName = clientName;
+    }
 }
