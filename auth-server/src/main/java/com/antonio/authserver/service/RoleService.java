@@ -51,7 +51,10 @@ public class RoleService {
 	}
 
 	public void updateRoleByName(String name, RoleDto roleDto) throws RoleNotFound {
+		roleDto.setName(roleDto.getName().replaceAll("\\s+", ""));
 		Role role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFound(name));
+		if (roleDto.getName().equals(""))
+			throw new NullResource("Role");
 		role.setName(roleDto.getName());
 		roleRepository.save(role);
 	}

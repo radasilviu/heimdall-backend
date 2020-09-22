@@ -43,7 +43,10 @@ public class ClientService {
 	}
 
 	public void updateClientByName(String name, ClientDto clientDto) throws ClientNotFound {
+		clientDto.setClientName(clientDto.getClientName().replaceAll("\\s+", ""));
 		Client client = clientRepository.findByClientName(name).orElseThrow(() -> new ClientNotFound(name));
+		if (clientDto.getClientName().equals(""))
+			throw new NullResource("Client");
 		client.setClientName(clientDto.getClientName());
 		clientRepository.save(client);
 	}
