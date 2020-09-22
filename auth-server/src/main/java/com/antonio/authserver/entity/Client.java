@@ -17,11 +17,13 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String clientName;
+    private String clientSecret;
 
     public Client() {
     }
 
-    public Client(String clientName) {
+    public Client(String clientName, String clientSecret) {
         this.clientName = clientName;
+        this.clientSecret = clientSecret;
     }
 }

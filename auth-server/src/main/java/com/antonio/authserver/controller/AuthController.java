@@ -1,6 +1,6 @@
 package com.antonio.authserver.controller;
 
-import com.antonio.authserver.entity.Code;
+import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.ResponseMessage;

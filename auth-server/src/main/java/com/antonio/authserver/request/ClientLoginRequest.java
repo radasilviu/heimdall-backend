@@ -2,8 +2,9 @@ package com.antonio.authserver.request;
 
 public class ClientLoginRequest {
     private String username;
-
     private String password;
+    private String clientId;
+    private String clientSecret;
 
     public String getUsername() {
         return username;
@@ -19,5 +20,21 @@ public class ClientLoginRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }
