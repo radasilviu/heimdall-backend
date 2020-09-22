@@ -10,10 +10,7 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class RoleService {
@@ -41,12 +38,17 @@ public class RoleService {
     }
 
     public void deleteRoleByName(String name) {
-       
+        Optional<Role> role = roleRepository.findByName(name);
+        Set<Role> roles = new HashSet<>();
+        roles.add(role.get());
+        List<AppUser> usersWithRole = appUserRepository.findByRolesIn(roles).get();
+        if(usersWithRole.isEmpty()){
+            roleRepository.deleteByName(name);
+        }else{
+            throw new RuntimeException("Please make sure that all users doesn't have the role " + name + "assigned to it /n" + "Users that might have the roles: " + usersWithRole.toString());
+        }
+
     }
-
-
-
-
 
 
 }
