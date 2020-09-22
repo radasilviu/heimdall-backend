@@ -112,14 +112,13 @@ public class UserService {
         return userDto;
     }
 
-    public AppUserDto findByCode(String code) {
-        final Optional<AppUser> userOptional = appUserRepository.findByCode(code);
+    public void verifyUserCode(String code) {
 
-        if (!userOptional.isPresent()) {
-            throw new AccessDeniedException("Your client do not have permission to use this app");
-        }
+        AppUser appUser = appUserRepository.findByCode(code).orElseThrow(() -> new CodeNotFound(code));
+        appUser.setCode(null);
 
-        return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+        appUserRepository.save(appUser);
+
     }
 
     public AppUserDto findByUsername(String username) {

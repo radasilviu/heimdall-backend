@@ -5,7 +5,9 @@ import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
+import com.antonio.authserver.model.exceptions.controllerexceptions.CodeNotFound;
 import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
+import com.antonio.authserver.model.exceptions.controllerexceptions.TokenNotFound;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
@@ -88,19 +90,22 @@ public class AuthService {
 
     public JwtObject login(LoginCredential loginCredential) {
         String code = loginCredential.getClientCode();
-        Claims claims = jwtService.decodeJWT(code);
-
         verifyClientCode(code);
-        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
 
+        Claims claims = jwtService.decodeJWT(code);
+        final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
+
+
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
         final String token = jwtService.createAccessToken(claims.getIssuer(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(expirationTime, token);
 
-        final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
+
         setJwtToUserAndSave(user, token);
 
         return jwtObject;
     }
+
 
     private void setJwtToUserAndSave(AppUserDto userDto, String token) {
         userDto.setToken(token);
@@ -108,7 +113,7 @@ public class AuthService {
     }
 
     private void verifyClientCode(String clientCode) {
-        userService.findByCode(clientCode);
+        userService.verifyUserCode(clientCode);
     }
 
     public void logout(String jwt) {
