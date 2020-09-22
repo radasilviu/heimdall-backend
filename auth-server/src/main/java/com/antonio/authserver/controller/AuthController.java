@@ -37,9 +37,9 @@ public class AuthController {
     }
 
     @CrossOrigin("http://localhost:4201")
-    @PutMapping(path = "/token/{username}")
-    public ResponseEntity<?> getToken(@PathVariable String username) {
-        authService.logout(username);
+    @PutMapping(path = "/token/{jwt}")
+    public ResponseEntity<?> deleteToken(@PathVariable String jwt) {
+        authService.logout(jwt);
         final ResponseMessage responseMessage = new ResponseMessage("User logged out");
         return ResponseEntity.unprocessableEntity().body(responseMessage);
     }

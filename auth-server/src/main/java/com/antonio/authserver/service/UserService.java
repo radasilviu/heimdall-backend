@@ -132,4 +132,10 @@ public class UserService {
         return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
     }
 
+    public AppUserDto findByToken(String token) {
+        AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
+
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
+
 }

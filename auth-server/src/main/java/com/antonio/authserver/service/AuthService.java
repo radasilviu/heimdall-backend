@@ -111,8 +111,8 @@ public class AuthService {
         userService.findByCode(clientCode);
     }
 
-    public void logout(String username) {
-        final AppUserDto appUserDto = userService.findByUsername(username);
+    public void logout(String jwt) {
+        final AppUserDto appUserDto = userService.findByToken(jwt);
         appUserDto.setToken(null);
 
         userService.update(appUserDto);
