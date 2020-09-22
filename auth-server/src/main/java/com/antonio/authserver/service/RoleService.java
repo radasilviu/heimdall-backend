@@ -42,7 +42,12 @@ public class RoleService {
         Optional<Role> role = roleRepository.findByName(name);
         Set<Role> roles = new HashSet<>();
         roles.add(role.get());
-        List<AppUser> usersWithRole = appUserRepository.findByRolesIn(roles).get();
+        List<AppUser> usersWithRole = new ArrayList<>();
+        if(appUserRepository.findByRolesIn(roles).isPresent()) {
+            usersWithRole = appUserRepository.findByRolesIn(roles).get();
+        }else{
+            throw new RuntimeException("dsdaf");
+        }
         if (usersWithRole.isEmpty()) {
             roleRepository.deleteByName(name);
             return "Delete succesfully";
