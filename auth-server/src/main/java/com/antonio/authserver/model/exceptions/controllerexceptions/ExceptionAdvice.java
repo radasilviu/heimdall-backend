@@ -59,6 +59,20 @@ public class ExceptionAdvice {
     }
 
     @ResponseBody
+    @ExceptionHandler(TokenExpired.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String tokenExpired(TokenExpired e) {
+        return e.getMessage();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(BadTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String badToken(BadTokenException e) {
+        return e.getMessage();
+    }
+
+    @ResponseBody
     @ExceptionHandler(CannotAddRole.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String cannotAddRole(CannotAddRole e) {

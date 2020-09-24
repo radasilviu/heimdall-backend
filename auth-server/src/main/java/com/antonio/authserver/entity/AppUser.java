@@ -28,8 +28,7 @@ public class AppUser {
     @Column(columnDefinition = "TEXT")
     private String code;
 
-    // TODO find a better solution
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

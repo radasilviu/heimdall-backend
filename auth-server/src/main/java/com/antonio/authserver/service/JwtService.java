@@ -2,6 +2,8 @@ package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.ClientDto;
+import com.antonio.authserver.model.exceptions.controllerexceptions.BadTokenException;
+import com.antonio.authserver.model.exceptions.controllerexceptions.TokenExpired;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +55,9 @@ public class JwtService {
                     .parseClaimsJws(jwt)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            throw new RuntimeException("Token expired");
+            throw new TokenExpired(jwt);
         } catch (JwtException ex) {
-            throw new RuntimeException("Token can not be trusted");
+            throw new BadTokenException(jwt);
         }
 
         return claims;

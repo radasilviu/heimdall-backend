@@ -47,7 +47,6 @@ public class AuthController {
     @CrossOrigin("http://localhost:8080")
     @GetMapping(path = "/access")
     public ResponseEntity<?> verifyToken() {
-
         final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
         return ResponseEntity.ok().body(responseMessage);
     }
