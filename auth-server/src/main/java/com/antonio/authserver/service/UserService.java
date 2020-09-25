@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -155,8 +156,14 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
 
-	public void sendEmailCode(AppUserDto appUserDto, String siteUrl)
+	public void sendVerificationEmail(AppUserDto appUserDto, String siteUrl)
 			throws UnsupportedEncodingException, MessagingException {
+		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
+		mailSenderImpl.setHost("smtp.mailtrap.io");
+		mailSenderImpl.setPort(2525);
+		mailSenderImpl.setUsername("98939673ff12ef");
+		mailSenderImpl.setPassword("4425af6ec5ec9d");
+
 		String subject = "Please verify your account.";
 		String senderName = "Heimdall Team";
 		String verifyUrl = siteUrl + "/verify?emailCode=" + appUserDto.getEmailCode();
@@ -170,6 +177,7 @@ public class UserService {
 		helper.setTo(appUserDto.getEmail());
 		helper.setSubject(subject);
 		helper.setText(mailContent, true);
+
 		javaMailSender.send(message);
 	}
 

@@ -7,12 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.repository.RoleRepository;
 import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.EmailUtility;
@@ -23,11 +25,14 @@ public class UserController {
 
 	private UserService userService;
 	private RoleService roleService;
+	private PasswordEncoder passwordEncoder;
+	private RoleRepository roleRepository;
 
 	@Autowired
-	public UserController(UserService userService, RoleService roleService) {
+	public UserController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
 		this.userService = userService;
 		this.roleService = roleService;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@GetMapping
@@ -46,8 +51,9 @@ public class UserController {
 	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user, HttpServletRequest request)
 			throws UnsupportedEncodingException, MessagingException {
 		String siteUrl = EmailUtility.getSiteUrl(request);
+		user.setEmail("sgaby100@gmail.com");
 		userService.create(user);
-		userService.sendEmailCode(user, siteUrl);
+		userService.sendVerificationEmail(user, siteUrl);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
@@ -85,7 +91,7 @@ public class UserController {
 		String pageTitle = verified ? "Verification Successful!" : "Verficiation Failed!";
 		model.addAttribute("pageTitle", pageTitle);
 
-		return "redirect:/api/user";
+		return "SUCCESS";
 	}
 
 }
