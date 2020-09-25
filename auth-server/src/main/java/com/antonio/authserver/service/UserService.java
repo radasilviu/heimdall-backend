@@ -49,7 +49,7 @@ public class UserService {
 		} else {
 			String randomCode = RandomString.make(64);
 			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
-			appUserDto.setIsActivated(false);
+			// appUserDto.setIsActivated(false);
 			appUserDto.setEmailCode(randomCode);
 			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 

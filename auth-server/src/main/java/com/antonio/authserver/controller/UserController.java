@@ -5,7 +5,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -86,14 +85,6 @@ public class UserController {
 		Role newRole = roleService.findRoleByNameDAO(role.getName());
 		userService.removeRole(username, newRole);
 
-	}
-
-	@GetMapping("/activate")
-	public String activateAccount(@Param("emailCode") String emailCode) {
-		Boolean verified = emailService.verifyEmailCode(emailCode);
-		if (verified)
-			System.out.println("WIN");
-		return "APEX";
 	}
 
 }
