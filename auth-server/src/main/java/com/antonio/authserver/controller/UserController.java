@@ -1,5 +1,5 @@
 package com.antonio.authserver.controller;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -8,16 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.repository.RoleRepository;
+import com.antonio.authserver.service.EmailService;
 import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.EmailUtility;
+import freemarker.template.TemplateException;
 @RestController
 @RequestMapping("api/user")
 @CrossOrigin
@@ -27,12 +28,15 @@ public class UserController {
 	private RoleService roleService;
 	private PasswordEncoder passwordEncoder;
 	private RoleRepository roleRepository;
+	private EmailService emailService;
 
 	@Autowired
-	public UserController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+	public UserController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder,
+			EmailService emailService) {
 		this.userService = userService;
 		this.roleService = roleService;
 		this.passwordEncoder = passwordEncoder;
+		this.emailService = emailService;
 	}
 
 	@GetMapping
@@ -49,11 +53,11 @@ public class UserController {
 
 	@PostMapping
 	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user, HttpServletRequest request)
-			throws UnsupportedEncodingException, MessagingException {
+			throws IOException, MessagingException, TemplateException {
 		String siteUrl = EmailUtility.getSiteUrl(request);
-		user.setEmail("sgaby100@gmail.com");
+		user.setEmail("Alyx@gmail.com"); // needs fix
 		userService.create(user);
-		userService.sendVerificationEmail(user, siteUrl);
+		emailService.sendEmail(user, siteUrl);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
@@ -84,14 +88,12 @@ public class UserController {
 
 	}
 
-	@GetMapping("/verify")
-	public String activateAccount(@Param("emailCode") String emailCode, Model model) {
-		Boolean verified = userService.verifyEmailCode(emailCode);
-
-		String pageTitle = verified ? "Verification Successful!" : "Verficiation Failed!";
-		model.addAttribute("pageTitle", pageTitle);
-
-		return "SUCCESS";
+	@GetMapping("/activate")
+	public String activateAccount(@Param("emailCode") String emailCode) {
+		Boolean verified = emailService.verifyEmailCode(emailCode);
+		if (verified)
+			System.out.println("WIN");
+		return "APEX";
 	}
 
 }

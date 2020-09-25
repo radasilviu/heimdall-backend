@@ -1,15 +1,9 @@
 package com.antonio.authserver.service;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.AppUserDto;
@@ -27,15 +21,13 @@ public class UserService {
 	private AppUserRepository appUserRepository;
 	private RoleRepository roleRepository;
 	private BCryptPasswordEncoder passwordEncoder;
-	private JavaMailSender javaMailSender;
 
 	@Autowired
 	public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository,
-			BCryptPasswordEncoder passwordEncoder, JavaMailSender javaMailSender) {
+			BCryptPasswordEncoder passwordEncoder) {
 		this.appUserRepository = appUserRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
-		this.javaMailSender = javaMailSender;
 	}
 
 	public List<AppUserDto> getAllUsers() {
@@ -156,38 +148,4 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
 
-	public void sendVerificationEmail(AppUserDto appUserDto, String siteUrl)
-			throws UnsupportedEncodingException, MessagingException {
-		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-		mailSenderImpl.setHost("smtp.mailtrap.io");
-		mailSenderImpl.setPort(2525);
-		mailSenderImpl.setUsername("98939673ff12ef");
-		mailSenderImpl.setPassword("4425af6ec5ec9d");
-
-		String subject = "Please verify your account.";
-		String senderName = "Heimdall Team";
-		String verifyUrl = siteUrl + "/verify?emailCode=" + appUserDto.getEmailCode();
-		String mailContent = "<p>Dear " + appUserDto.getUsername() + ",</p>";
-		mailContent += "<p>Please click the link below to verify your account:</p>";
-		mailContent += "<h3><a href=\"" + verifyUrl + "\">Activate account</a></h3>";
-		mailContent += "<p>Thank you <br>The Heimdall Team</p>";
-		MimeMessage message = javaMailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message);
-		helper.setFrom("heimdallteam@gmail.com", senderName);
-		helper.setTo(appUserDto.getEmail());
-		helper.setSubject(subject);
-		helper.setText(mailContent, true);
-
-		javaMailSender.send(message);
-	}
-
-	public Boolean verifyEmailCode(String emailCode) {
-		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new UserNotFound("Unknown"));
-		if (appUser == null || appUser.getIsActivated()) {
-			return false;
-		} else {
-			appUserRepository.activate(appUser.getUsername());
-			return true;
-		}
-	}
 }
