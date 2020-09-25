@@ -110,7 +110,7 @@ public class AuthService {
 
     private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
         userDto.setToken(token);
-        userDto.setRefreshToken(token);
+        userDto.setRefreshToken(refreshToken);
         userService.update(userDto);
     }
 
