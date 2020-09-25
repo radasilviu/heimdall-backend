@@ -1,42 +1,42 @@
 package com.antonio.authserver.dto;
-
-import com.antonio.authserver.entity.Role;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import com.antonio.authserver.entity.Role;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class AppUserDto {
 
-    private Long id;
-    private String username;
-    private String password;
-    private String token;
-    private String code;
-    private Set<Role> roles = new HashSet<>();
+	private Long id;
+	private String username;
+	private String password;
+	private String token;
+	private String code;
+	private Set<Role> roles = new HashSet<>();
+	private String email;
+	private Boolean isActivated;
+	private String emailCode;
 
+	@Override
+	public String toString() {
+		return "AppUserDto{" + "username='" + username + '\'' + ", roles=" + roles + '}';
+	}
 
-    @Override
-    public String toString() {
-        return "AppUserDto{" +
-                "username='" + username + '\'' +
-                ", roles=" + roles +
-                '}';
-    }
+	public AppUserDto() {
+	}
 
-    public AppUserDto() {
-    }
-
-    public AppUserDto(String username, String password, String code, String token, Set<Role> roles) {
-        this.username = username;
-        this.password = password;
-        this.code = code;
-        this.token = token;
-        this.roles = roles;
-    }
+	public AppUserDto(String username, String password, String code, String token, Set<Role> roles, String email,
+			Boolean isActivated, String emailCode) {
+		this.username = username;
+		this.password = password;
+		this.code = code;
+		this.token = token;
+		this.roles = roles;
+		this.email = email;
+		this.isActivated = isActivated;
+		this.emailCode = emailCode;
+	}
 }
