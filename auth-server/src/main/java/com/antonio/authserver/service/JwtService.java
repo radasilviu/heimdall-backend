@@ -65,7 +65,6 @@ public class JwtService {
 
     public String createRefreshToken(Long expirationTime, String secretKey) {
 
-        expirationTime += SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
         String refreshToken = Jwts.builder().setExpiration(new Date(expirationTime)).signWith(SignatureAlgorithm.HS512, secretKey).compact();
 
         return refreshToken;

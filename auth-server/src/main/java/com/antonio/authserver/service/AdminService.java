@@ -36,7 +36,7 @@ public class AdminService {
         Authentication authentication = getAuthentication(adminCredential);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        final long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
         final String accessToken = jwtService.createAccessToken(appUser.getUsername(), expirationTime, authentication.getAuthorities(), SecurityConstants.TOKEN_SECRET);
 
         final JwtObject jwtObject = new JwtObject(expirationTime, accessToken);

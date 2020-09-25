@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 
 @Service
@@ -78,7 +79,7 @@ public class AuthService {
 
     private String generateCode(AppUserDto userDto) {
 
-        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
 
         String token = jwtService.createAccessToken(userDto.getUsername(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
 
@@ -94,20 +95,22 @@ public class AuthService {
         final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
 
 
-        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
-        final String token = jwtService.createAccessToken(claims.getIssuer(), expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
-        final String refreshToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.REFRESH_TOKEN_SECRET);
-        final JwtObject jwtObject = new JwtObject(expirationTime, token, refreshToken);
+        long tokenExpirationTime = getTokenExpirationTime();
+        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+        final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.REFRESH_TOKEN_SECRET);
+        final JwtObject jwtObject = new JwtObject(accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
 
 
-        setJwtToUserAndSave(user, token);
+        setJwtToUserAndSave(user, accessToken, refreshToken);
 
         return jwtObject;
     }
 
 
-    private void setJwtToUserAndSave(AppUserDto userDto, String token) {
+    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
         userDto.setToken(token);
+        userDto.setRefreshToken(token);
         userService.update(userDto);
     }
 
@@ -118,11 +121,13 @@ public class AuthService {
     public void logout(JwtObject jwtObject) {
         final AppUserDto appUserDto = userService.findUserByToken(jwtObject.getAccess_token());
         appUserDto.setToken(null);
+        appUserDto.setRefreshToken(null);
 
         userService.update(appUserDto);
 
     }
 
+    @Transactional
     public JwtObject generateNewAccessToken(JwtObject refreshToken) {
         final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
 
@@ -142,18 +147,18 @@ public class AuthService {
 
     private JwtObject createNewJWtObject(AppUserDto appUserDto) {
 
-        long expirationTime = getTokenExpirationTime();
+        long tokenExpirationTime = getTokenExpirationTime();
+        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
         String accessToken = generateAccessToken(appUserDto);
         String refreshToken = generateRefreshToken();
 
-        JwtObject jwtObject = new JwtObject(expirationTime, accessToken, refreshToken);
+        JwtObject jwtObject = new JwtObject(accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
 
         return jwtObject;
-
     }
 
     private String generateRefreshToken() {
-        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
 
         String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
 
@@ -171,6 +176,10 @@ public class AuthService {
     }
 
     private Long getTokenExpirationTime() {
-        return System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+        return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+    }
+
+    private Long getRefreshTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
     }
 }

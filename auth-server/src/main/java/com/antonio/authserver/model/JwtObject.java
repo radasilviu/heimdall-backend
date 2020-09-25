@@ -10,21 +10,21 @@ import java.io.Serializable;
 public class JwtObject implements Serializable {
     private String access_token;
     private String refresh_token;
-    private Long expireTime;
+    private Long token_expire_time;
+    private Long refresh_token_expire_time;
 
     public JwtObject() {
     }
 
     public JwtObject(Long expireTime, String access_token) {
         this.access_token = access_token;
-        this.expireTime = expireTime;
+        this.token_expire_time = expireTime;
     }
 
-    public JwtObject(Long expireTime, String access_token, String refresh_token) {
-        this.expireTime = expireTime;
+    public JwtObject(String access_token, String refresh_token, Long token_expire_time, Long refresh_token_expire_time) {
         this.access_token = access_token;
         this.refresh_token = refresh_token;
+        this.token_expire_time = token_expire_time;
+        this.refresh_token_expire_time = refresh_token_expire_time;
     }
-
-
 }

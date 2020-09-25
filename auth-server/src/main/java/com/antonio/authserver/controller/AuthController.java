@@ -36,7 +36,7 @@ public class AuthController {
         return ResponseEntity.ok().body(jwtObject);
     }
 
-    @PostMapping(path = "/refreshToken")
+    @PutMapping(path = "/refreshToken")
     public ResponseEntity<?> getNewTokenByRefreshToken(@RequestBody JwtObject refreshToken) {
         JwtObject jwtObject = authService.generateNewAccessToken(refreshToken);
         return ResponseEntity.ok().body(jwtObject);
