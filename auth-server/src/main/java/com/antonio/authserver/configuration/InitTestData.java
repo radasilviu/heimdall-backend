@@ -42,13 +42,13 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
 		roleRepository.saveAll(roleList);
 
 		AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"),
-				"smtp.mailtrap.io");
+				"smtp.mailtrap.io", true, null);
 		AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"),
-				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io");
+				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
 		AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"),
-				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io");
+				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
 		AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"),
-				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io");
+				roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
 		appUserRepository.save(user);
 		appUserRepository.save(admin);
 		appUserRepository.save(admin_one);

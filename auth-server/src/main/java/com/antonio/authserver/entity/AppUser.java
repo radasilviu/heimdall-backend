@@ -38,11 +38,14 @@ public class AppUser {
 
 	}
 
-	public AppUser(String username, String password, Set<Role> roles, String email) {
+	public AppUser(String username, String password, Set<Role> roles, String email, Boolean isActivated,
+			String emailCode) {
 		this.username = username;
 		this.password = password;
 		this.roles = roles;
 		this.email = email;
+		this.isActivated = isActivated;
+		this.emailCode = emailCode;
 	}
 
 }

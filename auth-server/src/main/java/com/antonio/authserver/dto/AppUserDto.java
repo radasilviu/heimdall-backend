@@ -28,12 +28,15 @@ public class AppUserDto {
 	public AppUserDto() {
 	}
 
-	public AppUserDto(String username, String password, String code, String token, Set<Role> roles, String email) {
+	public AppUserDto(String username, String password, String code, String token, Set<Role> roles, String email,
+			Boolean isActivated, String emailCode) {
 		this.username = username;
 		this.password = password;
 		this.code = code;
 		this.token = token;
 		this.roles = roles;
 		this.email = email;
+		this.isActivated = isActivated;
+		this.emailCode = emailCode;
 	}
 }
