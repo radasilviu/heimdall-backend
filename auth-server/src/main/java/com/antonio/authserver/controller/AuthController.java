@@ -1,11 +1,13 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.service.AuthService;
+import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,8 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    public UserService userService;
 
     @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/client-login")
@@ -54,6 +58,13 @@ public class AuthController {
     @GetMapping(path = "/access")
     public ResponseEntity<?> verifyToken() {
         final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
+        return ResponseEntity.ok().body(responseMessage);
+    }
+
+    @PostMapping("register")
+    public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user) {
+        userService.create(user);
+        final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
         return ResponseEntity.ok().body(responseMessage);
     }
 
