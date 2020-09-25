@@ -4,6 +4,7 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
+import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.exceptions.controllerexceptions.*;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
@@ -138,10 +139,15 @@ public class UserService {
         return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
     }
 
-    public AppUserDto findByToken(String token) {
+    public AppUserDto findUserByToken(String token) {
         AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
 
         return AppUserMapper.INSTANCE.toAppUserDto(appUser);
     }
 
+    public AppUserDto findUserByRefreshToken(String refreshToken) {
+        AppUser appUser = appUserRepository.findByRefreshToken(refreshToken).orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
+
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
 }

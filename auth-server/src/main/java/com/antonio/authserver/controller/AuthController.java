@@ -36,6 +36,12 @@ public class AuthController {
         return ResponseEntity.ok().body(jwtObject);
     }
 
+    @PostMapping(path = "/refreshToken")
+    public ResponseEntity<?> getNewTokenByRefreshToken(@RequestBody JwtObject refreshToken) {
+        JwtObject jwtObject = authService.generateNewAccessToken(refreshToken);
+        return ResponseEntity.ok().body(jwtObject);
+    }
+
     @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/token/delete")
     public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {

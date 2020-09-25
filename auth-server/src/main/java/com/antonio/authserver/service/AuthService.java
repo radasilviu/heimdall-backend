@@ -116,10 +116,61 @@ public class AuthService {
     }
 
     public void logout(JwtObject jwtObject) {
-        final AppUserDto appUserDto = userService.findByToken(jwtObject.getAccess_token());
+        final AppUserDto appUserDto = userService.findUserByToken(jwtObject.getAccess_token());
         appUserDto.setToken(null);
 
         userService.update(appUserDto);
 
+    }
+
+    public JwtObject generateNewAccessToken(JwtObject refreshToken) {
+        final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
+
+        JwtObject jwtObject = createNewJWtObject(appUserDto);
+        updateNewTokensToUser(appUserDto, jwtObject);
+
+        return jwtObject;
+
+    }
+
+    private void updateNewTokensToUser(AppUserDto appUserDto, JwtObject jwtObject) {
+
+        appUserDto.setToken(jwtObject.getAccess_token());
+        appUserDto.setRefreshToken(jwtObject.getRefresh_token());
+        userService.update(appUserDto);
+    }
+
+    private JwtObject createNewJWtObject(AppUserDto appUserDto) {
+
+        long expirationTime = getTokenExpirationTime();
+        String accessToken = generateAccessToken(appUserDto);
+        String refreshToken = generateRefreshToken();
+
+        JwtObject jwtObject = new JwtObject(expirationTime, accessToken, refreshToken);
+
+        return jwtObject;
+
+    }
+
+    private String generateRefreshToken() {
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
+
+        String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
+
+        return accessToken;
+    }
+
+
+    private String generateAccessToken(AppUserDto appUserDto) {
+        final String issuer = appUserDto.getUsername();
+        long expirationTime = getTokenExpirationTime();
+
+        String accessToken = jwtService.createAccessToken(issuer, expirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+
+        return accessToken;
+    }
+
+    private Long getTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME;
     }
 }

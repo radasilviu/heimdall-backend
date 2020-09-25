@@ -23,4 +23,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     void deleteByUsername(String username);
 
     Optional<AppUser> findByToken(String token);
+
+    Optional<AppUser> findByRefreshToken(String refreshToken);
 }
