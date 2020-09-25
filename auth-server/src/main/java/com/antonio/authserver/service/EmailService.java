@@ -63,7 +63,7 @@ public class EmailService {
 		javaMailSender.send(message);
 	}
 
-	public Boolean verifyEmailCode(String emailCode) {
+	public Boolean verifyAndActivateEmailCode(String emailCode) {
 		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new UserNotFound("Unknown"));
 		if (appUser == null || appUser.getIsActivated()) {
 			return false;
