@@ -24,6 +24,8 @@ public class AppUser {
     @Column(columnDefinition = "TEXT")
     private String token;
 
+    @Column(columnDefinition = "TEXT")
+    private String refreshToken;
 
     @Column(columnDefinition = "TEXT")
     private String code;
