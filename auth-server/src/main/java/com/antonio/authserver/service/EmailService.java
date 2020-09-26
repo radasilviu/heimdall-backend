@@ -2,48 +2,60 @@ package com.antonio.authserver.service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import com.antonio.authserver.configuration.emailconfig.EmailProperties;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 @Service
 public class EmailService {
-
-	private JavaMailSender javaMailSender;
 	private AppUserRepository appUserRepository;
-	private Configuration configuration;
+	private EmailProperties emailProperties;
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
-	public EmailService(JavaMailSender javaMailSender, AppUserRepository appUserRepository,
-			Configuration configuration) {
-		this.javaMailSender = javaMailSender;
+	public EmailService(AppUserRepository appUserRepository, EmailProperties emailProperties) {
 		this.appUserRepository = appUserRepository;
-		this.configuration = configuration;
+		this.emailProperties = emailProperties;
 	}
 
 	public void sendEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/activate?emailCode=" + appUserDto.getEmailCode();
-		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-		mailSenderImpl.setHost("smtp.mailtrap.io");
-		mailSenderImpl.setPort(2525);
-		mailSenderImpl.setUsername("98939673ff12ef");
-		mailSenderImpl.setPassword("4425af6ec5ec9d");
+		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+
+		// Change to user settings!
+		emailProperties.setHost("smtp.gmail.com");
+		emailProperties.setPort(587);
+		emailProperties.setUsername("octavianp555@gmail.com");
+		emailProperties.setPassword("nwfr xbkd ogzq lhzh");
+
+		Properties props = new Properties();
+		props.put("mail.smtp.starttls.enable", "true");
+		javaMailSender.setJavaMailProperties(props);
+		javaMailSender.setHost(emailProperties.getHost());
+		javaMailSender.setPort(emailProperties.getPort());
+		javaMailSender.setUsername(emailProperties.getUsername());
+		javaMailSender.setPassword(emailProperties.getPassword());
+
+		System.out.println(emailProperties.getUsername());
+		System.out.println(emailProperties.getPassword());
+		System.out.println(emailProperties.getHost());
+		System.out.println(emailProperties.getPort());
+
 		MimeMessage message = javaMailSender.createMimeMessage();
 
 		MimeMessageHelper helper = new MimeMessageHelper(message);
