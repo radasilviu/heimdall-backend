@@ -46,7 +46,7 @@ public class AuthController {
     @PostMapping(path = "/token/delete")
     public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
         authService.logout(jwtObject);
-        final ResponseMessage responseMessage = new ResponseMessage("User logged out");
+        final ResponseMessage responseMessage = new ResponseMessage("User loogged out");
         return ResponseEntity.ok().body(responseMessage);
     }
 

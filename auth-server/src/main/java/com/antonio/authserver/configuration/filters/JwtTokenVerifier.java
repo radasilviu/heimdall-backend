@@ -1,16 +1,13 @@
 package com.antonio.authserver.configuration.filters;
 
 import com.antonio.authserver.dto.AppUserDto;
-import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.exceptions.controllerexceptions.TokenNotFound;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,9 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,10 +46,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
 
-            final String token = authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
-            final Claims claims = jwtService.decodeJWT(token);
-            final String username = claims.getIssuer();
-            final AppUserDto user = userService.getUserByUsername(username);
+            final String token = extractToken(authorizationHeader, SecurityConstants.BEARER_TOKEN_PREFIX);
+            final AppUserDto user = extractUserFromToken(token);
 
             verifyBearerToken(token, user.getToken());
         }
@@ -63,16 +55,27 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
             final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
-            final Claims claims = jwtService.decodeJWT(token);
-            final String username = claims.getIssuer();
+            final AppUserDto user = extractUserFromToken(token);
 
-            final List<Map<String, String>> authorities = (List<Map<String, String>>) claims.get("authorities");
+            final Set<Role> authorities = user.getRoles();
             final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
-            setAuthentication(username, grantedAuthorities);
+            setAuthentication(user.getUsername(), grantedAuthorities);
 
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+    private String extractToken(String authorizationHeader, String key) {
+        return authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
+    }
+
+    private AppUserDto extractUserFromToken(String token) {
+        final Claims claims = jwtService.decodeJWT(token);
+        final String username = claims.getIssuer();
+        final AppUserDto user = userService.getUserByUsername(username);
+
+        return user;
     }
 
     private void verifyBearerToken(String currentToken, String userToken) {
@@ -81,8 +84,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         }
     }
 
-    private Set<GrantedAuthority> getGrantedAuthoritySet(List<Map<String, String>> authorities) {
-        return authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.get("authority"))).collect(Collectors.toSet());
+    private Set<GrantedAuthority> getGrantedAuthoritySet(Set<Role> authorities) {
+        return authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.getName())).collect(Collectors.toSet());
     }
 
     private void setAuthentication(String username, Set<GrantedAuthority> grantedAuthorities) {

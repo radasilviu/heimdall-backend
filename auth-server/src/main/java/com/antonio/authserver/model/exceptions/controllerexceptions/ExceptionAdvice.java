@@ -52,6 +52,13 @@ public class ExceptionAdvice {
     }
 
     @ResponseBody
+    @ExceptionHandler(IncorrectPassword.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String incorrectPassword(IncorrectPassword e) {
+        return e.getMessage();
+    }
+
+    @ResponseBody
     @ExceptionHandler(CodeNotFound.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String codeNotFound(CodeNotFound e) {
@@ -69,6 +76,13 @@ public class ExceptionAdvice {
     @ExceptionHandler(BadTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String badToken(BadTokenException e) {
+        return e.getMessage();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(SessionExpired.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String badToken(SessionExpired e) {
         return e.getMessage();
     }
 

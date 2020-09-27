@@ -39,20 +39,23 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
 
     @Override
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {
-        List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER")));
-        roleRepository.saveAll(roleList);
+        // for demo purpose
+        if (roleRepository.findAll().size() == 0) {
+            List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER")));
+            roleRepository.saveAll(roleList);
 
-        AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"));
-        AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"));
-        AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"));
-        AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"));
-        appUserRepository.save(user);
-        appUserRepository.save(admin);
-        appUserRepository.save(admin_one);
-        appUserRepository.save(admin_two);
+            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"));
+            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"));
+            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"));
+            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"));
+            appUserRepository.save(user);
+            appUserRepository.save(admin);
+            appUserRepository.save(admin_one);
+            appUserRepository.save(admin_two);
 
-        Client client = new Client("myClient", passwordEncoder.encode("clientPass"));
-        clientRepository.save(client);
+            Client client = new Client("myClient", passwordEncoder.encode("clientPass"));
+            clientRepository.save(client);
+        }
 
     }
 
