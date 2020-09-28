@@ -2,11 +2,13 @@ package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.ClientDto;
+import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
 import com.antonio.authserver.model.exceptions.controllerexceptions.SessionExpired;
+import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -27,15 +30,19 @@ public class AuthService {
     private UserService userService;
     private JwtService jwtService;
     private Environment env;
+    private AppUserRepository appUserRepository;
 
     @Autowired
-    public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService, JwtService jwtService, Environment env, AuthenticationManager authenticationManager) {
+    public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
+                       JwtService jwtService, Environment env, AuthenticationManager authenticationManager,
+                       AppUserRepository appUserRepository) {
         this.passwordEncoder = passwordEncoder;
         this.clientService = clientService;
         this.userService = userService;
         this.jwtService = jwtService;
         this.env = env;
         this.authenticationManager = authenticationManager;
+        this.appUserRepository = appUserRepository;
     }
 
     private final AuthenticationManager authenticationManager;
@@ -191,5 +198,14 @@ public class AuthService {
 
     private Long getRefreshTokenExpirationTime() {
         return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
+    }
+
+    public AppUser sendForgotPasswordEmail(String email) {
+        Optional<AppUser> user = appUserRepository.findByEmail(email);
+
+        if (user != null) {
+
+        }
+        return null;
     }
 }

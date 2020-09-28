@@ -89,5 +89,12 @@ public class AuthController {
 
 		return "register/" + (activated ? "activate_success" : "activate_fail");
 	}
+
+	@CrossOrigin("http://localhost:4200")
+	@PostMapping("/forgot-password")
+	public ResponseEntity<?> sendForgotPasswordEmail() {
+		final ResponseMessage responseMessage = new ResponseMessage("Email sent");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 }
 
