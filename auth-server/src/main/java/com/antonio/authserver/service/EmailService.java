@@ -39,7 +39,7 @@ public class EmailService {
 
 	public void sendActivationEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
-		String verifyUrl = siteUrl + "/activate?emailCode=" + appUserDto.getEmailCode();
+		String verifyUrl = siteUrl + "/oauth/activate?emailCode=" + appUserDto.getEmailCode();
 		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
 
 		Properties props = new Properties();
@@ -62,7 +62,7 @@ public class EmailService {
 		Template freemarkerTemplate = freemarkerConfigurer.createConfiguration().getTemplate("email.ftl");
 		String htmlBody = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerTemplate, model);
 
-		helper.setTo("octavianp555@gmail.com"); // !!! IMPORTANT CHANGE
+		helper.setTo(appUserDto.getEmail()); // !!! IMPORTANT CHANGE
 		helper.setText(htmlBody, true);
 		helper.setSubject("Activate your account");
 		helper.setFrom("heimdallteam0@gmail.com");

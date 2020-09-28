@@ -4,7 +4,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
@@ -80,14 +79,4 @@ public class AuthController {
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	// Move to service
-	@CrossOrigin("http://localhost:8081")
-	@GetMapping("/activate")
-	public String activateAccount(@Param("emailCode") String emailCode) {
-		AppUserDto appUserDto = emailService.verifyAndActivateEmailCode(emailCode);
-		Boolean activated = appUserDto.getIsActivated();
-
-		return "register/" + (activated ? "activate_success" : "activate_fail");
-	}
 }
-
