@@ -54,7 +54,6 @@ public class UserController {
 	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user, HttpServletRequest request)
 			throws IOException, MessagingException, TemplateException {
 		String siteUrl = EmailUtility.getSiteUrl(request);
-		user.setEmail("Alyx@gmail.com"); // needs fix
 		userService.create(user);
 		emailService.sendActivationEmail(user, siteUrl);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");

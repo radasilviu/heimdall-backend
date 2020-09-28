@@ -1,4 +1,8 @@
 package com.antonio.authserver.controller;
+import java.io.IOException;
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +15,16 @@ import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.service.AuthService;
 import com.antonio.authserver.service.EmailService;
-
+import com.antonio.authserver.service.UserService;
+import com.antonio.authserver.utils.EmailUtility;
+import freemarker.template.TemplateException;
 @RestController
 @RequestMapping("/oauth")
 public class AuthController {
 	@Autowired
 	private AuthService authService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private EmailService emailService;
 	@CrossOrigin("http://localhost:4201")
@@ -48,11 +56,26 @@ public class AuthController {
 		final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
 		return ResponseEntity.ok().body(responseMessage);
 	}
+
+	@CrossOrigin("http://localhost:4200")
+	@PostMapping("/register")
+	public ResponseEntity<?> registerUser(@RequestBody AppUserDto user, HttpServletRequest httpServletRequest)
+			throws TemplateException, IOException, MessagingException {
+		String siteUrl = EmailUtility.getSiteUrl(httpServletRequest);
+		userService.create(user);
+		emailService.sendActivationEmail(user, siteUrl);
+		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
+		return ResponseEntity.ok().body(responseMessage);
+	}
+
 	// Move to service
 	@CrossOrigin("http://localhost:8081")
 	@GetMapping("/activate")
-	public ResponseEntity<AppUserDto> activateAccount(@Param("emailCode") String emailCode) {
+	public String activateAccount(@Param("emailCode") String emailCode) {
 		AppUserDto appUserDto = emailService.verifyAndActivateEmailCode(emailCode);
-		return ResponseEntity.ok().body(appUserDto);
+		Boolean activated = appUserDto.getIsActivated();
+
+		return "register/" + (activated ? "activate_success" : "activate_fail");
 	}
+
 }
