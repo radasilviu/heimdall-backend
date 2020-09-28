@@ -15,6 +15,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import com.antonio.authserver.configuration.emailconfig.EmailProperties;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.mapper.AppUserMapper;
+import com.antonio.authserver.model.exceptions.controllerexceptions.UserAccountIsAlreadyActivated;
 import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotFound;
 import com.antonio.authserver.repository.AppUserRepository;
 import freemarker.template.Template;
@@ -23,25 +25,22 @@ import freemarker.template.TemplateException;
 public class EmailService {
 	private AppUserRepository appUserRepository;
 	private EmailProperties emailProperties;
+	private AppUserMapper appUserMapper;
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
-	public EmailService(AppUserRepository appUserRepository, EmailProperties emailProperties) {
+	public EmailService(AppUserRepository appUserRepository, EmailProperties emailProperties,
+			AppUserMapper appUserMapper) {
 		this.appUserRepository = appUserRepository;
 		this.emailProperties = emailProperties;
+		this.appUserMapper = appUserMapper;
 	}
 
 	public void sendEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/activate?emailCode=" + appUserDto.getEmailCode();
 		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-
-		// Change to user settings!
-		emailProperties.setHost("smtp.gmail.com");
-		emailProperties.setPort(587);
-		emailProperties.setUsername("octavianp555@gmail.com");
-		emailProperties.setPassword("nwfr xbkd ogzq lhzh");
 
 		Properties props = new Properties();
 		props.put("mail.smtp.starttls.enable", "true");
@@ -50,11 +49,6 @@ public class EmailService {
 		javaMailSender.setPort(emailProperties.getPort());
 		javaMailSender.setUsername(emailProperties.getUsername());
 		javaMailSender.setPassword(emailProperties.getPassword());
-
-		System.out.println(emailProperties.getUsername());
-		System.out.println(emailProperties.getPassword());
-		System.out.println(emailProperties.getHost());
-		System.out.println(emailProperties.getPort());
 
 		MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -68,20 +62,20 @@ public class EmailService {
 		Template freemarkerTemplate = freemarkerConfigurer.createConfiguration().getTemplate("email.ftl");
 		String htmlBody = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerTemplate, model);
 
-		helper.setTo(appUserDto.getEmail());
+		helper.setTo("octavianp555@gmail.com"); // !!! IMPORTANT CHANGE
 		helper.setText(htmlBody, true);
 		helper.setSubject("Activate your account");
-		helper.setFrom("HeimdallTeam@gmail.com");
+		helper.setFrom("heimdallteam0@gmail.com");
 		javaMailSender.send(message);
 	}
 
-	public Boolean verifyAndActivateEmailCode(String emailCode) {
+	public AppUserDto verifyAndActivateEmailCode(String emailCode) {
 		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new UserNotFound("Unknown"));
 		if (appUser == null || appUser.getIsActivated()) {
-			return false;
+			throw new UserAccountIsAlreadyActivated(appUser.getUsername());
 		} else {
-			appUserRepository.activate(appUser.getUsername());
-			return true;
+			appUser.setIsActivated(true);
+			return appUserMapper.toAppUserDto(appUser);
 		}
 	}
 }
