@@ -56,7 +56,7 @@ public class UserController {
 		String siteUrl = EmailUtility.getSiteUrl(request);
 		user.setEmail("Alyx@gmail.com"); // needs fix
 		userService.create(user);
-		emailService.sendEmail(user, siteUrl);
+		emailService.sendActivationEmail(user, siteUrl);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
