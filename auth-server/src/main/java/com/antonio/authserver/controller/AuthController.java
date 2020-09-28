@@ -40,12 +40,11 @@ public class AuthController {
 		return ResponseEntity.unprocessableEntity().body(responseMessage);
 	}
 
-	@CrossOrigin("http://localhost:4201")
-	@PostMapping(path = "/token")
-	public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
-		JwtObject jwtObject = authService.login(loginCredential);
-		return ResponseEntity.ok().body(jwtObject);
-	}
+    @PostMapping(path = "/token")
+    public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
+        JwtObject jwtObject = authService.login(loginCredential);
+        return ResponseEntity.ok().body(jwtObject);
+    }
 
 	@PutMapping(path = "/refreshToken")
 	public ResponseEntity<?> getNewTokenByRefreshToken(@RequestBody JwtObject refreshToken) {
@@ -53,13 +52,12 @@ public class AuthController {
 		return ResponseEntity.ok().body(jwtObject);
 	}
 
-	@CrossOrigin("http://localhost:4201")
-	@PostMapping(path = "/token/delete")
-	public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
-		authService.logout(jwtObject);
-		final ResponseMessage responseMessage = new ResponseMessage("User logged out");
-		return ResponseEntity.ok().body(responseMessage);
-	}
+    @PostMapping(path = "/token/delete")
+    public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
+        authService.logout(jwtObject);
+        final ResponseMessage responseMessage = new ResponseMessage("User loogged out");
+        return ResponseEntity.ok().body(responseMessage);
+    }
 
 	@CrossOrigin("http://localhost:8080")
 	@GetMapping(path = "/access")

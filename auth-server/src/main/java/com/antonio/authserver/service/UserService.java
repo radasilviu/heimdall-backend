@@ -16,6 +16,7 @@ import com.antonio.authserver.repository.RoleRepository;
 import net.bytebuddy.utility.RandomString;
 
 @Service
+@Transactional
 public class UserService {
 
 	private AppUserRepository appUserRepository;
@@ -34,11 +35,11 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
 	}
 
-	@Transactional
-	public AppUserDto getUserByUsername(String username) throws UserNotFound {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-	}
+
+    public AppUserDto getUserByUsername(String username) throws UserNotFound {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
 
 	public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));

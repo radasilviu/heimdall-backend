@@ -17,10 +17,6 @@ public class JwtObject implements Serializable {
     public JwtObject() {
     }
 
-    public JwtObject(Long expireTime, String access_token) {
-        this.access_token = access_token;
-        this.token_expire_time = expireTime;
-    }
 
     public JwtObject(String username, String access_token, String refresh_token, Long token_expire_time, Long refresh_token_expire_time) {
         this.username = username;
