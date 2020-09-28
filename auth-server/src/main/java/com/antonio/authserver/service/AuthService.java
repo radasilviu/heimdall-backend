@@ -6,6 +6,7 @@ import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
+import com.antonio.authserver.model.exceptions.controllerexceptions.SessionExpired;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
@@ -99,7 +100,7 @@ public class AuthService {
         long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
         final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.REFRESH_TOKEN_SECRET);
-        final JwtObject jwtObject = new JwtObject(accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
+        final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
 
 
         setJwtToUserAndSave(user, accessToken, refreshToken);
@@ -119,12 +120,21 @@ public class AuthService {
     }
 
     public void logout(JwtObject jwtObject) {
-        final AppUserDto appUserDto = userService.findUserByToken(jwtObject.getAccess_token());
-        appUserDto.setToken(null);
-        appUserDto.setRefreshToken(null);
 
-        userService.update(appUserDto);
+        // if log out has been called, token need to be updated even on error occurs
+        final AppUserDto appUserDto = userService.getUserByUsername(jwtObject.getUsername());
+        updateNewTokensToUser(appUserDto, null, null);
 
+        if (verifyIfUserSessionExpired(jwtObject.getToken_expire_time(), jwtObject.getRefresh_token_expire_time())) {
+            throw new SessionExpired();
+        }
+
+    }
+
+    private boolean verifyIfUserSessionExpired(long accessTokenExpirationTime, long refreshTokenExpirationTime) {
+
+        final long currentTime = System.currentTimeMillis();
+        return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
     }
 
     @Transactional
@@ -132,16 +142,16 @@ public class AuthService {
         final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
 
         JwtObject jwtObject = createNewJWtObject(appUserDto);
-        updateNewTokensToUser(appUserDto, jwtObject);
+        updateNewTokensToUser(appUserDto, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
 
         return jwtObject;
 
     }
 
-    private void updateNewTokensToUser(AppUserDto appUserDto, JwtObject jwtObject) {
+    private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
 
-        appUserDto.setToken(jwtObject.getAccess_token());
-        appUserDto.setRefreshToken(jwtObject.getRefresh_token());
+        appUserDto.setToken(accessToken);
+        appUserDto.setRefreshToken(refreshToken);
         userService.update(appUserDto);
     }
 
@@ -149,10 +159,10 @@ public class AuthService {
 
         long tokenExpirationTime = getTokenExpirationTime();
         long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
-        String accessToken = generateAccessToken(appUserDto);
-        String refreshToken = generateRefreshToken();
+        final String accessToken = generateAccessToken(appUserDto);
+        final String refreshToken = generateRefreshToken();
 
-        JwtObject jwtObject = new JwtObject(accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
+        JwtObject jwtObject = new JwtObject(appUserDto.getUsername(), accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
 
         return jwtObject;
     }
@@ -160,7 +170,7 @@ public class AuthService {
     private String generateRefreshToken() {
         long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
 
-        String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
+        final String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
 
         return accessToken;
     }
