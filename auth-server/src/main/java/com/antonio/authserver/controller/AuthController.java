@@ -29,7 +29,6 @@ public class AuthController {
 	@Autowired
 	private EmailService emailService;
 
-	@CrossOrigin("http://localhost:4201")
 	@PostMapping(path = "/client-login")
 	public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
 		Code code = authService.getCode(loginRequest);
@@ -40,11 +39,11 @@ public class AuthController {
 		return ResponseEntity.unprocessableEntity().body(responseMessage);
 	}
 
-    @PostMapping(path = "/token")
-    public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
-        JwtObject jwtObject = authService.login(loginCredential);
-        return ResponseEntity.ok().body(jwtObject);
-    }
+	@PostMapping(path = "/token")
+	public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
+		JwtObject jwtObject = authService.login(loginCredential);
+		return ResponseEntity.ok().body(jwtObject);
+	}
 
 	@PutMapping(path = "/refreshToken")
 	public ResponseEntity<?> getNewTokenByRefreshToken(@RequestBody JwtObject refreshToken) {
@@ -52,21 +51,19 @@ public class AuthController {
 		return ResponseEntity.ok().body(jwtObject);
 	}
 
-    @PostMapping(path = "/token/delete")
-    public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
-        authService.logout(jwtObject);
-        final ResponseMessage responseMessage = new ResponseMessage("User loogged out");
-        return ResponseEntity.ok().body(responseMessage);
-    }
+	@PostMapping(path = "/token/delete")
+	public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
+		authService.logout(jwtObject);
+		final ResponseMessage responseMessage = new ResponseMessage("User loogged out");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
-	@CrossOrigin("http://localhost:8080")
 	@GetMapping(path = "/access")
 	public ResponseEntity<?> verifyToken() {
 		final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@CrossOrigin("http://localhost:4200")
 	@PostMapping("/register")
 	public ResponseEntity<?> registerUser(@RequestBody AppUserDto user, HttpServletRequest httpServletRequest)
 			throws TemplateException, IOException, MessagingException {
