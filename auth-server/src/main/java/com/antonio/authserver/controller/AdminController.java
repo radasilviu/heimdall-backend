@@ -24,8 +24,7 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AdminCredential adminCredential) {
-        adminService.validateAdminService(adminCredential);
-        JwtObject jwtObject = adminService.validateAdminService(adminCredential);
+        JwtObject jwtObject = adminService.adminLogin(adminCredential);
 
         return ResponseEntity.ok().body(jwtObject);
     }
