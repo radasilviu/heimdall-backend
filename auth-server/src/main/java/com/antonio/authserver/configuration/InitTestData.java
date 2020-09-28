@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.transaction.Transactional;
 
+import com.antonio.authserver.entity.Realm;
+import com.antonio.authserver.repository.RealmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
@@ -26,13 +28,15 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private RoleRepository roleRepository;
     private ClientRepository clientRepository;
     private BCryptPasswordEncoder passwordEncoder;
+    private RealmRepository realmRepository;
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
         this.passwordEncoder = passwordEncoder;
+        this.realmRepository = realmRepository;
     }
 
     @Override
@@ -54,5 +58,15 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             Client client = new Client("myClient", passwordEncoder.encode("clientPass"));
             clientRepository.save(client);
         }
+
+        List<Realm> realms = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Realm realm = new Realm();
+            realm.setName("master" + i);
+            realm.setDisplayName("Master " + i);
+            realm.setEnabled(true);
+            realms.add(realm);
+        }
+        realmRepository.saveAll(realms);
     }
 }
