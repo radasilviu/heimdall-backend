@@ -46,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // @formatter:off
         http.csrf().disable().
                 authorizeRequests()
-                .antMatchers("/oauth/**", "/admin/login").permitAll()
+                .antMatchers("/oauth/**", "/admin/**").permitAll()
                 .antMatchers("/api/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
@@ -57,15 +57,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // @formatter:on
     }
-
-
-   /* @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-        return bCryptPasswordEncoder;
-    }
-
-    */
 
 
     @Override

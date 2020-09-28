@@ -1,5 +1,6 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.AdminCredential;
@@ -14,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,30 +24,40 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
 
-    private AppUserRepository appUserRepository;
+    private AuthService authService;
+    private UserService userService;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
 
-    @Autowired
-    public AdminService(AppUserRepository appUserRepository, AuthenticationManager authenticationManager, JwtService jwtService) {
-        this.appUserRepository = appUserRepository;
+    public AdminService(AuthService authService, UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
+        this.authService = authService;
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
 
+    @Autowired
+
     public JwtObject adminLogin(AdminCredential adminCredential) {
 
-        final AppUser appUser = appUserRepository.findByUsername(adminCredential.getUsername()).orElseThrow(() -> new UserNotFound(adminCredential.getUsername()));
+        final AppUserDto appUser = userService.getUserByUsername(adminCredential.getUsername());
         verifyIfUserIsAuthorized(appUser);
 
         setAuthentication(adminCredential);
 
         final JwtObject jwtObject = createJWTObject(appUser);
+        setJwtToUserAndSave(appUser, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
 
         return jwtObject;
     }
 
-    private void verifyIfUserIsAuthorized(AppUser user) {
+    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
+        userDto.setToken(token);
+        userDto.setRefreshToken(refreshToken);
+        userService.update(userDto);
+    }
+
+    private void verifyIfUserIsAuthorized(AppUserDto user) {
 
         boolean isAdmin = false;
         for (Role role : user.getRoles()) {
@@ -60,10 +70,12 @@ public class AdminService {
             throw new UserNotAuthorized(user.getUsername());
     }
 
-    private JwtObject createJWTObject(AppUser appUser) {
-        final long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
-        final String accessToken = jwtService.createAccessToken(appUser.getUsername(), expirationTime, getGrantedAuthoritySet(appUser.getRoles()), SecurityConstants.TOKEN_SECRET);
-        final JwtObject jwtObject = new JwtObject(expirationTime, accessToken);
+    private JwtObject createJWTObject(AppUserDto appUser) {
+        final long accessTokenExpirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+        final long refreshTokenExpirationTime = System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
+        final String accessToken = jwtService.createAccessToken(appUser.getUsername(), accessTokenExpirationTime, getGrantedAuthoritySet(appUser.getRoles()), SecurityConstants.TOKEN_SECRET);
+        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.TOKEN_SECRET);
+        final JwtObject jwtObject = new JwtObject(appUser.getUsername(), accessToken, refreshToken, accessTokenExpirationTime, refreshTokenExpirationTime);
 
         return jwtObject;
     }
@@ -80,5 +92,4 @@ public class AdminService {
                         adminCredential.getPassword(), new ArrayList<>()));
         return authentication;
     }
-
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService {
 
     private AppUserRepository appUserRepository;
@@ -35,7 +36,7 @@ public class UserService {
         return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
     }
 
-    @Transactional
+
     public AppUserDto getUserByUsername(String username) throws UserNotFound {
         AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
         return AppUserMapper.INSTANCE.toAppUserDto(appUser);

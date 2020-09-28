@@ -99,7 +99,7 @@ public class AuthService {
         long tokenExpirationTime = getTokenExpirationTime();
         long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
         final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
-        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.REFRESH_TOKEN_SECRET);
+        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
 
 

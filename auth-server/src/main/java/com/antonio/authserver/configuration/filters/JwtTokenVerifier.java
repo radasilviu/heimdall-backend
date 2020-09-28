@@ -49,13 +49,16 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final String token = extractToken(authorizationHeader, SecurityConstants.BEARER_TOKEN_PREFIX);
             final AppUserDto user = extractUserFromToken(token);
 
-            verifyBearerToken(token, user.getToken());
+            verifyToken(token, user.getToken());
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 
             final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
+
+
             final AppUserDto user = extractUserFromToken(token);
+            verifyToken(token, user.getToken());
 
             final Set<Role> authorities = user.getRoles();
             final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
@@ -78,7 +81,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         return user;
     }
 
-    private void verifyBearerToken(String currentToken, String userToken) {
+    private void verifyToken(String currentToken, String userToken) {
         if (!currentToken.equals(userToken)) {
             throw new TokenNotFound(currentToken);
         }
@@ -97,8 +100,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         boolean shouldNotFilter = false;
 
-        final String path = "/oauth";
-        if (request.getServletPath().startsWith(path) || request.getServletPath().startsWith("/admin/login"))
+        if (request.getServletPath().startsWith("/oauth") || request.getServletPath().startsWith("/admin"))
             shouldNotFilter = true;
 
         if (request.getServletPath().endsWith("access"))
