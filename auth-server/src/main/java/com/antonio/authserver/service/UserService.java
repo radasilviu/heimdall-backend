@@ -10,13 +10,13 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
-import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.exceptions.controllerexceptions.*;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import net.bytebuddy.utility.RandomString;
 
 @Service
+@Transactional
 public class UserService {
 
 	private AppUserRepository appUserRepository;
@@ -35,11 +35,11 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
 	}
 
-	@Transactional
-	public AppUserDto getUserByUsername(String username) throws UserNotFound {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-	}
+
+    public AppUserDto getUserByUsername(String username) throws UserNotFound {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
 
 	public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
@@ -51,6 +51,7 @@ public class UserService {
 			String randomCode = RandomString.make(64);
 			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
 			appUserDto.setEmailCode(randomCode);
+			appUserDto.setIsActivated(false);
 			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 
 		}
@@ -142,14 +143,15 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 	}
 
-    public AppUserDto findUserByToken(String token) {
-        AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
+	public AppUserDto findUserByToken(String token) {
+		AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
 		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
 
-    public AppUserDto findUserByRefreshToken(String refreshToken) {
-        AppUser appUser = appUserRepository.findByRefreshToken(refreshToken).orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
+	public AppUserDto findUserByRefreshToken(String refreshToken) {
+		AppUser appUser = appUserRepository.findByRefreshToken(refreshToken)
+				.orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
 
-        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-    }
+		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+	}
 }

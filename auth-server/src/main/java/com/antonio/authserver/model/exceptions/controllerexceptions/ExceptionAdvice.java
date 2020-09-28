@@ -87,6 +87,14 @@ public class ExceptionAdvice {
     }
 
     @ResponseBody
+    @ExceptionHandler(UserNotAuthorized.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String badToken(UserNotAuthorized e) {
+        return e.getMessage();
+    }
+
+
+    @ResponseBody
     @ExceptionHandler(CannotAddRole.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String cannotAddRole(CannotAddRole e) {

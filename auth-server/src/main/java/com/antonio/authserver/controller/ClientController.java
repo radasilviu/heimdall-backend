@@ -1,16 +1,16 @@
 package com.antonio.authserver.controller;
-import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/client")
-@CrossOrigin
 public class ClientController {
 
 	private ClientService clientService;

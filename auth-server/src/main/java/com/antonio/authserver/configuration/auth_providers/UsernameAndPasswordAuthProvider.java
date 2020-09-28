@@ -1,5 +1,6 @@
 package com.antonio.authserver.configuration.auth_providers;
 
+import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
 import com.antonio.authserver.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -7,7 +8,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
 
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new UsernameNotFoundException("Password is not correct!");
+            throw new IncorrectPassword(password);
         }
 
 

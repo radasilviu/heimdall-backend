@@ -11,6 +11,7 @@ public class EmailConfiguration {
 	public FreeMarkerViewResolver freemarkerViewResolver() {
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setSuffix(".ftl");
+		resolver.setSuffix(".html");
 		return resolver;
 	}
 
