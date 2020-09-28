@@ -3,6 +3,7 @@ package com.antonio.authserver.configuration.filters;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.exceptions.controllerexceptions.TokenNotFound;
+import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotAuthorized;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
@@ -40,8 +41,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
-            return;
+            throw new UserNotAuthorized();
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {

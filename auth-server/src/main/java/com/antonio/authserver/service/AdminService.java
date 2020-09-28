@@ -24,19 +24,17 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
 
-    private AuthService authService;
     private UserService userService;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
 
-    public AdminService(AuthService authService, UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
-        this.authService = authService;
+    @Autowired
+    public AdminService( UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
 
-    @Autowired
 
     public JwtObject adminLogin(AdminCredential adminCredential) {
 
