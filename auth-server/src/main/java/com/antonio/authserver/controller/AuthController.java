@@ -21,7 +21,6 @@ public class AuthController {
     @Autowired
     public UserService userService;
 
-    @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/client-login")
     public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
@@ -33,7 +32,6 @@ public class AuthController {
         return ResponseEntity.unprocessableEntity().body(responseMessage);
     }
 
-    @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/token")
     public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
         JwtObject jwtObject = authService.login(loginCredential);
@@ -46,7 +44,6 @@ public class AuthController {
         return ResponseEntity.ok().body(jwtObject);
     }
 
-    @CrossOrigin("http://localhost:4201")
     @PostMapping(path = "/token/delete")
     public ResponseEntity<?> deleteToken(@RequestBody JwtObject jwtObject) {
         authService.logout(jwtObject);
@@ -54,7 +51,6 @@ public class AuthController {
         return ResponseEntity.ok().body(responseMessage);
     }
 
-    @CrossOrigin("http://localhost:8080")
     @GetMapping(path = "/access")
     public ResponseEntity<?> verifyToken() {
         final ResponseMessage responseMessage = new ResponseMessage("Valid Token");

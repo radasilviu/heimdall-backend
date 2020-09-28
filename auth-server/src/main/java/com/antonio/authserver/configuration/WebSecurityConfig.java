@@ -9,6 +9,7 @@ import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -24,8 +30,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private RestAccessDeniedHandler accessDeniedHandler;
     private RestAuthenticationEntryPoint unauthorizedHandler;
+
     @Autowired
     private UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
+
+    @Autowired
+    private Environment environment;
 
     @Autowired
     private JwtService jwtService;
@@ -38,7 +48,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
-        http.csrf().disable().
+        http.cors().configurationSource(corsConfigurationSource())
+                .and().csrf().disable().
                 authorizeRequests()
                 .antMatchers("/oauth/**", "/admin/**").permitAll()
                 .antMatchers("/api/**").hasRole("ADMIN")
@@ -50,6 +61,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // @formatter:on
+    }
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(this.environment.getProperty("clientFrontedURL"), this.environment.getProperty("clientBackendURL"),this.environment.getProperty("authorizationServerFrontedURL")));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 

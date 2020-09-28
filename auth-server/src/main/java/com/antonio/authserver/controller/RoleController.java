@@ -1,18 +1,16 @@
 package com.antonio.authserver.controller;
 
-import java.util.List;
-
+import com.antonio.authserver.dto.RoleDto;
+import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.antonio.authserver.dto.RoleDto;
-import com.antonio.authserver.model.ResponseMessage;
-import com.antonio.authserver.service.RoleService;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/role")
-@CrossOrigin
 public class RoleController {
 
 	private RoleService roleService;

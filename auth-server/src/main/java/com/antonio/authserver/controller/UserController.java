@@ -1,20 +1,19 @@
 package com.antonio.authserver.controller;
-import java.util.List;
 
-import com.antonio.authserver.service.RoleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
-import com.antonio.authserver.repository.RoleRepository;
+import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/user")
-@CrossOrigin
 public class UserController {
 
     private UserService userService;
