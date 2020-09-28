@@ -108,4 +108,11 @@ public class ExceptionAdvice {
         return e.getMessage();
     }
 
+	@ResponseBody
+	@ExceptionHandler(UserAccountIsAlreadyActivated.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public String userAccountIsAlreadyActivated(UserAccountIsAlreadyActivated e) {
+		return e.getMessage();
+	}
+
 }
