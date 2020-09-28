@@ -37,7 +37,7 @@ public class EmailService {
 		this.appUserMapper = appUserMapper;
 	}
 
-	public void sendEmail(AppUserDto appUserDto, String siteUrl)
+	public void sendActivationEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/activate?emailCode=" + appUserDto.getEmailCode();
 		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
@@ -71,7 +71,7 @@ public class EmailService {
 
 	public AppUserDto verifyAndActivateEmailCode(String emailCode) {
 		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new UserNotFound("Unknown"));
-		if (appUser == null || appUser.getIsActivated()) {
+		if (appUser.getIsActivated()) {
 			throw new UserAccountIsAlreadyActivated(appUser.getUsername());
 		} else {
 			appUser.setIsActivated(true);
