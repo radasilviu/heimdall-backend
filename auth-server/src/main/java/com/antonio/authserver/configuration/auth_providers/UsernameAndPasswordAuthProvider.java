@@ -1,8 +1,9 @@
 package com.antonio.authserver.configuration.auth_providers;
 
-import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
+import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,7 +23,7 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) throws CustomException {
         final String username = authentication.getName();
         final String password = (String) authentication.getCredentials();
 
@@ -30,7 +31,7 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
 
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IncorrectPassword(password);
+            throw new CustomException("The password "+ password +" is incorrect!", HttpStatus.BAD_REQUEST);
         }
 
 
