@@ -44,15 +44,15 @@ public class AdminService {
         setAuthentication(adminCredential);
 
         final JwtObject jwtObject = createJWTObject(appUser);
-        setJwtToUserAndSave(appUser, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
+        updateNewTokensToUser(appUser, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
 
         return jwtObject;
     }
 
-    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
-        userDto.setToken(token);
-        userDto.setRefreshToken(refreshToken);
-        userService.update(userDto);
+    private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
+        appUserDto.setToken(accessToken);
+        appUserDto.setRefreshToken(refreshToken);
+        userService.update(appUserDto);
     }
 
     private void verifyIfUserIsAuthorized(AppUserDto user) {

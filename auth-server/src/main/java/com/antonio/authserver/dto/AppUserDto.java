@@ -3,6 +3,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +21,7 @@ public class AppUserDto {
 	private String email;
 	private Boolean isActivated;
 	private String emailCode;
+	private AuthenticationProvider authProvider;
 
 	@Override
 	public String toString() {

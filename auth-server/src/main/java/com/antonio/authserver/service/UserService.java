@@ -1,10 +1,16 @@
 package com.antonio.authserver.service;
+
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
+import com.antonio.authserver.model.oauth.OAuth2CustomUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
@@ -17,23 +23,23 @@ import net.bytebuddy.utility.RandomString;
 
 @Service
 @Transactional
-public class UserService {
+public class UserService extends DefaultOAuth2UserService {
 
-	private AppUserRepository appUserRepository;
-	private RoleRepository roleRepository;
-	private BCryptPasswordEncoder passwordEncoder;
+    private AppUserRepository appUserRepository;
+    private RoleRepository roleRepository;
+    private BCryptPasswordEncoder passwordEncoder;
 
-	@Autowired
-	public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository,
-			BCryptPasswordEncoder passwordEncoder) {
-		this.appUserRepository = appUserRepository;
-		this.roleRepository = roleRepository;
-		this.passwordEncoder = passwordEncoder;
-	}
+    @Autowired
+    public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository,
+                       BCryptPasswordEncoder passwordEncoder) {
+        this.appUserRepository = appUserRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-	public List<AppUserDto> getAllUsers() {
-		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
-	}
+    public List<AppUserDto> getAllUsers() {
+        return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
+    }
 
 
     public AppUserDto getUserByUsername(String username) throws UserNotFound {
@@ -41,117 +47,154 @@ public class UserService {
         return AppUserMapper.INSTANCE.toAppUserDto(appUser);
     }
 
-	public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
-		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-		if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
-			throw new UserAlreadyExists(appUserDto.getUsername());
-		else if (appUserDto.getUsername().equals("")) {
-			throw new NullResource("User");
-		} else {
-			String randomCode = RandomString.make(64);
-			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
-			appUserDto.setEmailCode(randomCode);
-			appUserDto.setIsActivated(false);
-			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
+    public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
+            throw new UserAlreadyExists(appUserDto.getUsername());
+        else if (appUserDto.getUsername().equals("")) {
+            throw new NullResource("User");
+        } else {
+            String randomCode = RandomString.make(64);
+            appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
+            appUserDto.setEmailCode(randomCode);
+            appUserDto.setIsActivated(false);
+            appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 
-		}
-	}
+        }
+    }
 
-	public void update(AppUserDto appUserDto) {
+    public AppUserDto createSocialUser(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
+            throw new UserAlreadyExists(appUserDto.getUsername());
+        else if (appUserDto.getUsername().equals("")) {
+            throw new NullResource("User");
+        } else {
+            String randomCode = RandomString.make(64);
+            appUserDto.setEmailCode(randomCode);
+            appUserDto.setIsActivated(false);
+            appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
 
-		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-		final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername())
-				.orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
+        }
 
-		final AppUser userToUpdate = AppUserMapper.INSTANCE.toAppUserDao(appUserDto);
+        return appUserDto;
+    }
 
-		if (appUserDto.getUsername().equals("")) {
-			throw new NullResource("User");
-		}
+    public void update(AppUserDto appUserDto) {
 
-		userToUpdate.setId(appUser.getId());
-		appUserRepository.save(userToUpdate);
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername())
+                .orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
 
-	}
+        final AppUser userToUpdate = AppUserMapper.INSTANCE.toAppUserDao(appUserDto);
 
-	public void updateUserByUsername(String username, AppUserDto appUserDto) {
-		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		if (appUserDto.getUsername().equals(""))
-			throw new NullResource("User");
-		appUser.setUsername(appUserDto.getUsername());
-		appUser.setPassword(appUserDto.getPassword());
-		appUserRepository.save(appUser);
-	}
+        if (appUserDto.getUsername().equals("")) {
+            throw new NullResource("User");
+        }
 
-	public AppUser addRole(String username, Role role) throws UserNotFound, CannotAddRole {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
+        userToUpdate.setId(appUser.getId());
+        appUserRepository.save(userToUpdate);
 
-		appUser.getRoles().add(role);
-		appUserRepository.save(appUser);
+    }
 
-		return appUser;
-	}
+    public void updateUserByUsername(String username, AppUserDto appUserDto) {
+        appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        if (appUserDto.getUsername().equals(""))
+            throw new NullResource("User");
+        appUser.setUsername(appUserDto.getUsername());
+        appUser.setPassword(appUserDto.getPassword());
+        appUserRepository.save(appUser);
+    }
 
-	public void removeRole(String username, Role role) throws UserNotFound, CannotAddRole {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
+    public AppUser addRole(String username, Role role) throws UserNotFound, CannotAddRole {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
 
-		appUser.getRoles().remove(role);
-		appUserRepository.save(appUser);
+        appUser.getRoles().add(role);
+        appUserRepository.save(appUser);
 
-	}
+        return appUser;
+    }
 
-	public void deleteUser(String username) throws UserNotFound {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		appUserRepository.delete(appUser);
+    public void removeRole(String username, Role role) throws UserNotFound, CannotAddRole {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
 
-	}
+        appUser.getRoles().remove(role);
+        appUserRepository.save(appUser);
 
-	public AppUserDto findByUsernameAndPassword(String username, String password) {
-		Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
+    }
 
-		if (!userOptional.isPresent()) {
-			throw new UserNotFound(username);
-		}
-		AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+    public void deleteUser(String username) throws UserNotFound {
+        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+        appUserRepository.delete(appUser);
 
-		if (!passwordEncoder.matches(password, userDto.getPassword())) {
-			throw new IncorrectPassword(password);
-		}
+    }
 
-		return userDto;
-	}
+    public AppUserDto findByUsernameAndPassword(String username, String password) {
+        Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
-	public void verifyUserCode(String code) {
+        if (!userOptional.isPresent()) {
+            throw new UserNotFound(username);
+        }
+        AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 
-		AppUser appUser = appUserRepository.findByCode(code).orElseThrow(() -> new CodeNotFound(code));
-		appUser.setCode(null);
+        if (!passwordEncoder.matches(password, userDto.getPassword())) {
+            throw new IncorrectPassword(password);
+        }
 
-		appUserRepository.save(appUser);
+        return userDto;
+    }
 
-	}
+    public void verifyUserCode(String code) {
 
-	public AppUserDto findByUsername(String username) {
-		final Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
+        AppUser appUser = appUserRepository.findByCode(code).orElseThrow(() -> new CodeNotFound(code));
+        appUser.setCode(null);
 
-		if (!userOptional.isPresent()) {
-			throw new UserNotFound(username);
-		}
+        appUserRepository.save(appUser);
 
-		return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
-	}
+    }
 
-	public AppUserDto findUserByToken(String token) {
-		AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-	}
+    public AppUserDto findByEmail(String email) {
+        final Optional<AppUser> userOptional = appUserRepository.findByEmail(email);
 
-	public AppUserDto findUserByRefreshToken(String refreshToken) {
-		AppUser appUser = appUserRepository.findByRefreshToken(refreshToken)
-				.orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
+        if (!userOptional.isPresent()) {
+            throw new UserNotFound(email);
+        }
 
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-	}
+        return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+    }
+
+
+    public AppUserDto findByUsername(String username) {
+        final Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
+
+        if (!userOptional.isPresent()) {
+            throw new UserNotFound(username);
+        }
+
+        return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+    }
+
+    public AppUserDto findUserByToken(String token) {
+        AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
+
+    public AppUserDto findUserByRefreshToken(String refreshToken) {
+        AppUser appUser = appUserRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
+        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User user = super.loadUser(userRequest);
+        return new OAuth2CustomUser(user);
+    }
+
+    public boolean verifyIfUserExist(String email) {
+        return appUserRepository.findByEmail(email).isPresent();
+    }
 }

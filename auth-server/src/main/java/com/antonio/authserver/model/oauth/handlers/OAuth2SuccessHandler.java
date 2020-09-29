@@ -1,10 +1,7 @@
 package com.antonio.authserver.model.oauth.handlers;
 
-import com.antonio.authserver.dto.AppUserDto;
-import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.oauth.OAuth2CustomUser;
-import com.antonio.authserver.service.AuthService;
-import com.antonio.authserver.service.UserService;
+import com.antonio.authserver.service.OAuth2SocialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -19,15 +16,20 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthService authService;
+    private OAuth2SocialService oAuth2SocialService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2CustomUser oAuth2CustomUser = (OAuth2CustomUser) authentication.getPrincipal();
         String email = oAuth2CustomUser.getEmail();
+
+        oAuth2CustomUser.getAttributes().keySet().forEach(System.out::println);
+
+        if (oAuth2SocialService.verifyIfUserExist(email)) {
+            oAuth2SocialService.updateSocialUser(email);
+        } else {
+            oAuth2SocialService.registerSocialUser(oAuth2CustomUser);
+        }
 
         System.out.println("Customer Email: " + email);
 

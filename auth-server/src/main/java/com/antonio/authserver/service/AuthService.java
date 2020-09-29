@@ -10,6 +10,7 @@ import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPas
 import com.antonio.authserver.model.exceptions.controllerexceptions.SessionExpired;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
+import com.antonio.authserver.utils.JwtUtility;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+
+import static com.antonio.authserver.utils.JwtUtility.*;
 
 @Service
 public class AuthService {
@@ -198,13 +201,7 @@ public class AuthService {
         return accessToken;
     }
 
-    private Long getTokenExpirationTime() {
-        return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
-    }
 
-    private Long getRefreshTokenExpirationTime() {
-        return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
-    }
 
     public void sendForgotPasswordEmail(String email) {
         Optional<AppUser> user = appUserRepository.findByEmail(email);

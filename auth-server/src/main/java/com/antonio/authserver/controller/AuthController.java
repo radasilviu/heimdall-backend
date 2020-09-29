@@ -7,6 +7,7 @@ import com.antonio.authserver.request.ForgotPasswordRequest;
 import com.antonio.authserver.request.ChangePasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.model.Code;
@@ -63,6 +64,12 @@ public class AuthController {
 
 	@GetMapping(path = "/access")
 	public ResponseEntity<?> verifyToken() {
+		final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
+		return ResponseEntity.ok().body(responseMessage);
+	}
+
+	@GetMapping(path = "/login/oauth2/code/google")
+	public ResponseEntity<?> test(@RequestBody OAuth2User oAuth2User) {
 		final ResponseMessage responseMessage = new ResponseMessage("Valid Token");
 		return ResponseEntity.ok().body(responseMessage);
 	}
