@@ -2,11 +2,13 @@ package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.ClientDto;
+import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
 import com.antonio.authserver.model.exceptions.controllerexceptions.SessionExpired;
+import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
@@ -17,25 +19,36 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.util.*;
 
 @Service
 public class AuthService {
 
     private BCryptPasswordEncoder passwordEncoder;
+
     private ClientService clientService;
+
     private UserService userService;
+
     private JwtService jwtService;
+
     private Environment env;
 
+    private AppUserRepository appUserRepository;
+
+    private EmailService emailService;
     @Autowired
-    public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService, JwtService jwtService, Environment env, AuthenticationManager authenticationManager) {
+    public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
+                       JwtService jwtService, Environment env, AuthenticationManager authenticationManager,
+                       AppUserRepository appUserRepository, EmailService emailService) {
         this.passwordEncoder = passwordEncoder;
         this.clientService = clientService;
         this.userService = userService;
         this.jwtService = jwtService;
         this.env = env;
         this.authenticationManager = authenticationManager;
+        this.appUserRepository = appUserRepository;
+        this.emailService = emailService;
     }
 
     private final AuthenticationManager authenticationManager;
@@ -192,4 +205,50 @@ public class AuthService {
     private Long getRefreshTokenExpirationTime() {
         return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
     }
+
+    public void sendForgotPasswordEmail(String email) {
+        Optional<AppUser> user = appUserRepository.findByEmail(email);
+
+        if (user != null) {
+            String forgotPasswordCode = generateRandomString();
+            user.get().setForgotPasswordCode(forgotPasswordCode);
+            appUserRepository.save(user.get());
+
+            Map<String, Object> model = new HashMap<>();
+            model.put("email", user.get().getEmail());
+            model.put("forgotPasswordCode", user.get().getForgotPasswordCode());
+            model.put("clientFrontedURL", env.getProperty("clientFrontedURL"));
+
+            emailService.sendEmail("forgot_password.ftl", model, user.get().getEmail(), "Forgot password", this.env.getProperty("mail.from"));
+        }
+    }
+
+    private String generateRandomString() {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+
+        return generatedString;
+    }
+
+    public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
+        if (!password.equals(confirmPassword)) {
+           throw new RuntimeException("Passwords do not match");
+        }
+        Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
+
+        if (user == null) {
+            throw  new RuntimeException("Invalid password change request");
+        }
+        user.get().setPassword(passwordEncoder.encode(password));
+        appUserRepository.save(user.get());
+    }
+
 }
