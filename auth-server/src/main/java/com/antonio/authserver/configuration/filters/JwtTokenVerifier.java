@@ -2,13 +2,13 @@ package com.antonio.authserver.configuration.filters;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Role;
-import com.antonio.authserver.model.exceptions.controllerexceptions.TokenNotFound;
-import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotAuthorized;
+import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,7 +41,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
-            throw new UserNotAuthorized();
+            throw new CustomException("The user is not authorized to do this.", HttpStatus.UNAUTHORIZED);
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
@@ -83,7 +83,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private void verifyToken(String currentToken, String userToken) {
         if (!currentToken.equals(userToken)) {
-            throw new TokenNotFound(currentToken);
+            throw new CustomException("The token " + currentToken +" could not be found!",HttpStatus.NOT_FOUND);
         }
     }
 

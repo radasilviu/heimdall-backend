@@ -11,8 +11,7 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
-import com.antonio.authserver.model.CustomException;
-import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
+import com.antonio.authserver.model.CustomException;;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import net.bytebuddy.utility.RandomString;
@@ -84,7 +83,7 @@ public class UserService {
 		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
 				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
 		if (appUserDto.getUsername().equals(""))
-			throw new NullResource("User");
+			throw new CustomException("The inserted User cannot be null!",HttpStatus.BAD_REQUEST);
 		appUser.setUsername(appUserDto.getUsername());
 		appUser.setPassword(appUserDto.getPassword());
 		appUserRepository.save(appUser);
