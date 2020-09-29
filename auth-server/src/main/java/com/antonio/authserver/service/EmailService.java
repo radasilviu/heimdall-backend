@@ -78,4 +78,50 @@ public class EmailService {
 			return appUserMapper.toAppUserDto(appUser);
 		}
 	}
+
+	public void sendEmail(String template, Object model, String to, String subject, String from) {
+		JavaMailSenderImpl javaMailSender = configureMailSender();
+		MimeMessage message = javaMailSender.createMimeMessage();
+
+		try {
+			Template htmlTemplate = freemarkerConfigurer.createConfiguration().getTemplate(template);
+			String htmlBody = FreeMarkerTemplateUtils.processTemplateIntoString(htmlTemplate, model);
+			message = configureMailMessage(message, to, htmlBody, subject, from);
+
+			javaMailSender.send(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TemplateException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public JavaMailSenderImpl configureMailSender() {
+		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+
+		Properties props = new Properties();
+		props.put("mail.smtp.starttls.enable", "true");
+		javaMailSender.setJavaMailProperties(props);
+		javaMailSender.setHost(emailProperties.getHost());
+		javaMailSender.setPort(emailProperties.getPort());
+		javaMailSender.setUsername(emailProperties.getUsername());
+		javaMailSender.setPassword(emailProperties.getPassword());
+
+		return javaMailSender;
+	}
+
+	public MimeMessage configureMailMessage(MimeMessage message, String to, String body, String subject, String from) {
+		MimeMessageHelper helper = new MimeMessageHelper(message);
+
+		try {
+			helper.setTo(to);
+			helper.setText(body, true);
+			helper.setSubject(subject);
+			helper.setFrom(from);
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+
+		return message;
+	}
 }
