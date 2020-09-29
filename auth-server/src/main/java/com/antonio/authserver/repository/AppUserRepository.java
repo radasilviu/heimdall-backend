@@ -28,4 +28,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByRefreshToken(String refreshToken);
 
     Optional<AppUser> findByEmail(String email);
+
+    Optional<AppUser> findByEmailAndForgotPasswordCode(String email, String forgotPasswordCode);
 }

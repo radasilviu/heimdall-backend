@@ -3,8 +3,9 @@ import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.antonio.authserver.request.ForgotPasswordRequest;
+import com.antonio.authserver.request.ChangePasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
@@ -27,6 +28,7 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
+
 	@Autowired
 	private EmailService emailService;
 
@@ -75,10 +77,17 @@ public class AuthController {
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@CrossOrigin("http://localhost:4200")
 	@PostMapping("/forgot-password")
-	public ResponseEntity<?> sendForgotPasswordEmail() {
+	public ResponseEntity<?> sendForgotPasswordEmail(@RequestBody ForgotPasswordRequest request) {
+		this.authService.sendForgotPasswordEmail(request.getEmail());
 		final ResponseMessage responseMessage = new ResponseMessage("Email sent");
+		return ResponseEntity.ok().body(responseMessage);
+	}
+
+	@PostMapping("/change-password")
+	public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+		this.authService.changePassword(request.getPassword(), request.getConfirmPassword(), request.getEmail(), request.getForgotPasswordCode());
+		final ResponseMessage responseMessage = new ResponseMessage("Password change");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 }
