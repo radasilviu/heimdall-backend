@@ -100,7 +100,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         boolean shouldNotFilter = false;
 
-        if (request.getServletPath().startsWith("/oauth") || request.getServletPath().startsWith("/admin"))
+        if (request.getServletPath().startsWith("/oauth") || request.getServletPath().startsWith("/admin") ||request.getServletPath().startsWith("/login") )
             shouldNotFilter = true;
 
         if (request.getServletPath().endsWith("access"))

@@ -4,12 +4,16 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
-import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.exceptions.controllerexceptions.*;
+import com.antonio.authserver.model.oauth.OAuth2CustomUser;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class UserService {
+public class UserService extends DefaultOAuth2UserService {
 
     private AppUserRepository appUserRepository;
     private RoleRepository roleRepository;
@@ -150,5 +154,11 @@ public class UserService {
         AppUser appUser = appUserRepository.findByRefreshToken(refreshToken).orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
 
         return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+    }
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User user = super.loadUser(userRequest);
+        return new OAuth2CustomUser(user);
     }
 }

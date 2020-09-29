@@ -4,6 +4,9 @@ import com.antonio.authserver.configuration.auth_providers.UsernameAndPasswordAu
 import com.antonio.authserver.configuration.filters.JwtTokenVerifier;
 import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
 import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
+import com.antonio.authserver.model.oauth.OAuth2CustomUser;
+import com.antonio.authserver.model.oauth.handlers.OAuth2FailureHandler;
+import com.antonio.authserver.model.oauth.handlers.OAuth2SuccessHandler;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,31 +48,41 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @Autowired
+    private OAuth2FailureHandler oAuth2FailureHandler;
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
         http.cors().configurationSource(corsConfigurationSource())
-                .and().csrf().disable().
-                authorizeRequests()
-                .antMatchers("/oauth/**", "/admin/**").permitAll()
-                .antMatchers("/api/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
                 .and()
-                .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
+                    .csrf()
+                    .disable()
+                .authorizeRequests()
+                    .antMatchers("/", "/oauth/**", "/admin/**", "/oauth2/**").permitAll()
+                    .antMatchers("/api/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
                 .and()
-                .addFilterAfter(new JwtTokenVerifier(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        // @formatter:on
+                    .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
+                .and()
+                    .addFilterAfter(new JwtTokenVerifier(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                    .oauth2Login()
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler);
+        /// @formatter:on
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(this.environment.getProperty("clientFrontedURL"), this.environment.getProperty("clientBackendURL"),this.environment.getProperty("authorizationServerFrontedURL")));
+        configuration.setAllowedOrigins(Arrays.asList(this.environment.getProperty("clientFrontedURL"), this.environment.getProperty("clientBackendURL"), this.environment.getProperty("authorizationServerFrontedURL")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept","whitelist"));
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "whitelist"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

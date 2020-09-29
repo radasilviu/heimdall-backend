@@ -1,6 +1,7 @@
 package com.antonio.authserver.dto;
 
 import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ public class AppUserDto {
     private String token;
     private String refreshToken;
     private String code;
+    private AuthenticationProvider authProvider;
     private Set<Role> roles = new HashSet<>();
 
 

@@ -1,5 +1,6 @@
 package com.antonio.authserver.entity;
 
+import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,9 @@ public class AppUser {
 
     @Column(columnDefinition = "TEXT")
     private String code;
+
+    @Enumerated(EnumType.STRING)
+    private AuthenticationProvider authProvider;
 
     @ManyToMany
     @JoinTable(
