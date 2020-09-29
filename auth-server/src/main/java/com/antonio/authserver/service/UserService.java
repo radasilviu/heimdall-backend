@@ -4,13 +4,15 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
-import com.antonio.authserver.model.exceptions.controllerexceptions.*;
+import com.antonio.authserver.model.CustomException;
+import com.antonio.authserver.model.exceptions.controllerexceptions.NullResource;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import net.bytebuddy.utility.RandomString;
@@ -35,18 +37,19 @@ public class UserService {
 		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
 	}
 
+	public AppUserDto getUserByUsername(String username) throws CustomException {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
+				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
+		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+	}
 
-    public AppUserDto getUserByUsername(String username) throws UserNotFound {
-        AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-        return AppUserMapper.INSTANCE.toAppUserDto(appUser);
-    }
-
-	public void create(AppUserDto appUserDto) throws UserAlreadyExists, NullResource {
+	public void create(AppUserDto appUserDto) throws CustomException {
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
 		if (appUserRepository.findByUsername(appUserDto.getUsername()).isPresent())
-			throw new UserAlreadyExists(appUserDto.getUsername());
+			throw new CustomException("User with the username [ " + appUserDto.getUsername() + " ] already exists!",
+					HttpStatus.CONFLICT);
 		else if (appUserDto.getUsername().equals("")) {
-			throw new NullResource("User");
+			throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
 			String randomCode = RandomString.make(64);
 			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
@@ -61,12 +64,14 @@ public class UserService {
 
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
 		final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername())
-				.orElseThrow(() -> new UserNotFound(appUserDto.getUsername()));
+				.orElseThrow(() -> new CustomException(
+						"User with the username [ " + appUserDto.getUsername() + " ] could not be found!",
+						HttpStatus.NOT_FOUND));
 
 		final AppUser userToUpdate = AppUserMapper.INSTANCE.toAppUserDao(appUserDto);
 
 		if (appUserDto.getUsername().equals("")) {
-			throw new NullResource("User");
+			throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
 		}
 
 		userToUpdate.setId(appUser.getId());
@@ -76,7 +81,8 @@ public class UserService {
 
 	public void updateUserByUsername(String username, AppUserDto appUserDto) {
 		appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
+				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
 		if (appUserDto.getUsername().equals(""))
 			throw new NullResource("User");
 		appUser.setUsername(appUserDto.getUsername());
@@ -84,9 +90,13 @@ public class UserService {
 		appUserRepository.save(appUser);
 	}
 
-	public AppUser addRole(String username, Role role) throws UserNotFound, CannotAddRole {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
+	public AppUser addRole(String username, Role role) throws CustomException {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
+				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
+		roleRepository.findByName(role.getName())
+				.orElseThrow(() -> new CustomException(
+						"Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
+						HttpStatus.BAD_REQUEST));
 
 		appUser.getRoles().add(role);
 		appUserRepository.save(appUser);
@@ -94,17 +104,22 @@ public class UserService {
 		return appUser;
 	}
 
-	public void removeRole(String username, Role role) throws UserNotFound, CannotAddRole {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
-		roleRepository.findByName(role.getName()).orElseThrow(() -> new CannotAddRole(role.getName()));
+	public void removeRole(String username, Role role) throws CustomException {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
+				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
+		roleRepository.findByName(role.getName())
+				.orElseThrow(() -> new CustomException(
+						"Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
+						HttpStatus.BAD_REQUEST));
 
 		appUser.getRoles().remove(role);
 		appUserRepository.save(appUser);
 
 	}
 
-	public void deleteUser(String username) throws UserNotFound {
-		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new UserNotFound(username));
+	public void deleteUser(String username) throws CustomException {
+		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
+				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
 		appUserRepository.delete(appUser);
 
 	}
@@ -113,12 +128,13 @@ public class UserService {
 		Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
 		if (!userOptional.isPresent()) {
-			throw new UserNotFound(username);
+			throw new CustomException("User with the username [ " + username + " ] could not be found!",
+					HttpStatus.NOT_FOUND);
 		}
 		AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 
 		if (!passwordEncoder.matches(password, userDto.getPassword())) {
-			throw new IncorrectPassword(password);
+			throw new CustomException("Password [" + password + "] is wrong.", HttpStatus.UNAUTHORIZED);
 		}
 
 		return userDto;
@@ -126,7 +142,8 @@ public class UserService {
 
 	public void verifyUserCode(String code) {
 
-		AppUser appUser = appUserRepository.findByCode(code).orElseThrow(() -> new CodeNotFound(code));
+		AppUser appUser = appUserRepository.findByCode(code).orElseThrow(
+				() -> new CustomException("Code [ " + code + " ] could not be found!", HttpStatus.NOT_FOUND));
 		appUser.setCode(null);
 
 		appUserRepository.save(appUser);
@@ -137,20 +154,23 @@ public class UserService {
 		final Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
 
 		if (!userOptional.isPresent()) {
-			throw new UserNotFound(username);
+			throw new CustomException("User with the username [ " + username + " ] could not be found!",
+					HttpStatus.NOT_FOUND);
 		}
 
 		return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 	}
 
 	public AppUserDto findUserByToken(String token) {
-		AppUser appUser = appUserRepository.findByToken(token).orElseThrow(() -> new TokenNotFound(token));
+		AppUser appUser = appUserRepository.findByToken(token).orElseThrow(
+				() -> new CustomException("Token [ " + token + " ] could not be found!", HttpStatus.NOT_FOUND));
 		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
 
 	public AppUserDto findUserByRefreshToken(String refreshToken) {
 		AppUser appUser = appUserRepository.findByRefreshToken(refreshToken)
-				.orElseThrow(() -> new RefreshTokenNotFound(refreshToken));
+				.orElseThrow(() -> new CustomException("RefreshToken [ " + refreshToken + " ] could not be found!",
+						HttpStatus.NOT_FOUND));
 
 		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
 	}
