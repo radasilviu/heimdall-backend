@@ -4,9 +4,11 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.Code;
+import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.exceptions.controllerexceptions.IncorrectPassword;
+import com.antonio.authserver.model.exceptions.controllerexceptions.InvalidPasswordChangeRequest;
 import com.antonio.authserver.model.exceptions.controllerexceptions.SessionExpired;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
@@ -14,6 +16,7 @@ import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -240,13 +243,14 @@ public class AuthService {
 
     public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
         if (!password.equals(confirmPassword)) {
-           throw new RuntimeException("Passwords do not match");
+            throw new CustomException("Passwords do not match", HttpStatus.BAD_REQUEST);
         }
         Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
 
-        if (user == null) {
-            throw  new RuntimeException("Invalid password change request");
+        if (!user.isPresent()) {
+            throw new CustomException("Code invalid or wrong code for user", HttpStatus.BAD_REQUEST);
         }
+
         user.get().setPassword(passwordEncoder.encode(password));
         appUserRepository.save(user.get());
     }
