@@ -1,23 +1,18 @@
 package com.antonio.authserver.configuration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.transaction.Transactional;
 
-import com.antonio.authserver.entity.Realm;
-import com.antonio.authserver.repository.RealmRepository;
+import com.antonio.authserver.entity.*;
+import com.antonio.authserver.repository.*;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import com.antonio.authserver.entity.AppUser;
-import com.antonio.authserver.entity.Client;
-import com.antonio.authserver.entity.Role;
-import com.antonio.authserver.repository.AppUserRepository;
-import com.antonio.authserver.repository.ClientRepository;
-import com.antonio.authserver.repository.RoleRepository;
-import lombok.extern.log4j.Log4j2;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Log4j2
@@ -29,21 +24,28 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private ClientRepository clientRepository;
     private BCryptPasswordEncoder passwordEncoder;
     private RealmRepository realmRepository;
+    private IdentityProviderRepository identityProviderRepository;
+
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
         this.passwordEncoder = passwordEncoder;
         this.realmRepository = realmRepository;
+        this.identityProviderRepository = identityProviderRepository;
     }
 
     @Override
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {
         // for demo purpose
         if (roleRepository.findAll().size() == 0) {
-            List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER")));
+
+            List<IdentityProvider> identityProviders = Arrays.asList(new IdentityProvider("GOOGLE"));
+            identityProviderRepository.saveAll(identityProviders);
+
+            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER"));
             roleRepository.saveAll(roleList);
 
             AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null);

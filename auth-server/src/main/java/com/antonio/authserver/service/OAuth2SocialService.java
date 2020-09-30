@@ -1,12 +1,13 @@
 package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
+import com.antonio.authserver.dto.IdentityProviderDto;
+import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import com.antonio.authserver.model.oauth.OAuth2CustomUser;
 import com.antonio.authserver.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,12 +21,13 @@ public class OAuth2SocialService {
 
     private UserService userService;
     private JwtService jwtService;
-
+    private IdentityProviderService identityProviderService;
 
     @Autowired
-    public OAuth2SocialService(UserService userService, JwtService jwtService) {
+    public OAuth2SocialService(UserService userService, JwtService jwtService, IdentityProviderService identityProviderService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.identityProviderService = identityProviderService;
     }
 
     public void registerSocialUser(OAuth2CustomUser oAuth2CustomUser) {
@@ -46,7 +48,8 @@ public class OAuth2SocialService {
         appUserDto.setUsername(oAuth2CustomUser.getName());
         appUserDto.setEmail(oAuth2CustomUser.getEmail());
 
-        appUserDto.setAuthProvider(AuthenticationProvider.GOOGLE);
+        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider("GOOGLE");
+        appUserDto.setIdentityProvider(identityProviderDto);
 
         return appUserDto;
     }
@@ -64,7 +67,10 @@ public class OAuth2SocialService {
 
         appUserDto.setToken(accessToken);
         appUserDto.setRefreshToken(refreshToken);
-        appUserDto.setAuthProvider(AuthenticationProvider.GOOGLE);
+
+        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider("GOOGLE");
+        appUserDto.setIdentityProvider(identityProviderDto);
+
         userService.update(appUserDto);
     }
 
