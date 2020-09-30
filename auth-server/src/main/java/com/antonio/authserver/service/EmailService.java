@@ -41,10 +41,7 @@ public class EmailService {
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/oauth/activate?emailCode=" + appUserDto.getEmailCode();
 		JavaMailSenderImpl javaMailSender = configureMailSender();
-
 		MimeMessage message = javaMailSender.createMimeMessage();
-
-		MimeMessageHelper helper = new MimeMessageHelper(message);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put("Name", "Heimdall Team");
@@ -54,11 +51,7 @@ public class EmailService {
 		Template freemarkerTemplate = freemarkerConfigurer.createConfiguration().getTemplate("email.ftl");
 		String htmlBody = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerTemplate, model);
 
-		helper.setTo(appUserDto.getEmail()); // !!! IMPORTANT CHANGE
-		helper.setText(htmlBody, true);
-		helper.setSubject("Activate your account");
-		helper.setFrom(emailProperties.getUsername());
-		javaMailSender.send(message);
+		javaMailSender.send(configureMailMessage(message, appUserDto.getEmail(),htmlBody,"Activate your account", emailProperties.getUsername()));
 	}
 
 	public AppUserDto verifyAndActivateEmailCode(String emailCode) throws CustomException {
@@ -119,4 +112,5 @@ public class EmailService {
 
 		return message;
 	}
+
 }
