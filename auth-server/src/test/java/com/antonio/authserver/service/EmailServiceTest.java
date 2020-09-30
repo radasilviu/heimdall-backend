@@ -44,7 +44,7 @@ class EmailServiceTest {
 	}
 	@Test
 	void withGivenEmailCode_shouldVerifyAndActivateAccount() {
-		AppUser appUser = new AppUser("A","A",null,"a@gmail.com",false,"a");
+		AppUser appUser = new AppUser("A","A",null,"a@gmail.com",false,"a",null);
 		when(appUserRepository.findByEmailCode(anyString())).thenReturn(Optional.of(appUser));
 		when(appUserMapper.toAppUserDto(any(AppUser.class))).thenReturn(new AppUserDto("A","A","A","A",null,"a@gmail.com",false,"a"));
 		AppUserDto appUserDto = emailService.verifyAndActivateEmailCode("a");
@@ -58,7 +58,7 @@ class EmailServiceTest {
 	}
 	@Test
 	void withGiveEmailCode_shouldReturnUserAlreadyActivatedException(){
-		AppUser appUser = new AppUser("A","A",null,"a@gmail.com",true,"a");
+		AppUser appUser = new AppUser("A","A",null,"a@gmail.com",true,"a",null);
 		when(appUserRepository.findByEmailCode(anyString())).thenReturn(Optional.of(appUser));
 		CustomException exception = assertThrows(CustomException.class,() -> emailService.verifyAndActivateEmailCode("A"));
 		assertTrue(exception.getMessage().contains(" has been already activated."));
