@@ -1,4 +1,5 @@
 package com.antonio.authserver.service;
+
 import java.util.*;
 import javax.transaction.Transactional;
 
@@ -23,231 +24,203 @@ import io.jsonwebtoken.Claims;
 @Service
 public class AuthService {
 
-	private BCryptPasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
-	private ClientService clientService;
+    private ClientService clientService;
 
-	private UserService userService;
+    private UserService userService;
 
-	private JwtService jwtService;
+    private JwtService jwtService;
 
-	private Environment env;
+    private Environment env;
 
-	private AppUserRepository appUserRepository;
+    private AppUserRepository appUserRepository;
 
-	private EmailService emailService;
-	@Autowired
-	public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
-			JwtService jwtService, Environment env, AuthenticationManager authenticationManager,
-			AppUserRepository appUserRepository, EmailService emailService) {
-		this.passwordEncoder = passwordEncoder;
-		this.clientService = clientService;
-		this.userService = userService;
-		this.jwtService = jwtService;
-		this.env = env;
-		this.authenticationManager = authenticationManager;
-		this.appUserRepository = appUserRepository;
-		this.emailService = emailService;
-	}
+    private EmailService emailService;
 
-	private final AuthenticationManager authenticationManager;
+    @Autowired
+    public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
+                       JwtService jwtService, Environment env, AuthenticationManager authenticationManager,
+                       AppUserRepository appUserRepository, EmailService emailService) {
+        this.passwordEncoder = passwordEncoder;
+        this.clientService = clientService;
+        this.userService = userService;
+        this.jwtService = jwtService;
+        this.env = env;
+        this.authenticationManager = authenticationManager;
+        this.appUserRepository = appUserRepository;
+        this.emailService = emailService;
+    }
 
-	public Code getCode(ClientLoginRequest clientLoginRequest) {
+    private final AuthenticationManager authenticationManager;
 
-		final ClientDto client = clientService.getClientByName(clientLoginRequest.getClientId());
-		verifyClientCredential(clientLoginRequest.getClientSecret(), client.getClientSecret());
+    public Code getCode(ClientLoginRequest clientLoginRequest) {
+        clientService.validateClient(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
+        final AppUserDto user = userService.findByUsernameAndPassword(clientLoginRequest.getUsername(),
+                clientLoginRequest.getPassword());
 
-		final AppUserDto user = userService.findByUsernameAndPassword(clientLoginRequest.getUsername(),
-				clientLoginRequest.getPassword());
 
-		Code code = createOauthCode(user);
-		saveUserWithNewCodeValue(user, code);
+        Code code = clientService.generateCode(user);
+        saveUserWithNewCodeValue(user, code);
 
-		return code;
-	}
+        return code;
+    }
 
-	private void verifyClientCredential(String currentPassword, String storedPassword) {
+    private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
+        user.setCode(code.getCode());
+        userService.update(user);
 
-		if (!passwordEncoder.matches(currentPassword, storedPassword)) {
-			throw new CustomException("Client has not permission to use the authorization server", HttpStatus.UNAUTHORIZED);
-		}
-	}
+    }
 
-	private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
-		user.setCode(code.getCode());
-		userService.update(user);
+    public JwtObject login(LoginCredential loginCredential) {
+        String code = loginCredential.getClientCode();
+        verifyClientCode(code);
 
-	}
+        Claims claims = jwtService.decodeJWT(code);
+        final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
 
-	private Code createOauthCode(AppUserDto user) {
-		String jwtCode = generateCode(user);
+        long tokenExpirationTime = getTokenExpirationTime();
+        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+        final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime,
+                new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
+                SecurityConstants.TOKEN_SECRET);
+        final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime,
+                refreshTokenExpirationTime);
 
-		if (!jwtCode.equals("")) {
-			final Code code = new Code(jwtCode);
-			return code;
-		}
-		return null;
-	}
+        setJwtToUserAndSave(user, accessToken, refreshToken);
 
-	private String generateCode(AppUserDto userDto) {
+        return jwtObject;
+    }
 
-		long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
+        userDto.setToken(token);
+        userDto.setRefreshToken(refreshToken);
+        userService.update(userDto);
+    }
 
-		String token = jwtService.createAccessToken(userDto.getUsername(), expirationTime, new ArrayList<>(),
-				SecurityConstants.TOKEN_SECRET);
+    private void verifyClientCode(String clientCode) {
+        userService.verifyUserCode(clientCode);
+    }
 
-		return token;
-	}
+    public void logout(JwtObject jwtObject) {
 
-	public JwtObject login(LoginCredential loginCredential) {
-		String code = loginCredential.getClientCode();
-		verifyClientCode(code);
+        // if log out has been called, token need to be updated even on error occurs
+        final AppUserDto appUserDto = userService.getUserByUsername(jwtObject.getUsername());
+        updateNewTokensToUser(appUserDto, null, null);
 
-		Claims claims = jwtService.decodeJWT(code);
-		final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
+        if (verifyIfUserSessionExpired(jwtObject.getToken_expire_time(), jwtObject.getRefresh_token_expire_time())) {
+            throw new CustomException("Your session has been expired, please log in again.", HttpStatus.UNAUTHORIZED);
+        }
 
-		long tokenExpirationTime = getTokenExpirationTime();
-		long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
-		final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime,
-				new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
-		final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
-				SecurityConstants.TOKEN_SECRET);
-		final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime,
-				refreshTokenExpirationTime);
+    }
 
-		setJwtToUserAndSave(user, accessToken, refreshToken);
+    private boolean verifyIfUserSessionExpired(long accessTokenExpirationTime, long refreshTokenExpirationTime) {
 
-		return jwtObject;
-	}
+        final long currentTime = System.currentTimeMillis();
+        return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
+    }
 
-	private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
-		userDto.setToken(token);
-		userDto.setRefreshToken(refreshToken);
-		userService.update(userDto);
-	}
+    @Transactional
+    public JwtObject generateNewAccessToken(JwtObject refreshToken) {
+        final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
 
-	private void verifyClientCode(String clientCode) {
-		userService.verifyUserCode(clientCode);
-	}
+        JwtObject jwtObject = createNewJWtObject(appUserDto);
+        updateNewTokensToUser(appUserDto, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
 
-	public void logout(JwtObject jwtObject) {
+        return jwtObject;
 
-		// if log out has been called, token need to be updated even on error occurs
-		final AppUserDto appUserDto = userService.getUserByUsername(jwtObject.getUsername());
-		updateNewTokensToUser(appUserDto, null, null);
+    }
 
-		if (verifyIfUserSessionExpired(jwtObject.getToken_expire_time(), jwtObject.getRefresh_token_expire_time())) {
-			throw new CustomException("Your session has been expired, please log in again.", HttpStatus.UNAUTHORIZED);
-		}
+    private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
 
-	}
+        appUserDto.setToken(accessToken);
+        appUserDto.setRefreshToken(refreshToken);
+        userService.update(appUserDto);
+    }
 
-	private boolean verifyIfUserSessionExpired(long accessTokenExpirationTime, long refreshTokenExpirationTime) {
+    private JwtObject createNewJWtObject(AppUserDto appUserDto) {
 
-		final long currentTime = System.currentTimeMillis();
-		return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
-	}
+        long tokenExpirationTime = getTokenExpirationTime();
+        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+        final String accessToken = generateAccessToken(appUserDto);
+        final String refreshToken = generateRefreshToken();
 
-	@Transactional
-	public JwtObject generateNewAccessToken(JwtObject refreshToken) {
-		final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
+        JwtObject jwtObject = new JwtObject(appUserDto.getUsername(), accessToken, refreshToken, tokenExpirationTime,
+                refreshTokenExpirationTime);
 
-		JwtObject jwtObject = createNewJWtObject(appUserDto);
-		updateNewTokensToUser(appUserDto, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
+        return jwtObject;
+    }
 
-		return jwtObject;
+    private String generateRefreshToken() {
+        long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
 
-	}
+        final String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
 
-	private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
+        return accessToken;
+    }
 
-		appUserDto.setToken(accessToken);
-		appUserDto.setRefreshToken(refreshToken);
-		userService.update(appUserDto);
-	}
+    private String generateAccessToken(AppUserDto appUserDto) {
+        final String issuer = appUserDto.getUsername();
+        long expirationTime = getTokenExpirationTime();
 
-	private JwtObject createNewJWtObject(AppUserDto appUserDto) {
+        String accessToken = jwtService.createAccessToken(issuer, expirationTime, new ArrayList<>(),
+                SecurityConstants.TOKEN_SECRET);
 
-		long tokenExpirationTime = getTokenExpirationTime();
-		long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
-		final String accessToken = generateAccessToken(appUserDto);
-		final String refreshToken = generateRefreshToken();
+        return accessToken;
+    }
 
-		JwtObject jwtObject = new JwtObject(appUserDto.getUsername(), accessToken, refreshToken, tokenExpirationTime,
-				refreshTokenExpirationTime);
+    private Long getTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+    }
 
-		return jwtObject;
-	}
+    private Long getRefreshTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
+    }
 
-	private String generateRefreshToken() {
-		long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+    public void sendForgotPasswordEmail(String email) {
+        Optional<AppUser> user = appUserRepository.findByEmail(email);
 
-		final String accessToken = jwtService.createRefreshToken(expirationTime, SecurityConstants.TOKEN_SECRET);
+        if (user != null) {
+            String forgotPasswordCode = generateRandomString();
+            user.get().setForgotPasswordCode(forgotPasswordCode);
+            appUserRepository.save(user.get());
 
-		return accessToken;
-	}
+            Map<String, Object> model = new HashMap<>();
+            model.put("email", user.get().getEmail());
+            model.put("forgotPasswordCode", user.get().getForgotPasswordCode());
+            model.put("clientFrontedURL", env.getProperty("clientFrontedURL"));
 
-	private String generateAccessToken(AppUserDto appUserDto) {
-		final String issuer = appUserDto.getUsername();
-		long expirationTime = getTokenExpirationTime();
+            emailService.sendEmail("forgot_password.ftl", model, user.get().getEmail(), "Forgot password",
+                    this.env.getProperty("mail.from"));
+        }
+    }
 
-		String accessToken = jwtService.createAccessToken(issuer, expirationTime, new ArrayList<>(),
-				SecurityConstants.TOKEN_SECRET);
+    private String generateRandomString() {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
 
-		return accessToken;
-	}
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97)).limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
 
-	private Long getTokenExpirationTime() {
-		return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
-	}
+        return generatedString;
+    }
 
-	private Long getRefreshTokenExpirationTime() {
-		return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
-	}
+    public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
+        if (!password.equals(confirmPassword)) {
+            throw new CustomException("Passwords do not match", HttpStatus.BAD_REQUEST);
+        }
+        Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
 
-	public void sendForgotPasswordEmail(String email) {
-		Optional<AppUser> user = appUserRepository.findByEmail(email);
+        if (!user.isPresent()) {
+            throw new CustomException("Code invalid or wrong code for user", HttpStatus.BAD_REQUEST);
+        }
 
-		if (user != null) {
-			String forgotPasswordCode = generateRandomString();
-			user.get().setForgotPasswordCode(forgotPasswordCode);
-			appUserRepository.save(user.get());
-
-			Map<String, Object> model = new HashMap<>();
-			model.put("email", user.get().getEmail());
-			model.put("forgotPasswordCode", user.get().getForgotPasswordCode());
-			model.put("clientFrontedURL", env.getProperty("clientFrontedURL"));
-
-			emailService.sendEmail("forgot_password.ftl", model, user.get().getEmail(), "Forgot password",
-					this.env.getProperty("mail.from"));
-		}
-	}
-
-	private String generateRandomString() {
-		int leftLimit = 48; // numeral '0'
-		int rightLimit = 122; // letter 'z'
-		int targetStringLength = 10;
-		Random random = new Random();
-
-		String generatedString = random.ints(leftLimit, rightLimit + 1)
-				.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97)).limit(targetStringLength)
-				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
-
-		return generatedString;
-	}
-
-	public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
-		if (!password.equals(confirmPassword)) {
-			throw new CustomException("Passwords do not match", HttpStatus.BAD_REQUEST);
-		}
-		Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
-
-		if (!user.isPresent()) {
-			throw new CustomException("Code invalid or wrong code for user", HttpStatus.BAD_REQUEST);
-		}
-
-		user.get().setPassword(passwordEncoder.encode(password));
-		appUserRepository.save(user.get());
-	}
+        user.get().setPassword(passwordEncoder.encode(password));
+        appUserRepository.save(user.get());
+    }
 
 }

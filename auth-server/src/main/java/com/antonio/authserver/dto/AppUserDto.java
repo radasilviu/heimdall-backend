@@ -2,9 +2,7 @@ package com.antonio.authserver.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.entity.Role;
-import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Setter
 public class OAuthSocialUser implements Serializable {
 
-    private Long id;
+    private String id;
     private String email;
     private String name;
     private String photoUrl;
@@ -20,5 +20,7 @@ public class OAuthSocialUser implements Serializable {
     private String idToken;
     private String authorizationCode;
     private String provider;
+    private String clientId;
+    private String clientSecret;
 
 }

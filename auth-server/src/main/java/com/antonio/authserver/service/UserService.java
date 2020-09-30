@@ -60,7 +60,7 @@ public class UserService {
         }
     }
 
-    public void update(AppUserDto appUserDto) {
+    public AppUserDto update(AppUserDto appUserDto) {
 
         appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
         final AppUser appUser = appUserRepository.findByUsername(appUserDto.getUsername())
@@ -77,6 +77,7 @@ public class UserService {
         userToUpdate.setId(appUser.getId());
         appUserRepository.save(userToUpdate);
 
+        return appUserDto;
     }
 
     public void updateUserByUsername(String username, AppUserDto appUserDto) {

@@ -1,12 +1,11 @@
 package com.antonio.authserver.entity;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.*;
-
-import com.antonio.authserver.model.oauth.AuthenticationProvider;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "app_user")

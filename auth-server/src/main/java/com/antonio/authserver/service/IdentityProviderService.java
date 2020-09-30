@@ -5,6 +5,7 @@ import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.mapper.IdentityProviderMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.IdentityProviderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class IdentityProviderService {
 
 
+    @Autowired
     private IdentityProviderRepository identityProviderRepository;
 
 

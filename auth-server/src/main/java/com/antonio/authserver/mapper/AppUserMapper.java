@@ -22,6 +22,7 @@ public interface AppUserMapper {
 	@Mapping(source = "email", target = "email")
 	@Mapping(source = "isActivated", target = "isActivated")
 	@Mapping(source = "emailCode", target = "emailCode")
+	@Mapping(target = "identityProvider",ignore = true)
 	AppUser toAppUserDao(AppUserDto appUserDto);
 
 	@Mapping(source = "username", target = "username")
@@ -33,6 +34,7 @@ public interface AppUserMapper {
 	@Mapping(source = "email", target = "email")
 	@Mapping(source = "isActivated", target = "isActivated")
 	@Mapping(source = "emailCode", target = "emailCode")
+	@Mapping(target = "identityProvider",ignore = true)
 	AppUserDto toAppUserDto(AppUser appUser);
 
 	List<AppUserDto> toAppUserDtoList(List<AppUser> list);

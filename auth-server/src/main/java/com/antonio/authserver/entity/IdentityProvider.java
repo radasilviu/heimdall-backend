@@ -16,9 +16,10 @@ public class IdentityProvider {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String provider;
 
-    @OneToMany(mappedBy = "identityProvider", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "identityProvider",  orphanRemoval = true)
     private List<AppUser> users = new ArrayList<>();
 
     public IdentityProvider() {
