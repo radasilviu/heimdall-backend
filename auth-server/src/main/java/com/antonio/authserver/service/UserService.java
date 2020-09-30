@@ -23,13 +23,15 @@ public class UserService {
 	private AppUserRepository appUserRepository;
 	private RoleRepository roleRepository;
 	private BCryptPasswordEncoder passwordEncoder;
+	private AppUserMapper appUserMapper;
 
 	@Autowired
 	public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository,
-			BCryptPasswordEncoder passwordEncoder) {
+					   BCryptPasswordEncoder passwordEncoder, AppUserMapper appUserMapper) {
 		this.appUserRepository = appUserRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.appUserMapper = appUserMapper;
 	}
 
 	public List<AppUserDto> getAllUsers() {
@@ -39,7 +41,7 @@ public class UserService {
 	public AppUserDto getUserByUsername(String username) throws CustomException {
 		AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(() -> new CustomException(
 				"User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+		return appUserMapper.toAppUserDto(appUser);
 	}
 
 	public void create(AppUserDto appUserDto) throws CustomException {
@@ -54,7 +56,7 @@ public class UserService {
 			appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
 			appUserDto.setEmailCode(randomCode);
 			appUserDto.setIsActivated(false);
-			appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
+			appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
 
 		}
 	}
@@ -67,7 +69,7 @@ public class UserService {
 						"User with the username [ " + appUserDto.getUsername() + " ] could not be found!",
 						HttpStatus.NOT_FOUND));
 
-		final AppUser userToUpdate = AppUserMapper.INSTANCE.toAppUserDao(appUserDto);
+		final AppUser userToUpdate = appUserMapper.toAppUserDao(appUserDto);
 
 		if (appUserDto.getUsername().equals("")) {
 			throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
@@ -130,7 +132,7 @@ public class UserService {
 			throw new CustomException("User with the username [ " + username + " ] could not be found!",
 					HttpStatus.NOT_FOUND);
 		}
-		AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+		AppUserDto userDto = appUserMapper.toAppUserDto(userOptional.get());
 
 		if (!passwordEncoder.matches(password, userDto.getPassword())) {
 			throw new CustomException("Invalid Credentials", HttpStatus.UNAUTHORIZED);
@@ -157,13 +159,13 @@ public class UserService {
 					HttpStatus.NOT_FOUND);
 		}
 
-		return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+		return appUserMapper.toAppUserDto(userOptional.get());
 	}
 
 	public AppUserDto findUserByToken(String token) {
 		AppUser appUser = appUserRepository.findByToken(token).orElseThrow(
 				() -> new CustomException("Token [ " + token + " ] could not be found!", HttpStatus.NOT_FOUND));
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+		return appUserMapper.toAppUserDto(appUser);
 	}
 
 	public AppUserDto findUserByRefreshToken(String refreshToken) {
@@ -171,6 +173,6 @@ public class UserService {
 				.orElseThrow(() -> new CustomException("RefreshToken [ " + refreshToken + " ] could not be found!",
 						HttpStatus.NOT_FOUND));
 
-		return AppUserMapper.INSTANCE.toAppUserDto(appUser);
+		return appUserMapper.toAppUserDto(appUser);
 	}
 }

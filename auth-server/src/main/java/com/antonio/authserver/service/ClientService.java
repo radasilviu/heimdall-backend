@@ -17,15 +17,21 @@ public class ClientService {
 	@Autowired
 	private ClientRepository clientRepository;
 
+	private ClientMapper clientMapper;
+
+	@Autowired
+	public ClientService(ClientMapper clientMapper) {
+		this.clientMapper = clientMapper;
+	}
 	public List<ClientDto> getAllClients() {
 		System.out.println(clientRepository.findAll());
-		return ClientMapper.INSTANCE.toClientDtoList(clientRepository.findAll());
+		return clientMapper.toClientDtoList(clientRepository.findAll());
 	}
 
 	public ClientDto getClientByName(String clientName) throws CustomException {
 		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new CustomException(
 				"Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));
-		return ClientMapper.INSTANCE.toClientDto(client);
+		return clientMapper.toClientDto(client);
 
 	}
 
@@ -40,7 +46,7 @@ public class ClientService {
 			throw new CustomException("The inserted client cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
 
-			clientRepository.save(ClientMapper.INSTANCE.toClientDao(client));
+			clientRepository.save(clientMapper.toClientDao(client));
 		}
 	}
 

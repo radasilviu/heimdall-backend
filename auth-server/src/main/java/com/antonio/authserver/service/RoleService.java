@@ -20,11 +20,13 @@ public class RoleService {
 
 	private RoleRepository roleRepository;
 	private AppUserRepository appUserRepository;
+	private RoleMapper roleMapper;
 
 	@Autowired
-	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository) {
+	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
+		this.roleMapper = roleMapper;
 	}
 
 	public void saveRole(RoleDto role) throws CustomException {
@@ -37,19 +39,19 @@ public class RoleService {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
 
-			roleRepository.save(RoleMapper.INSTANCE.toRoleDao(role));
+			roleRepository.save(roleMapper.toRoleDao(role));
 		}
 	}
 
 	public List<RoleDto> getAllRoles() {
-		return RoleMapper.INSTANCE.toRoleDtoList(roleRepository.findAll());
+		return roleMapper.toRoleDtoList(roleRepository.findAll());
 	}
 
 	public RoleDto getRoleByName(String name) throws CustomException {
 		Role role = roleRepository.findByName(name)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
-		return RoleMapper.INSTANCE.toRoleDto(role);
+		return roleMapper.toRoleDto(role);
 	}
 
 	public void updateRoleByName(String name, RoleDto roleDto) throws CustomException {
