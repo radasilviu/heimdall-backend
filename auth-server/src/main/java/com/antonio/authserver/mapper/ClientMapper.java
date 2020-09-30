@@ -15,10 +15,12 @@ public interface ClientMapper {
 
     @Mapping(source = "clientName", target = "clientName")
     @Mapping(source = "clientSecret", target = "clientSecret")
+    @Mapping(source = "realm", target = "realm")
     Client toClientDao(ClientDto clientDto);
 
     @Mapping(source = "clientName", target = "clientName")
     @Mapping(source = "clientSecret", target = "clientSecret")
+    @Mapping(source = "realm", target = "realm")
     ClientDto toClientDto(Client client);
 
     List<ClientDto> toClientDtoList(List<Client> list);

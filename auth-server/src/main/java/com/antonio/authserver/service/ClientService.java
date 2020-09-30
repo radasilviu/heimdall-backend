@@ -22,6 +22,11 @@ public class ClientService {
 		return ClientMapper.INSTANCE.toClientDtoList(clientRepository.findAll());
 	}
 
+	public ClientDto getClientBySecretAndNameWithRealm(String realmName, String clientName, String clientSecret) {
+		Client client = clientRepository.findByClientNameAndClientSecretAndRealmName(clientName, clientSecret, realmName);
+		return ClientMapper.INSTANCE.toClientDto(client);
+	}
+
 	public ClientDto getClientByName(String clientName) throws CustomException {
 		Client client = clientRepository.findByClientName(clientName).orElseThrow(() -> new CustomException(
 				"Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));

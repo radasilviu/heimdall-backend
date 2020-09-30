@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
+import com.antonio.authserver.configuration.constants.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -123,17 +124,16 @@ public class UserService {
 
 	}
 
-	public AppUserDto findByUsernameAndPassword(String username, String password) {
-		Optional<AppUser> userOptional = appUserRepository.findByUsername(username);
+	public AppUserDto findByUsernameAndPasswordAndRealm(String username, String password, String realmName) {
+		Optional<AppUser> userOptional = appUserRepository.findByUsernameAndRealmName(username, realmName);
 
 		if (!userOptional.isPresent()) {
-			throw new CustomException("User with the username [ " + username + " ] could not be found!",
-					HttpStatus.NOT_FOUND);
+			throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
 		}
 		AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 
 		if (!passwordEncoder.matches(password, userDto.getPassword())) {
-			throw new CustomException("Invalid Credentials", HttpStatus.UNAUTHORIZED);
+			throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
 		}
 
 		return userDto;

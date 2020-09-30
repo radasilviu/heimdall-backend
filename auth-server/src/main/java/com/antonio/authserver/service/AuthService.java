@@ -2,6 +2,7 @@ package com.antonio.authserver.service;
 import java.util.*;
 import javax.transaction.Transactional;
 
+import com.antonio.authserver.configuration.constants.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -54,11 +55,15 @@ public class AuthService {
 
 	public Code getCode(ClientLoginRequest clientLoginRequest) {
 
-		final ClientDto client = clientService.getClientByName(clientLoginRequest.getClientId());
-		verifyClientCredential(clientLoginRequest.getClientSecret(), client.getClientSecret());
+		final ClientDto client = clientService.getClientBySecretAndNameWithRealm(clientLoginRequest.getRealm(),
+				clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
 
-		final AppUserDto user = userService.findByUsernameAndPassword(clientLoginRequest.getUsername(),
-				clientLoginRequest.getPassword());
+		if (client == null) {
+			throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
+		final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getUsername(),
+				clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
 
 		Code code = createOauthCode(user);
 		saveUserWithNewCodeValue(user, code);

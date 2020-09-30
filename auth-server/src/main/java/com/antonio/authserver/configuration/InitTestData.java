@@ -43,30 +43,39 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {
         // for demo purpose
         if (roleRepository.findAll().size() == 0) {
+            List<Realm> realms = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                Realm realm = new Realm();
+                realm.setName("master" + i);
+                realm.setDisplayName("Master " + i);
+                realm.setEnabled(true);
+                realms.add(realm);
+            }
+            realms = realmRepository.saveAll(realms);
+
             List<Role> roleList = new ArrayList<Role>(Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER")));
             roleRepository.saveAll(roleList);
 
-            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null);
-            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
-            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
-            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
+            AppUser user = new AppUser("test", passwordEncoder.encode("test"),
+                    roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true,
+                    null, realms.get(0));
+            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"),
+                    roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true,
+                    null, realms.get(0));
+            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"),
+                    roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true,
+                    null, realms.get(0));
+            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"),
+                    roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true,
+                    null, realms.get(0));
+
             appUserRepository.save(user);
             appUserRepository.save(admin);
             appUserRepository.save(admin_one);
             appUserRepository.save(admin_two);
 
-            Client client = new Client("myClient", passwordEncoder.encode("clientPass"));
+            Client client = new Client("myClient", "egNe7kxsWXDgl3D3", realms.get(0));
             clientRepository.save(client);
         }
-
-        List<Realm> realms = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Realm realm = new Realm();
-            realm.setName("master" + i);
-            realm.setDisplayName("Master " + i);
-            realm.setEnabled(true);
-            realms.add(realm);
-        }
-        realmRepository.saveAll(realms);
     }
 }

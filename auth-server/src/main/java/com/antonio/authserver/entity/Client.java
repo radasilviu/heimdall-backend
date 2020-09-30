@@ -3,10 +3,7 @@ package com.antonio.authserver.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -19,11 +16,15 @@ public class Client {
     private String clientName;
     private String clientSecret;
 
+    @ManyToOne
+    private Realm realm;
+
     public Client() {
     }
 
-    public Client(String clientName, String clientSecret) {
+    public Client(String clientName, String clientSecret, Realm realm) {
         this.clientName = clientName;
         this.clientSecret = clientSecret;
+        this.realm = realm;
     }
 }
