@@ -9,6 +9,7 @@ import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.Id;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,17 +43,18 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         // for demo purpose
         if (roleRepository.findAll().size() == 0) {
 
-            List<IdentityProvider> identityProviders = Arrays.asList(new IdentityProvider("GOOGLE"));
+            final IdentityProvider google = new IdentityProvider("GOOGLE");
+            final IdentityProvider usernameAndPassword = new IdentityProvider("USERNAME_AND_PASSWORD");
+            List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
             identityProviderRepository.saveAll(identityProviders);
 
             List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER"));
             roleRepository.saveAll(roleList);
 
-            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null);
-            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
-            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
-            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null);
-            user.setIdentityProvider(identityProviders.get(0));
+            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, usernameAndPassword);
+            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
+            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
+            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
             appUserRepository.save(user);
             appUserRepository.save(admin);
             appUserRepository.save(admin_one);

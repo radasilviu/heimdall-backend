@@ -12,7 +12,10 @@ import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.*;
 
+import javax.transaction.Transactional;
+
 @Service
+@Transactional
 public class JwtService {
 
 	private Environment env;

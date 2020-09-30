@@ -7,7 +7,10 @@ import com.antonio.authserver.model.oauth.OAuthSocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
+@Transactional
 public class OAuth2SocialService {
 
 
@@ -15,14 +18,12 @@ public class OAuth2SocialService {
     private IdentityProviderService identityProviderService;
     private ClientService clientService;
 
-
     @Autowired
     public OAuth2SocialService(UserService userService, IdentityProviderService identityProviderService, ClientService clientService) {
         this.userService = userService;
         this.identityProviderService = identityProviderService;
         this.clientService = clientService;
     }
-
 
     public boolean verifyIfUserExist(String email) {
         return userService.verifyIfUserExist(email);

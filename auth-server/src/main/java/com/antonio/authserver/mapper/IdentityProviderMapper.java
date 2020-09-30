@@ -8,16 +8,13 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {AppUserMapper.class})
+@Mapper(componentModel = "spring")
 public interface IdentityProviderMapper {
 
     IdentityProviderMapper INSTANCE = Mappers.getMapper(IdentityProviderMapper.class);
 
-    @Mapping(target = "users", ignore = true)
     IdentityProvider toIdentityProviderDao(IdentityProviderDto
                                                    identityProviderDto);
 
     IdentityProviderDto toIdentityProviderDto(IdentityProvider identityProvider);
-
-    List<IdentityProviderDto> toIdentityProviderDtoList(List<IdentityProvider> list);
 }

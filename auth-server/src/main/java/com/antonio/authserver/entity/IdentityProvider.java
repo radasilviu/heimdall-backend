@@ -19,9 +19,6 @@ public class IdentityProvider {
     @Column(unique = true)
     private String provider;
 
-    @OneToMany(mappedBy = "identityProvider",  orphanRemoval = true)
-    private List<AppUser> users = new ArrayList<>();
-
     public IdentityProvider() {
     }
 

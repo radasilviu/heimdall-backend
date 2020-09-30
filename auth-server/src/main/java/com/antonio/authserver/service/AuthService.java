@@ -1,16 +1,6 @@
 package com.antonio.authserver.service;
 
-import java.util.*;
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.AppUserDto;
-import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.CustomException;
@@ -20,8 +10,18 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.*;
 
 @Service
+@Transactional
 public class AuthService {
 
     private BCryptPasswordEncoder passwordEncoder;
@@ -86,7 +86,7 @@ public class AuthService {
         final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
                 SecurityConstants.TOKEN_SECRET);
         final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime,
-                refreshTokenExpirationTime);
+                refreshTokenExpirationTime, user.getIdentityProvider().getProvider());
 
         setJwtToUserAndSave(user, accessToken, refreshToken);
 
@@ -147,7 +147,7 @@ public class AuthService {
         final String refreshToken = generateRefreshToken();
 
         JwtObject jwtObject = new JwtObject(appUserDto.getUsername(), accessToken, refreshToken, tokenExpirationTime,
-                refreshTokenExpirationTime);
+                refreshTokenExpirationTime, appUserDto.getIdentityProvider().getProvider());
 
         return jwtObject;
     }

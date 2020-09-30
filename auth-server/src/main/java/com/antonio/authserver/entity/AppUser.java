@@ -41,6 +41,7 @@ public class AppUser {
     private Set<Role> roles = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id")
     private IdentityProvider identityProvider;
 
     public AppUser() {
@@ -48,12 +49,13 @@ public class AppUser {
     }
 
     public AppUser(String username, String password, Set<Role> roles, String email, Boolean isActivated,
-                   String emailCode) {
+                   String emailCode, IdentityProvider identityProvider) {
         this.username = username;
         this.password = password;
         this.roles = roles;
         this.email = email;
         this.isActivated = isActivated;
         this.emailCode = emailCode;
+        this.identityProvider = identityProvider;
     }
 }
