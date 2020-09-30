@@ -30,7 +30,7 @@ public class ClientService {
 
 	public ClientDto getClientBySecretAndNameWithRealm(String realmName, String clientName, String clientSecret) {
 		Client client = clientRepository.findByClientNameAndClientSecretAndRealmName(clientName, clientSecret, realmName);
-		return ClientMapper.INSTANCE.toClientDto(client);
+		return clientMapper.toClientDto(client);
 	}
 
 	public ClientDto getClientByName(String clientName) throws CustomException {

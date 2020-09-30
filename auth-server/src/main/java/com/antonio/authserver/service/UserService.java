@@ -36,7 +36,7 @@ public class UserService {
 	}
 
 	public List<AppUserDto> getAllUsers() {
-		return AppUserMapper.INSTANCE.toAppUserDtoList(appUserRepository.findAll());
+		return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
 	}
 
 	public AppUserDto getUserByUsername(String username) throws CustomException {
