@@ -119,7 +119,7 @@ class RoleServiceTest {
         Assert.assertEquals(role.getName(),found.getName());
     }
     @Test
-    void withGivenName_shouldReturnRoleNotFound(){
+    void withGivenName_shouldReturnRoleNotFoundException(){
         when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
         CustomException exception = assertThrows(CustomException.class,() -> roleService.findRoleByNameDAO("Dummy"));
         assertTrue(exception.getMessage().contains("could not be found!"));
