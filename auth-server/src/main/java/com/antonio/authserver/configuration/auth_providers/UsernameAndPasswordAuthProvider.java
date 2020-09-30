@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -31,7 +30,7 @@ public class UsernameAndPasswordAuthProvider implements AuthenticationProvider {
 
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new CustomException("The password "+ password +" is incorrect!", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Invalid Credentials", HttpStatus.UNAUTHORIZED);
         }
 
 

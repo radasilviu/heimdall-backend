@@ -133,7 +133,7 @@ public class UserService {
 		AppUserDto userDto = AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
 
 		if (!passwordEncoder.matches(password, userDto.getPassword())) {
-			throw new CustomException("Password [" + password + "] is wrong.", HttpStatus.UNAUTHORIZED);
+			throw new CustomException("Invalid Credentials", HttpStatus.UNAUTHORIZED);
 		}
 
 		return userDto;
