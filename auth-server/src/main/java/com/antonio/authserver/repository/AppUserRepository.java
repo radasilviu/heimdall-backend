@@ -30,4 +30,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByEmail(String email);
 
     Optional<AppUser> findByEmailAndForgotPasswordCode(String email, String forgotPasswordCode);
+
+    Optional<AppUser> findByUsernameAndRealmName(String username, String realmName);
 }
