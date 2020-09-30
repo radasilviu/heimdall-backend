@@ -4,9 +4,6 @@ import com.antonio.authserver.configuration.auth_providers.UsernameAndPasswordAu
 import com.antonio.authserver.configuration.filters.JwtTokenVerifier;
 import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
 import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
-import com.antonio.authserver.model.oauth.OAuth2CustomUser;
-import com.antonio.authserver.model.oauth.handlers.OAuth2FailureHandler;
-import com.antonio.authserver.model.oauth.handlers.OAuth2SuccessHandler;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +45,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    private OAuth2SuccessHandler oAuth2SuccessHandler;
-
-    @Autowired
-    private OAuth2FailureHandler oAuth2FailureHandler;
-
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
@@ -69,11 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
                     .addFilterAfter(new JwtTokenVerifier(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
-                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                    .oauth2Login()
-                        .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(oAuth2FailureHandler);
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         /// @formatter:on
     }
 

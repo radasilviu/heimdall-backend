@@ -8,7 +8,4 @@ import lombok.Setter;
 public class IdentityProviderDto {
 
     private String provider;
-
-    private String username;
-
 }

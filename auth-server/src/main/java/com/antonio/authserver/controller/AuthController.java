@@ -1,32 +1,27 @@
 package com.antonio.authserver.controller;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.antonio.authserver.request.ForgotPasswordRequest;
-import com.antonio.authserver.request.ChangePasswordRequest;
-import com.antonio.authserver.utils.SecurityConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.LoginCredential;
 import com.antonio.authserver.model.ResponseMessage;
+import com.antonio.authserver.model.oauth.OAuthSocialUser;
+import com.antonio.authserver.request.ChangePasswordRequest;
 import com.antonio.authserver.request.ClientLoginRequest;
+import com.antonio.authserver.request.ForgotPasswordRequest;
 import com.antonio.authserver.service.AuthService;
 import com.antonio.authserver.service.EmailService;
+import com.antonio.authserver.service.OAuth2SocialService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.EmailUtility;
 import freemarker.template.TemplateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/oauth")
@@ -50,7 +45,6 @@ public class AuthController {
         final ResponseMessage responseMessage = new ResponseMessage("Failed to generate JWT Code");
         return ResponseEntity.unprocessableEntity().body(responseMessage);
     }
-
     @PostMapping(path = "/token")
     public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
         JwtObject jwtObject = authService.login(loginCredential);

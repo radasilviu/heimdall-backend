@@ -13,11 +13,10 @@ public interface IdentityProviderMapper {
 
     IdentityProviderMapper INSTANCE = Mappers.getMapper(IdentityProviderMapper.class);
 
-    @Mapping(source = "username", target = "user.username")
+    @Mapping(target = "users", ignore = true)
     IdentityProvider toIdentityProviderDao(IdentityProviderDto
                                                    identityProviderDto);
 
-    @Mapping(source = "user.username", target = "username")
     IdentityProviderDto toIdentityProviderDto(IdentityProvider identityProvider);
 
     List<IdentityProviderDto> toIdentityProviderDtoList(List<IdentityProvider> list);

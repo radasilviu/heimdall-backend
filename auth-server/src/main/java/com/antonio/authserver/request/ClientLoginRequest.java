@@ -37,4 +37,14 @@ public class ClientLoginRequest {
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
     }
+
+    public ClientLoginRequest() {
+    }
+
+    public ClientLoginRequest(String username, String password, String clientId, String clientSecret) {
+        this.username = username;
+        this.password = password;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+    }
 }

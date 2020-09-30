@@ -2,10 +2,10 @@ package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.IdentityProviderDto;
-import com.antonio.authserver.entity.IdentityProvider;
+import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.JwtObject;
-import com.antonio.authserver.model.oauth.AuthenticationProvider;
-import com.antonio.authserver.model.oauth.OAuth2CustomUser;
+import com.antonio.authserver.model.oauth.OAuthSocialUser;
+import com.antonio.authserver.request.ClientLoginRequest;
 import com.antonio.authserver.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,48 +20,14 @@ public class OAuth2SocialService {
 
 
     private UserService userService;
-    private JwtService jwtService;
     private IdentityProviderService identityProviderService;
 
     @Autowired
-    public OAuth2SocialService(UserService userService, JwtService jwtService, IdentityProviderService identityProviderService) {
+    public OAuth2SocialService(UserService userService, IdentityProviderService identityProviderService) {
         this.userService = userService;
-        this.jwtService = jwtService;
         this.identityProviderService = identityProviderService;
     }
 
-    public void registerSocialUser(OAuth2CustomUser oAuth2CustomUser) {
-
-        final AppUserDto appUserDto = createNewAppUser(oAuth2CustomUser);
-        AppUserDto savedAppUser = userService.createSocialUser(appUserDto);
-
-        final JwtObject jwtObject = generateNewToken(appUserDto.getUsername());
-        savedAppUser.setToken(jwtObject.getAccess_token());
-        savedAppUser.setRefreshToken(jwtObject.getRefresh_token());
-
-        userService.update(savedAppUser);
-    }
-
-    private AppUserDto createNewAppUser(OAuth2CustomUser oAuth2CustomUser) {
-
-        AppUserDto appUserDto = new AppUserDto();
-        appUserDto.setUsername(oAuth2CustomUser.getName());
-        appUserDto.setEmail(oAuth2CustomUser.getEmail());
-
-        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider("GOOGLE");
-        appUserDto.setIdentityProvider(identityProviderDto);
-
-        return appUserDto;
-    }
-
-
-    public void updateSocialUser(String email) {
-        final AppUserDto appUserDto = userService.findByEmail(email);
-
-        final JwtObject jwtObject = generateNewToken(appUserDto.getUsername());
-
-        updateNewTokensToUser(appUserDto, jwtObject.getAccess_token(), jwtObject.getRefresh_token());
-    }
 
     private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
 
@@ -74,21 +40,45 @@ public class OAuth2SocialService {
         userService.update(appUserDto);
     }
 
-
-    private JwtObject generateNewToken(String username) {
-        long tokenExpirationTime = getTokenExpirationTime();
-        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
-        final String accessToken = jwtService.createAccessToken(username, tokenExpirationTime, new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
-        final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime, SecurityConstants.TOKEN_SECRET);
-        final JwtObject jwtObject = new JwtObject(username, accessToken, refreshToken, tokenExpirationTime, refreshTokenExpirationTime);
-
-        return jwtObject;
-    }
-
-
     public boolean verifyIfUserExist(String email) {
         return userService.verifyIfUserExist(email);
     }
 
 
+    public Code getCode(OAuthSocialUser oAuthSocialUser) {
+
+        if (verifyIfUserExist(oAuthSocialUser.getEmail())) {
+            updateSocialUser(oAuthSocialUser.getEmail());
+        } else {
+            registerSocialUser(oAuthSocialUser);
+        }
+        return null;
+    }
+
+
+    private void updateSocialUser(String email) {
+        final AppUserDto appUserDto = userService.findByEmail(email);
+
+    }
+
+    private void registerSocialUser(OAuthSocialUser oAuthSocialUser) {
+
+        final AppUserDto appUserDto = createNewAppUser(oAuthSocialUser);
+        AppUserDto savedAppUser = userService.createSocialUser(appUserDto);
+
+
+        userService.update(savedAppUser);
+    }
+
+    private AppUserDto createNewAppUser(OAuthSocialUser oAuthSocialUser) {
+
+        AppUserDto appUserDto = new AppUserDto();
+        appUserDto.setUsername(oAuthSocialUser.getName());
+        appUserDto.setEmail(oAuthSocialUser.getEmail());
+
+        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider("GOOGLE");
+        appUserDto.setIdentityProvider(identityProviderDto);
+
+        return appUserDto;
+    }
 }

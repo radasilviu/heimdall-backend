@@ -69,7 +69,7 @@ public class AuthService {
 	private void verifyClientCredential(String currentPassword, String storedPassword) {
 
 		if (!passwordEncoder.matches(currentPassword, storedPassword)) {
-			throw new CustomException("Password " + currentPassword + " is wrong.", HttpStatus.UNAUTHORIZED);
+			throw new CustomException("Client has not permission to use the authorization server", HttpStatus.UNAUTHORIZED);
 		}
 	}
 
