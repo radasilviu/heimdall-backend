@@ -39,17 +39,21 @@ public class AppUser {
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 
+	@ManyToOne
+	private Realm realm;
+
 	public AppUser() {
 
 	}
 
 	public AppUser(String username, String password, Set<Role> roles, String email, Boolean isActivated,
-			String emailCode) {
+			String emailCode, Realm realm) {
 		this.username = username;
 		this.password = password;
 		this.roles = roles;
 		this.email = email;
 		this.isActivated = isActivated;
 		this.emailCode = emailCode;
+		this.realm = realm;
 	}
 }
