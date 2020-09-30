@@ -3,11 +3,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.service.EmailService;
 @Controller
-@RequestMapping("/oauth")
 public class EmailController {
 	private EmailService emailService;
 	@Autowired
@@ -15,11 +14,16 @@ public class EmailController {
 		this.emailService = emailService;
 	}
 
-	@GetMapping("/activate")
+	@GetMapping("/oauth/activate")
 	public String activateAccount(@Param("emailCode") String emailCode) {
 		AppUserDto appUserDto = emailService.verifyAndActivateEmailCode(emailCode);
 		Boolean activated = appUserDto.getIsActivated();
 
 		return activated ? "activate_success" : "activate_fail";
+	}
+	@GetMapping("favicon.ico")
+	@ResponseBody
+	void returnNoFavicon() {
+
 	}
 }

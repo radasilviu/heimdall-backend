@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,7 @@ import com.antonio.authserver.configuration.emailconfig.EmailProperties;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.mapper.AppUserMapper;
-import com.antonio.authserver.model.exceptions.controllerexceptions.UserAccountIsAlreadyActivated;
-import com.antonio.authserver.model.exceptions.controllerexceptions.UserNotFound;
+import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -40,15 +40,7 @@ public class EmailService {
 	public void sendActivationEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/oauth/activate?emailCode=" + appUserDto.getEmailCode();
-		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-
-		Properties props = new Properties();
-		props.put("mail.smtp.starttls.enable", "true");
-		javaMailSender.setJavaMailProperties(props);
-		javaMailSender.setHost(emailProperties.getHost());
-		javaMailSender.setPort(emailProperties.getPort());
-		javaMailSender.setUsername(emailProperties.getUsername());
-		javaMailSender.setPassword(emailProperties.getPassword());
+		JavaMailSenderImpl javaMailSender = configureMailSender();
 
 		MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -65,14 +57,17 @@ public class EmailService {
 		helper.setTo(appUserDto.getEmail()); // !!! IMPORTANT CHANGE
 		helper.setText(htmlBody, true);
 		helper.setSubject("Activate your account");
-		helper.setFrom("heimdallteam0@gmail.com");
+		helper.setFrom(emailProperties.getUsername());
 		javaMailSender.send(message);
 	}
 
-	public AppUserDto verifyAndActivateEmailCode(String emailCode) {
-		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new UserNotFound("Unknown"));
+	public AppUserDto verifyAndActivateEmailCode(String emailCode) throws CustomException {
+		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new CustomException(
+				"User with the emailCode [ " + emailCode + " ] could not be found!", HttpStatus.NOT_FOUND));
 		if (appUser.getIsActivated()) {
-			throw new UserAccountIsAlreadyActivated(appUser.getUsername());
+			throw new CustomException(
+					"User account with the username " + appUser.getUsername() + " has been already activated.",
+					HttpStatus.CONFLICT);
 		} else {
 			appUser.setIsActivated(true);
 			return appUserMapper.toAppUserDto(appUser);
