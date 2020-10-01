@@ -1,11 +1,11 @@
 package com.antonio.authserver.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "app_user")
@@ -40,6 +40,9 @@ public class AppUser {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @ManyToOne
+    private Realm realm;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id")
     private IdentityProvider identityProvider;
@@ -49,13 +52,14 @@ public class AppUser {
     }
 
     public AppUser(String username, String password, Set<Role> roles, String email, Boolean isActivated,
-                   String emailCode, IdentityProvider identityProvider) {
+                   String emailCode, Realm realm, IdentityProvider identityProvider) {
         this.username = username;
         this.password = password;
         this.roles = roles;
         this.email = email;
         this.isActivated = isActivated;
         this.emailCode = emailCode;
+        this.realm = realm;
         this.identityProvider = identityProvider;
     }
 }

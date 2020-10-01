@@ -1,19 +1,23 @@
 package com.antonio.authserver.configuration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.transaction.Transactional;
 
-import com.antonio.authserver.entity.*;
-import com.antonio.authserver.repository.*;
-import lombok.extern.log4j.Log4j2;
+import com.antonio.authserver.entity.Realm;
+import com.antonio.authserver.repository.RealmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.Id;
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Client;
+import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.repository.AppUserRepository;
+import com.antonio.authserver.repository.ClientRepository;
+import com.antonio.authserver.repository.RoleRepository;
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
@@ -43,6 +47,16 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         // for demo purpose
         if (roleRepository.findAll().size() == 0) {
 
+            List<Realm> realms = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                Realm realm = new Realm();
+                realm.setName("master" + i);
+                realm.setDisplayName("Master " + i);
+                realm.setEnabled(true);
+                realms.add(realm);
+            }
+            realms = realmRepository.saveAll(realms);
+
             final IdentityProvider google = new IdentityProvider("GOOGLE");
             final IdentityProvider usernameAndPassword = new IdentityProvider("USERNAME_AND_PASSWORD");
             List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
@@ -51,9 +65,9 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER"));
             roleRepository.saveAll(roleList);
 
-            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, usernameAndPassword);
-            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
-            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
+            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null,realms.get(0), usernameAndPassword);
+            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null,realms.get(0), usernameAndPassword);
+            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null,realms.get(0), usernameAndPassword);
             AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, usernameAndPassword);
             appUserRepository.save(user);
             appUserRepository.save(admin);

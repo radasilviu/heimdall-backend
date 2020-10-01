@@ -75,8 +75,8 @@ public class UserController {
 	}
 
 	@PostMapping("/{username}/addRole")
-	public void addRoleToUser(@PathVariable String username, @RequestBody RoleDto role) {
-		Role newRole = roleService.findRoleByNameDAO(role.getName());
+	public void addRoleToUser(@PathVariable String username, @RequestBody String roleName) {
+		Role newRole = roleService.findRoleByNameDAO(roleName);
 		userService.addRole(username, newRole);
 	}
 
@@ -86,8 +86,8 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{username}/removeRole")
-	public void removeRoleFromUser(@PathVariable String username, @RequestBody RoleDto role) {
-		Role newRole = roleService.findRoleByNameDAO(role.getName());
+	public void removeRoleFromUser(@PathVariable String username, @RequestBody String roleName) {
+		Role newRole = roleService.findRoleByNameDAO(roleName);
 		userService.removeRole(username, newRole);
 
 	}
