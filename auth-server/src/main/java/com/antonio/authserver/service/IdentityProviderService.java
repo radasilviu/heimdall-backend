@@ -15,9 +15,14 @@ import java.util.Optional;
 public class IdentityProviderService {
 
 
-    @Autowired
     private IdentityProviderRepository identityProviderRepository;
+    private IdentityProviderMapper identityProviderMapper;
 
+    @Autowired
+    public IdentityProviderService(IdentityProviderRepository identityProviderRepository, IdentityProviderMapper identityProviderMapper) {
+        this.identityProviderRepository = identityProviderRepository;
+        this.identityProviderMapper = identityProviderMapper;
+    }
 
     public void saveIdentityProvider(IdentityProviderDto identityProviderDto) {
         Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProviderDto.getProvider());
@@ -25,7 +30,7 @@ public class IdentityProviderService {
             throw new CustomException("Identity Provider [ " + identityProviderDto.getProvider() + " ] already exists!",
                     HttpStatus.CONFLICT);
         }
-        identityProviderRepository.save(IdentityProviderMapper.INSTANCE.toIdentityProviderDao(identityProviderDto));
+        identityProviderRepository.save(identityProviderMapper.toIdentityProviderDao(identityProviderDto));
     }
 
     public void updateIdentityProvider(IdentityProviderDto identityProviderDto) {
@@ -37,13 +42,13 @@ public class IdentityProviderService {
         if (identityProviderDto.getProvider().equals(""))
             throw new CustomException("The inserted provider cannot be null!", HttpStatus.BAD_REQUEST);
 
-        identityProviderRepository.save(IdentityProviderMapper.INSTANCE.toIdentityProviderDao(identityProviderDto));
+        identityProviderRepository.save(identityProviderMapper.toIdentityProviderDao(identityProviderDto));
     }
 
     public IdentityProviderDto findByProvider(String provider) {
         final IdentityProvider identityProvider = identityProviderRepository.findByProvider(provider).orElseThrow(() ->
                 new CustomException("Identity Provider [ " + provider + " ] not found!", HttpStatus.NOT_FOUND));
 
-        return IdentityProviderMapper.INSTANCE.toIdentityProviderDto(identityProvider);
+        return identityProviderMapper.toIdentityProviderDto(identityProvider);
     }
 }

@@ -191,7 +191,7 @@ public class UserService {
             String randomCode = RandomString.make(64);
             appUserDto.setEmailCode(randomCode);
             appUserDto.setIsActivated(false);
-            appUserRepository.save(AppUserMapper.INSTANCE.toAppUserDao(appUserDto));
+            appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
 
         }
 
@@ -209,6 +209,6 @@ public class UserService {
             throw new CustomException("User with the email [ " + email + " ] could not be found!", HttpStatus.NOT_FOUND);
         }
 
-        return AppUserMapper.INSTANCE.toAppUserDto(userOptional.get());
+        return appUserMapper.toAppUserDto(userOptional.get());
     }
 }
