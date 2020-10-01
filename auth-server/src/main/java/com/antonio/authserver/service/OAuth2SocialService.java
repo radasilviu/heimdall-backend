@@ -4,6 +4,7 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.oauth.OAuthSocialUser;
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,17 +26,13 @@ public class OAuth2SocialService {
         this.clientService = clientService;
     }
 
-    public boolean verifyIfUserExist(String email) {
-        return userService.verifyIfUserExist(email);
-    }
-
 
     public Code getCode(OAuthSocialUser oAuthSocialUser) {
 
         verifyClientCredentials(oAuthSocialUser);
 
         AppUserDto appUserDto;
-        if (verifyIfUserExist(oAuthSocialUser.getEmail())) {
+        if (userService.verifyIfUserExist(oAuthSocialUser.getEmail())) {
             appUserDto = updateSocialUser(oAuthSocialUser);
         } else {
             appUserDto = registerSocialUser(oAuthSocialUser);
