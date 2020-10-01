@@ -1,5 +1,6 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.configuration.constants.ErrorMessage;
 import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.IdentityProviderRepository;
@@ -23,27 +24,27 @@ public class IdentityProviderService {
     public void saveIdentityProvider(IdentityProvider identityProvider) {
         Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProvider.getProvider());
         if (optionalIdentityProvider.isPresent()) {
-            throw new CustomException("Identity Provider [ " + identityProvider.getProvider() + " ] already exists!",
-                    HttpStatus.CONFLICT);
+            throw new CustomException(ErrorMessage.IDENTITY_PROVIDER_EXIST.getMessage(), HttpStatus.CONFLICT);
         }
         identityProviderRepository.save(identityProvider);
     }
 
-    public void updateIdentityProvider(IdentityProvider identityProvider) {
-        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProvider.getProvider());
+    public void updateIdentityProvider(IdentityProvider identityProvider, String beforeUpdateProviderName) {
+        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(beforeUpdateProviderName);
         if (!optionalIdentityProvider.isPresent()) {
-            throw new CustomException("Identity Provider [ " + identityProvider.getProvider() + " ] not found!",
+            throw new CustomException(ErrorMessage.IDENTITY_PROVIDER_NOT_FOUND.getMessage(),
                     HttpStatus.NOT_FOUND);
         }
         if (identityProvider.getProvider().equals(""))
-            throw new CustomException("The inserted provider cannot be null!", HttpStatus.BAD_REQUEST);
+            throw new CustomException(ErrorMessage.IDENTITY_PROVIDER_NOT_NULL.getMessage(), HttpStatus.BAD_REQUEST);
 
         identityProviderRepository.save(identityProvider);
     }
 
     public IdentityProvider findByProvider(String provider) {
         final IdentityProvider identityProvider = identityProviderRepository.findByProvider(provider).orElseThrow(() ->
-                new CustomException("Identity Provider [ " + provider + " ] not found!", HttpStatus.NOT_FOUND));
+                new CustomException(ErrorMessage.IDENTITY_PROVIDER_NOT_FOUND.getMessage(),
+                        HttpStatus.NOT_FOUND));
 
         return identityProvider;
     }
