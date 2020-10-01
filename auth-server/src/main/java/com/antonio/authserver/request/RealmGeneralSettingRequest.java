@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RealmGeneralSettingRequest {
-    private Long id;
 
     private String name;
 

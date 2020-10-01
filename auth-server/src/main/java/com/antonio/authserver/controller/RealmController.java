@@ -55,6 +55,7 @@ public class RealmController {
 
     @PutMapping("/general-update")
     public RealmDto generalSettingUpdate(@RequestBody final RealmGeneralSettingRequest realm) {
+        System.out.println(realm.getName());
         return realmService.updateGeneralSettings(realm);
     }
 

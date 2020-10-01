@@ -28,19 +28,23 @@ public class RealmService {
         this.realmMapper = realmMapper;
     }
     public RealmDto updateGeneralSettings(RealmGeneralSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findByName(realm.getName());
-        temp.get().setName(realm.getName());
-        temp.get().setDisplayName(realm.getDisplayName());
-        temp.get().setEnabled(realm.isEnabled());
+        Realm temp = realmRepository.findByName(realm.getName()).orElseThrow(() -> new CustomException("Realm with the name [" + realm.getDisplayName() + "] could not be found!",HttpStatus.NOT_FOUND));
+        temp.setName(realm.getName());
+        System.out.println(temp.getName());
+        temp.setDisplayName(realm.getDisplayName());
+        System.out.println(temp.getDisplayName());
+        temp.setEnabled(realm.isEnabled());
+        System.out.println(temp.isEnabled());
 
-        return realmMapper.toRealmDto(realmRepository.save(temp.get()));
+        realmRepository.save(temp);
+        return realmMapper.toRealmDto(temp);
     }
 
     public RealmDto updateLoginSettings(RealmLoginSettingRequest realm) {
         Optional<Realm> temp = realmRepository.findByName(realm.getName());
         temp.get().setUserRegistration(realm.isUserRegistration());
         temp.get().setEditUsername(realm.isEditUsername());
-        temp.get().setForgotPassword(realm.isForgotUsername());
+        temp.get().setForgotPassword(realm.isForgotPassword());
         temp.get().setRememberMe(realm.isRememberMe());
         temp.get().setVerifyEmail(realm.isVerifyEmail());
         temp.get().setLoginWithEmail(realm.isLoginWithEmail());

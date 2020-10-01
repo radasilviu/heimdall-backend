@@ -15,7 +15,7 @@ public class RealmLoginSettingRequest {
 
     private boolean editUsername;
 
-    private boolean forgotUsername;
+    private boolean forgotPassword;
 
     private boolean rememberMe;
 
