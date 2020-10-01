@@ -1,7 +1,8 @@
 package com.antonio.authserver.configuration.constants;
 
 public enum ErrorMessage {
-    INVALID_CREDENTIALS("Invalid credentials");
+    INVALID_CREDENTIALS("Invalid credentials"),
+    INVALID_CLIENT("Client  is invalid");
 
     private final String message;
 

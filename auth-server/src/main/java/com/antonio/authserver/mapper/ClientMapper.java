@@ -12,8 +12,6 @@ import com.antonio.authserver.entity.Client;
 @Mapper(componentModel = "spring",injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ClientMapper {
 
-    ClientMapper INSTANCE = Mappers.getMapper(ClientMapper.class);
-
     Client toClientDao(ClientDto clientDto);
     ClientDto toClientDto(Client client);
     List<ClientDto> toClientDtoList(List<Client> list);

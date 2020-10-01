@@ -70,7 +70,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     }
 
     private String extractToken(String authorizationHeader, String key) {
-        return authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, "");
+        return authorizationHeader.replace(key, "");
     }
 
     private AppUserDto extractUserFromToken(String token) {
@@ -83,7 +83,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private void verifyToken(String currentToken, String userToken) {
         if (!currentToken.equals(userToken)) {
-            throw new CustomException("The token " + currentToken +" could not be found!",HttpStatus.NOT_FOUND);
+            throw new CustomException("The token " + currentToken + " could not be found!", HttpStatus.NOT_FOUND);
         }
     }
 
