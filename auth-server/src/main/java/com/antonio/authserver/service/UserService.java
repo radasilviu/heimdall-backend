@@ -141,6 +141,16 @@ public class UserService {
 		return userDto;
 	}
 
+	public AppUserDto findByUsernameAndRealmName(String username, String realm) {
+		Optional<AppUser> user = appUserRepository.findByUsernameAndRealmName(username, realm);
+
+		if (!user.isPresent()) {
+			throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		AppUserDto userDto = appUserMapper.toAppUserDto(user.get());
+		return userDto;
+	}
+
 	public void verifyUserCode(String code) {
 
 		AppUser appUser = appUserRepository.findByCode(code).orElseThrow(

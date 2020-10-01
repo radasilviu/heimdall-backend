@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/admin/realm")
+@RequestMapping("api")
 @CrossOrigin
 public class RealmController {
 
@@ -21,18 +21,23 @@ public class RealmController {
     @Autowired
     private RealmService realmService;
 
-    @GetMapping("/list")
+    @GetMapping("/admin/realm/list")
     public List<Realm> list() {
         return realmRepository.findAll();
     }
 
-    @PutMapping("/general-update")
+    @PutMapping("/admin/realm/general-update")
     public Realm generalSettingUpdate(@RequestBody final RealmGeneralSettingRequest realm) {
         return realmService.updateGeneralSettings(realm);
     }
 
-    @PutMapping("/login-update")
+    @PutMapping("/admin/realm/login-update")
     public Realm loginSettingUpdate(@RequestBody final RealmLoginSettingRequest realm) {
         return realmService.updateLoginSettings(realm);
+    }
+
+    @GetMapping("/realm/check/{realm}")
+    public Realm checkRealmExists(@PathVariable final String realm) {
+        return realmService.getRealmByName(realm);
     }
 }

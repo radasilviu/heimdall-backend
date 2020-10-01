@@ -6,10 +6,9 @@ import java.util.List;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {RoleMapper.class},injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = {RoleMapper.class, RealmMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AppUserMapper {
 
 	AppUserMapper INSTANCE = Mappers.getMapper(AppUserMapper.class);

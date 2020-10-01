@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.antonio.authserver.request.ForgotPasswordRequest;
 import com.antonio.authserver.request.ChangePasswordRequest;
+import com.antonio.authserver.request.ProfileLoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -89,5 +90,17 @@ public class AuthController {
 		this.authService.changePassword(request.getPassword(), request.getConfirmPassword(), request.getEmail(), request.getForgotPasswordCode());
 		final ResponseMessage responseMessage = new ResponseMessage("Password change");
 		return ResponseEntity.ok().body(responseMessage);
+	}
+
+	@PostMapping(path = "/user-profile/login")
+	public ResponseEntity<?> profileLogin(@RequestBody ProfileLoginRequest profileLoginRequest) {
+		JwtObject jwt = authService.profileLogin(profileLoginRequest.getUsername(), profileLoginRequest.getPassword(),
+				profileLoginRequest.getRealm());
+
+		if (jwt != null) {
+			return ResponseEntity.ok().body(jwt);
+		}
+		final ResponseMessage responseMessage = new ResponseMessage("Failed to generate JWT Code");
+		return ResponseEntity.unprocessableEntity().body(responseMessage);
 	}
 }

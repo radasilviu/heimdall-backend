@@ -1,7 +1,8 @@
 package com.antonio.authserver.configuration.constants;
 
 public enum ErrorMessage {
-    INVALID_CREDENTIALS("Invalid credentials");
+    INVALID_CREDENTIALS("Invalid credentials"),
+    REALM_NOT_FOUND("Realm not found");
 
     private final String message;
 

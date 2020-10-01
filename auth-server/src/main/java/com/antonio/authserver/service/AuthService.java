@@ -22,6 +22,7 @@ import com.antonio.authserver.utils.SecurityConstants;
 import io.jsonwebtoken.Claims;
 
 @Service
+@Transactional
 public class AuthService {
 
 	private BCryptPasswordEncoder passwordEncoder;
@@ -255,4 +256,22 @@ public class AuthService {
 		appUserRepository.save(user.get());
 	}
 
+	public JwtObject profileLogin(String username, String password, String realm) {
+		AppUserDto user = userService.findByUsernameAndRealmName(username, realm);
+		verifyClientCredential(password, user.getPassword());
+
+		long tokenExpirationTime = getTokenExpirationTime();
+		long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+
+		final String accessToken = jwtService.createAccessToken(user.getUsername(), tokenExpirationTime,
+				new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
+		final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
+				SecurityConstants.TOKEN_SECRET);
+		final JwtObject jwtObject = new JwtObject(user.getUsername(), accessToken, refreshToken, tokenExpirationTime,
+				refreshTokenExpirationTime);
+
+		setJwtToUserAndSave(user, accessToken, refreshToken);
+
+		return jwtObject;
+	}
 }

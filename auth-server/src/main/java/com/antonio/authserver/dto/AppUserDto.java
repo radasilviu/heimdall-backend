@@ -2,6 +2,7 @@ package com.antonio.authserver.dto;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.entity.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class AppUserDto {
 	private String email;
 	private Boolean isActivated;
 	private String emailCode;
+	private Realm realm;
 
 	@Override
 	public String toString() {
