@@ -38,15 +38,16 @@ public class RealmService {
     }
 
     public RealmDto updateLoginSettings(RealmLoginSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findByName(realm.getName());
-        temp.get().setUserRegistration(realm.isUserRegistration());
-        temp.get().setEditUsername(realm.isEditUsername());
-        temp.get().setForgotPassword(realm.isForgotPassword());
-        temp.get().setRememberMe(realm.isRememberMe());
-        temp.get().setVerifyEmail(realm.isVerifyEmail());
-        temp.get().setLoginWithEmail(realm.isLoginWithEmail());
+        Realm temp = realmRepository.findByName(realm.getName()).orElseThrow(() -> new CustomException("Realm with the name [" + realm.getName() + "] could not be found!",HttpStatus.NOT_FOUND));
+        temp.setUserRegistration(realm.isUserRegistration());
+        temp.setEditUsername(realm.isEditUsername());
+        temp.setForgotPassword(realm.isForgotPassword());
+        temp.setRememberMe(realm.isRememberMe());
+        temp.setVerifyEmail(realm.isVerifyEmail());
+        temp.setLoginWithEmail(realm.isLoginWithEmail());
 
-        return realmMapper.toRealmDto(realmRepository.save(temp.get()));
+        realmRepository.save(temp);
+        return realmMapper.toRealmDto(temp);
     }
 
     public List<RealmDto> getAllRealms(){
@@ -65,7 +66,7 @@ public class RealmService {
             throw new CustomException("Realm with the name [ " + realm.get().getDisplayName() + " ] already exists!",
                     HttpStatus.CONFLICT);
         else if (realmDto.getName().equals("")) {
-            throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
+            throw new CustomException("The inserted Realm cannot be null!", HttpStatus.BAD_REQUEST);
         } else {
             realmRepository.save(realmMapper.toRealmDao(realmDto));
         }
