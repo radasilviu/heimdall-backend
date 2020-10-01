@@ -12,4 +12,11 @@ public class RealmGeneralSettingRequest {
     private String displayName;
 
     private boolean enabled;
+    public RealmGeneralSettingRequest() {
+    }
+    public RealmGeneralSettingRequest(String name, String displayName, boolean enabled) {
+        this.name = name;
+        this.displayName = displayName;
+        this.enabled = enabled;
+    }
 }
