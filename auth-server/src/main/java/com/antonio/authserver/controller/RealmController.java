@@ -53,10 +53,9 @@ public class RealmController {
         return ResponseEntity.ok().body(responseMessage);
     }
 
-    @PutMapping("/general-update")
-    public RealmDto generalSettingUpdate(@RequestBody final RealmGeneralSettingRequest realm) {
-        System.out.println(realm.getName());
-        return realmService.updateGeneralSettings(realm);
+    @PutMapping("/general-update/{name}")
+    public RealmDto generalSettingUpdate(@PathVariable String name,@RequestBody final RealmGeneralSettingRequest realm) {
+        return realmService.updateGeneralSettings(name,realm);
     }
 
     @PutMapping("/login-update")

@@ -27,14 +27,11 @@ public class RealmService {
         this.realmRepository = realmRepository;
         this.realmMapper = realmMapper;
     }
-    public RealmDto updateGeneralSettings(RealmGeneralSettingRequest realm) {
-        Realm temp = realmRepository.findByName(realm.getName()).orElseThrow(() -> new CustomException("Realm with the name [" + realm.getDisplayName() + "] could not be found!",HttpStatus.NOT_FOUND));
+    public RealmDto updateGeneralSettings(String name,RealmGeneralSettingRequest realm) {
+        Realm temp = realmRepository.findByName(name).orElseThrow(() -> new CustomException("Realm with the name [" + name + "] could not be found!",HttpStatus.NOT_FOUND));
         temp.setName(realm.getName());
-        System.out.println(temp.getName());
         temp.setDisplayName(realm.getDisplayName());
-        System.out.println(temp.getDisplayName());
         temp.setEnabled(realm.isEnabled());
-        System.out.println(temp.isEnabled());
 
         realmRepository.save(temp);
         return realmMapper.toRealmDto(temp);
