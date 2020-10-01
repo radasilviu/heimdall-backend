@@ -26,6 +26,9 @@ services:
       - 8081:8081
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://ms:3306/heimdall?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      authorizationServerFrontedURL: http://localhost:4201
+      clientFrontedURL: http://localhost:4200
+      clientBackendURL: http://localhost:8080
     networks:
       - heimdallnetwork
 
