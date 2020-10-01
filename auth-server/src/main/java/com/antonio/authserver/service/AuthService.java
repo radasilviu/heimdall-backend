@@ -52,7 +52,7 @@ public class AuthService {
 
 
     public Code getCode(ClientLoginRequest clientLoginRequest) {
-        clientService.validateClient(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret(), clientLoginRequest.getRealm());
+        clientService.getClientBySecretAndNameWithRealm(clientLoginRequest.getRealm(),clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
         final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getUsername(),
                 clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
 

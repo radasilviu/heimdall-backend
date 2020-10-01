@@ -72,15 +72,5 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             Client client = new Client("myClient", "clientPass", realms.get(0));
             clientRepository.save(client);
         }
-
-        List<Realm> realms = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Realm realm = new Realm();
-            realm.setName("master" + i);
-            realm.setDisplayName("Master " + i);
-            realm.setEnabled(true);
-            realms.add(realm);
-        }
-        realmRepository.saveAll(realms);
     }
 }

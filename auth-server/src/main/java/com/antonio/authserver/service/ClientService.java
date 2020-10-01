@@ -89,11 +89,6 @@ public class ClientService {
         return code;
     }
 
-    public void validateClient(String clientId, String clientSecret, String realm) {
-
-        final ClientDto client = getClientBySecretAndNameWithRealm(clientId, clientSecret, realm);
-
-    }
 
     private Code createOauthCode(AppUserDto user) {
         String jwtCode = generateTokenCode(user);

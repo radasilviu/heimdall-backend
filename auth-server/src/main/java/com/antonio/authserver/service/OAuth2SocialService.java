@@ -54,7 +54,7 @@ public class OAuth2SocialService {
     }
 
     private void verifyClientCredentials(OAuthSocialUser oAuthSocialUser) {
-        clientService.validateClient(oAuthSocialUser.getClientId(), oAuthSocialUser.getClientSecret(), oAuthSocialUser.getRealm());
+        clientService.getClientBySecretAndNameWithRealm(oAuthSocialUser.getRealm(), oAuthSocialUser.getClientId(), oAuthSocialUser.getClientSecret());
     }
 
 
