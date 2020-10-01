@@ -1,4 +1,5 @@
 package com.antonio.authserver.service;
+
 import java.util.Collection;
 import java.util.Date;
 
@@ -18,51 +19,60 @@ import javax.transaction.Transactional;
 @Transactional
 public class JwtService {
 
-	private Environment env;
-	private UserService userService;
+    private Environment env;
+    private UserService userService;
 
-	@Autowired
-	public JwtService(Environment env, UserService userService) {
-		this.env = env;
-		this.userService = userService;
-	}
+    @Autowired
+    public JwtService(Environment env, UserService userService) {
+        this.env = env;
+        this.userService = userService;
+    }
 
-	public String createAccessToken(String issuer, long expirationTime,
-			Collection<? extends GrantedAuthority> authorities, String secretKey) {
-		final AppUserDto userDto = userService.getUserByUsername(issuer);
+    public String createAccessToken(String issuer, long expirationTime,
+                                    Collection<? extends GrantedAuthority> authorities, String secretKey) {
+        final AppUserDto userDto = userService.getUserByUsername(issuer);
 
-		String token = buildToken(userDto.getUsername(), userDto.toString(), expirationTime, authorities, secretKey);
+        String token = buildToken(userDto.getUsername(), userDto.toString(), expirationTime, authorities, secretKey);
 
-		return token;
-	}
+        return token;
+    }
 
-	private String buildToken(String issuer, String subject, long expirationTime,
-			Collection<? extends GrantedAuthority> authorities, String secretKey) {
-		String token = Jwts.builder().setIssuer(issuer).setSubject(subject).claim("authorities", authorities)
-				.setExpiration(new Date(expirationTime)).signWith(SignatureAlgorithm.HS512, secretKey).compact();
 
-		return token;
-	}
+    public String createRefreshToken(Long expirationTime, String secretKey) {
 
-	public Claims decodeJWT(String jwt) {
-		Claims claims;
-		try {
-			claims = Jwts.parser().setSigningKey(SecurityConstants.TOKEN_SECRET).parseClaimsJws(jwt).getBody();
-		} catch (ExpiredJwtException e) {
-			throw new CustomException("Token [ " + jwt + " ] expired!", HttpStatus.UNAUTHORIZED);
-		} catch (JwtException ex) {
-			throw new CustomException("Token [ " + jwt + " ] can not be trusted", HttpStatus.UNAUTHORIZED);
-		}
+        String refreshToken = Jwts.builder().setExpiration(new Date(expirationTime))
+                .signWith(SignatureAlgorithm.HS512, secretKey).compact();
 
-		return claims;
-	}
+        return refreshToken;
 
-	public String createRefreshToken(Long expirationTime, String secretKey) {
+    }
 
-		String refreshToken = Jwts.builder().setExpiration(new Date(expirationTime))
-				.signWith(SignatureAlgorithm.HS512, secretKey).compact();
+    public Claims decodeJWT(String jwt) {
+        Claims claims;
+        try {
+            claims = Jwts.parser().setSigningKey(SecurityConstants.TOKEN_SECRET).parseClaimsJws(jwt).getBody();
+        } catch (ExpiredJwtException e) {
+            throw new CustomException("Token [ " + jwt + " ] expired!", HttpStatus.UNAUTHORIZED);
+        } catch (JwtException ex) {
+            throw new CustomException("Token [ " + jwt + " ] can not be trusted", HttpStatus.UNAUTHORIZED);
+        }
 
-		return refreshToken;
+        return claims;
+    }
 
-	}
+    public Long getTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
+    }
+
+    public Long getRefreshTokenExpirationTime() {
+        return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
+    }
+
+    private String buildToken(String issuer, String subject, long expirationTime,
+                              Collection<? extends GrantedAuthority> authorities, String secretKey) {
+        String token = Jwts.builder().setIssuer(issuer).setSubject(subject).claim("authorities", authorities)
+                .setExpiration(new Date(expirationTime)).signWith(SignatureAlgorithm.HS512, secretKey).compact();
+
+        return token;
+    }
 }

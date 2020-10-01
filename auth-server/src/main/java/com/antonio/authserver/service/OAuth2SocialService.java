@@ -1,7 +1,7 @@
 package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.AppUserDto;
-import com.antonio.authserver.dto.IdentityProviderDto;
+import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.model.Code;
 import com.antonio.authserver.model.oauth.OAuthSocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +54,14 @@ public class OAuth2SocialService {
     }
 
     private void verifyClientCredentials(OAuthSocialUser oAuthSocialUser) {
-        clientService.validateClient(oAuthSocialUser.getClientId(), oAuthSocialUser.getClientSecret());
+        clientService.validateClient(oAuthSocialUser.getClientId(), oAuthSocialUser.getClientSecret(), oAuthSocialUser.getRealm());
     }
 
 
     private AppUserDto updateSocialUser(OAuthSocialUser oAuthSocialUser) {
         final AppUserDto appUserDto = userService.findByEmail(oAuthSocialUser.getEmail());
-        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider(oAuthSocialUser.getProvider());
-        appUserDto.setIdentityProvider(identityProviderDto);
+        final IdentityProvider identityProvider = identityProviderService.findByProvider(oAuthSocialUser.getProvider());
+        appUserDto.setIdentityProvider(identityProvider);
         return userService.update(appUserDto);
     }
 
@@ -80,8 +80,8 @@ public class OAuth2SocialService {
         appUserDto.setUsername(oAuthSocialUser.getName());
         appUserDto.setEmail(oAuthSocialUser.getEmail());
 
-        final IdentityProviderDto identityProviderDto = identityProviderService.findByProvider(oAuthSocialUser.getProvider());
-        appUserDto.setIdentityProvider(identityProviderDto);
+        final IdentityProvider identityProvider = identityProviderService.findByProvider(oAuthSocialUser.getProvider());
+        appUserDto.setIdentityProvider(identityProvider);
 
         return appUserDto;
     }

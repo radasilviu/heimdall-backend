@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {RoleMapper.class, IdentityProviderMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = {RoleMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AppUserMapper {
 
 

@@ -1,5 +1,6 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.configuration.constants.ErrorMessage;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
@@ -22,14 +23,12 @@ public class ClientService {
 
     private ClientRepository clientRepository;
     private JwtService jwtService;
-    private BCryptPasswordEncoder passwordEncoder;
     private ClientMapper clientMapper;
 
     @Autowired
-    public ClientService(ClientRepository clientRepository, JwtService jwtService, BCryptPasswordEncoder passwordEncoder, ClientMapper clientMapper) {
+    public ClientService(ClientRepository clientRepository, JwtService jwtService, ClientMapper clientMapper) {
         this.clientRepository = clientRepository;
         this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
         this.clientMapper = clientMapper;
     }
 
@@ -39,7 +38,8 @@ public class ClientService {
     }
 
     public ClientDto getClientBySecretAndNameWithRealm(String realmName, String clientName, String clientSecret) {
-        Client client = clientRepository.findByClientNameAndClientSecretAndRealmName(clientName, clientSecret, realmName);
+        Client client = clientRepository.findByClientNameAndClientSecretAndRealmName(clientName, clientSecret, realmName).orElseThrow(() -> new CustomException(
+                ErrorMessage.INVALID_CLIENT.getMessage(), HttpStatus.NOT_FOUND));
         return clientMapper.toClientDto(client);
     }
 
@@ -89,18 +89,10 @@ public class ClientService {
         return code;
     }
 
-    public void validateClient(String clientId, String clientSecret) {
+    public void validateClient(String clientId, String clientSecret, String realm) {
 
-        final ClientDto client = getClientByName(clientId);
-        verifyClientCredential(clientSecret, client.getClientSecret());
+        final ClientDto client = getClientBySecretAndNameWithRealm(clientId, clientSecret, realm);
 
-    }
-
-    private void verifyClientCredential(String currentPassword, String storedPassword) {
-
-        if (!passwordEncoder.matches(currentPassword, storedPassword)) {
-            throw new CustomException("Client has not permission to use the authorization server", HttpStatus.UNAUTHORIZED);
-        }
     }
 
     private Code createOauthCode(AppUserDto user) {

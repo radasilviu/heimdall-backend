@@ -1,8 +1,6 @@
 package com.antonio.authserver.service;
 
-import com.antonio.authserver.dto.IdentityProviderDto;
 import com.antonio.authserver.entity.IdentityProvider;
-import com.antonio.authserver.mapper.IdentityProviderMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.IdentityProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,39 +14,37 @@ public class IdentityProviderService {
 
 
     private IdentityProviderRepository identityProviderRepository;
-    private IdentityProviderMapper identityProviderMapper;
 
     @Autowired
-    public IdentityProviderService(IdentityProviderRepository identityProviderRepository, IdentityProviderMapper identityProviderMapper) {
+    public IdentityProviderService(IdentityProviderRepository identityProviderRepository) {
         this.identityProviderRepository = identityProviderRepository;
-        this.identityProviderMapper = identityProviderMapper;
     }
 
-    public void saveIdentityProvider(IdentityProviderDto identityProviderDto) {
-        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProviderDto.getProvider());
+    public void saveIdentityProvider(IdentityProvider identityProvider) {
+        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProvider.getProvider());
         if (optionalIdentityProvider.isPresent()) {
-            throw new CustomException("Identity Provider [ " + identityProviderDto.getProvider() + " ] already exists!",
+            throw new CustomException("Identity Provider [ " + identityProvider.getProvider() + " ] already exists!",
                     HttpStatus.CONFLICT);
         }
-        identityProviderRepository.save(identityProviderMapper.toIdentityProviderDao(identityProviderDto));
+        identityProviderRepository.save(identityProvider);
     }
 
-    public void updateIdentityProvider(IdentityProviderDto identityProviderDto) {
-        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProviderDto.getProvider());
+    public void updateIdentityProvider(IdentityProvider identityProvider) {
+        Optional<IdentityProvider> optionalIdentityProvider = identityProviderRepository.findByProvider(identityProvider.getProvider());
         if (!optionalIdentityProvider.isPresent()) {
-            throw new CustomException("Identity Provider [ " + identityProviderDto.getProvider() + " ] not found!",
+            throw new CustomException("Identity Provider [ " + identityProvider.getProvider() + " ] not found!",
                     HttpStatus.NOT_FOUND);
         }
-        if (identityProviderDto.getProvider().equals(""))
+        if (identityProvider.getProvider().equals(""))
             throw new CustomException("The inserted provider cannot be null!", HttpStatus.BAD_REQUEST);
 
-        identityProviderRepository.save(identityProviderMapper.toIdentityProviderDao(identityProviderDto));
+        identityProviderRepository.save(identityProvider);
     }
 
-    public IdentityProviderDto findByProvider(String provider) {
+    public IdentityProvider findByProvider(String provider) {
         final IdentityProvider identityProvider = identityProviderRepository.findByProvider(provider).orElseThrow(() ->
                 new CustomException("Identity Provider [ " + provider + " ] not found!", HttpStatus.NOT_FOUND));
 
-        return identityProviderMapper.toIdentityProviderDto(identityProvider);
+        return identityProvider;
     }
 }

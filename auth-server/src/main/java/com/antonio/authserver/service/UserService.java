@@ -7,6 +7,7 @@ import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
+import com.antonio.authserver.repository.IdentityProviderRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +29,18 @@ public class UserService {
     private RoleRepository roleRepository;
     private BCryptPasswordEncoder passwordEncoder;
     private AppUserMapper appUserMapper;
+    private IdentityProviderRepository identityProviderRepository;
+
 
     @Autowired
-    public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository,
-                       BCryptPasswordEncoder passwordEncoder, AppUserMapper appUserMapper) {
+    public UserService(AppUserRepository appUserRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, AppUserMapper appUserMapper, IdentityProviderRepository identityProviderRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.appUserMapper = appUserMapper;
+        this.identityProviderRepository = identityProviderRepository;
     }
+
 
     public List<AppUserDto> getAllUsers() {
         return appUserMapper.toAppUserDtoList(appUserRepository.findAll());
@@ -191,7 +195,11 @@ public class UserService {
             String randomCode = RandomString.make(64);
             appUserDto.setEmailCode(randomCode);
             appUserDto.setIsActivated(false);
-            appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
+
+
+            final AppUser appUser = appUserMapper.toAppUserDao(appUserDto);
+
+            appUserRepository.save(appUser);
 
         }
 

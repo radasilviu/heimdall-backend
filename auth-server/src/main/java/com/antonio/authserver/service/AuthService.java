@@ -52,7 +52,7 @@ public class AuthService {
 
 
     public Code getCode(ClientLoginRequest clientLoginRequest) {
-        clientService.validateClient(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
+        clientService.validateClient(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret(), clientLoginRequest.getRealm());
         final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getUsername(),
                 clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
 
@@ -76,8 +76,8 @@ public class AuthService {
         Claims claims = jwtService.decodeJWT(code);
         final AppUserDto user = userService.getUserByUsername(claims.getIssuer());
 
-        long tokenExpirationTime = getTokenExpirationTime();
-        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+        long tokenExpirationTime = jwtService.getTokenExpirationTime();
+        long refreshTokenExpirationTime = jwtService.getRefreshTokenExpirationTime();
         final String accessToken = jwtService.createAccessToken(claims.getIssuer(), tokenExpirationTime,
                 new ArrayList<>(), SecurityConstants.TOKEN_SECRET);
         final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
@@ -137,8 +137,8 @@ public class AuthService {
 
     private JwtObject createNewJWtObject(AppUserDto appUserDto) {
 
-        long tokenExpirationTime = getTokenExpirationTime();
-        long refreshTokenExpirationTime = getRefreshTokenExpirationTime();
+        long tokenExpirationTime = jwtService.getTokenExpirationTime();
+        long refreshTokenExpirationTime = jwtService.getRefreshTokenExpirationTime();
         final String accessToken = generateAccessToken(appUserDto);
         final String refreshToken = generateRefreshToken();
 
@@ -158,7 +158,7 @@ public class AuthService {
 
     private String generateAccessToken(AppUserDto appUserDto) {
         final String issuer = appUserDto.getUsername();
-        long expirationTime = getTokenExpirationTime();
+        long expirationTime = jwtService.getTokenExpirationTime();
 
         String accessToken = jwtService.createAccessToken(issuer, expirationTime, new ArrayList<>(),
                 SecurityConstants.TOKEN_SECRET);
@@ -166,13 +166,7 @@ public class AuthService {
         return accessToken;
     }
 
-    private Long getTokenExpirationTime() {
-        return System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
-    }
 
-    private Long getRefreshTokenExpirationTime() {
-        return System.currentTimeMillis() + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
-    }
 
     public void sendForgotPasswordEmail(String email) {
         Optional<AppUser> user = appUserRepository.findByEmail(email);

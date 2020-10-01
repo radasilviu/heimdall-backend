@@ -22,5 +22,6 @@ public class OAuthSocialUser implements Serializable {
     private String provider;
     private String clientId;
     private String clientSecret;
+    private String realm;
 
 }
