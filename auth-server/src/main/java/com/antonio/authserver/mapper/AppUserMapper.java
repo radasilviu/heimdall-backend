@@ -2,12 +2,11 @@ package com.antonio.authserver.mapper;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
-import java.util.List;
-
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {RoleMapper.class},injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AppUserMapper {

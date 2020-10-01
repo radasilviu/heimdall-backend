@@ -13,7 +13,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,24 +39,22 @@ public class AuthService {
 
     @Autowired
     public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
-                       JwtService jwtService, Environment env, AuthenticationManager authenticationManager,
+                       JwtService jwtService, Environment env,
                        AppUserRepository appUserRepository, EmailService emailService) {
         this.passwordEncoder = passwordEncoder;
         this.clientService = clientService;
         this.userService = userService;
         this.jwtService = jwtService;
         this.env = env;
-        this.authenticationManager = authenticationManager;
         this.appUserRepository = appUserRepository;
         this.emailService = emailService;
     }
 
-    private final AuthenticationManager authenticationManager;
 
     public Code getCode(ClientLoginRequest clientLoginRequest) {
         clientService.validateClient(clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
-        final AppUserDto user = userService.findByUsernameAndPassword(clientLoginRequest.getUsername(),
-                clientLoginRequest.getPassword());
+        final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getUsername(),
+                clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
 
 
         Code code = clientService.generateCode(user);
@@ -121,7 +118,6 @@ public class AuthService {
         return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
     }
 
-    @Transactional
     public JwtObject generateNewAccessToken(JwtObject refreshToken) {
         final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
 
