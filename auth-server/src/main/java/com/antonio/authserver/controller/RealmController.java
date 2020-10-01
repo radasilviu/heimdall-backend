@@ -54,12 +54,12 @@ public class RealmController {
     }
 
     @PutMapping("/general-update")
-    public Realm generalSettingUpdate(@RequestBody final RealmGeneralSettingRequest realm) {
+    public RealmDto generalSettingUpdate(@RequestBody final RealmGeneralSettingRequest realm) {
         return realmService.updateGeneralSettings(realm);
     }
 
     @PutMapping("/login-update")
-    public Realm loginSettingUpdate(@RequestBody final RealmLoginSettingRequest realm) {
+    public RealmDto loginSettingUpdate(@RequestBody final RealmLoginSettingRequest realm) {
         return realmService.updateLoginSettings(realm);
     }
 }

@@ -27,17 +27,17 @@ public class RealmService {
         this.realmRepository = realmRepository;
         this.realmMapper = realmMapper;
     }
-    public Realm updateGeneralSettings(RealmGeneralSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findById(realm.getId());
+    public RealmDto updateGeneralSettings(RealmGeneralSettingRequest realm) {
+        Optional<Realm> temp = realmRepository.findByName(realm.getName());
         temp.get().setName(realm.getName());
         temp.get().setDisplayName(realm.getDisplayName());
         temp.get().setEnabled(realm.isEnabled());
 
-        return realmRepository.save(temp.get());
+        return realmMapper.toRealmDto(realmRepository.save(temp.get()));
     }
 
-    public Realm updateLoginSettings(RealmLoginSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findById(realm.getId());
+    public RealmDto updateLoginSettings(RealmLoginSettingRequest realm) {
+        Optional<Realm> temp = realmRepository.findByName(realm.getName());
         temp.get().setUserRegistration(realm.isUserRegistration());
         temp.get().setEditUsername(realm.isEditUsername());
         temp.get().setForgotPassword(realm.isForgotUsername());
@@ -45,7 +45,7 @@ public class RealmService {
         temp.get().setVerifyEmail(realm.isVerifyEmail());
         temp.get().setLoginWithEmail(realm.isLoginWithEmail());
 
-        return realmRepository.save(temp.get());
+        return realmMapper.toRealmDto(realmRepository.save(temp.get()));
     }
 
     public List<RealmDto> getAllRealms(){
@@ -61,7 +61,7 @@ public class RealmService {
         realmDto.setName(realmDto.getName().replaceAll("\\s+", ""));
         Optional<Realm> realm = realmRepository.findByName(realmDto.getName());
         if (realm.isPresent())
-            throw new CustomException("Realm with the name [ " + realm.get().getName() + " ] already exists!",
+            throw new CustomException("Realm with the name [ " + realm.get().getDisplayName() + " ] already exists!",
                     HttpStatus.CONFLICT);
         else if (realmDto.getName().equals("")) {
             throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
@@ -77,6 +77,7 @@ public class RealmService {
         if (realmDto.getName().equals(""))
             throw new CustomException("The inserted Realm cannot be null!", HttpStatus.BAD_REQUEST);
         realm.setName(realmDto.getName());
+        realm.setDisplayName(realmDto.getDisplayName());
         realmRepository.save(realm);
     }
     public void deleteRealmByName(String name){
