@@ -35,7 +35,7 @@ public class IdentityProviderService {
             throw new CustomException(ErrorMessage.IDENTITY_PROVIDER_NOT_FOUND.getMessage(),
                     HttpStatus.NOT_FOUND);
         }
-        if (identityProvider.getProvider().equals(""))
+        if (identityProvider.getProvider().isEmpty())
             throw new CustomException(ErrorMessage.IDENTITY_PROVIDER_NOT_NULL.getMessage(), HttpStatus.BAD_REQUEST);
 
         identityProviderRepository.save(identityProvider);
