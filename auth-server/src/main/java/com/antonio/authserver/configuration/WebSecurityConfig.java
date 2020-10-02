@@ -49,13 +49,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
         http.cors().configurationSource(corsConfigurationSource())
-                .and()
-                    .csrf()
-                    .disable()
-                .authorizeRequests()
-                    .antMatchers( "/oauth/**", "/admin/**", "/oauth2/**").permitAll()
-                    .antMatchers("/api/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                .and().csrf().disable().
+                authorizeRequests()
+                .antMatchers("/oauth/**", "/admin/**", "/api/**").permitAll()
+                .antMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
                 .and()
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()

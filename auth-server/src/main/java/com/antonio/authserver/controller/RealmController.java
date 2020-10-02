@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/admin/realm")
+@RequestMapping("api")
 @CrossOrigin
 public class RealmController {
 
@@ -61,5 +61,10 @@ public class RealmController {
     @PutMapping("/login-update")
     public RealmDto loginSettingUpdate(@RequestBody final RealmLoginSettingRequest realm) {
         return realmService.updateLoginSettings(realm);
+    }
+
+    @GetMapping("/realm/check/{realm}")
+    public Realm checkRealmExists(@PathVariable final String realm) {
+        return realmService.getRealmByName(realm);
     }
 }

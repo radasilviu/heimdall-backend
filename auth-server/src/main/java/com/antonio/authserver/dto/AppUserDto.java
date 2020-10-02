@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.entity.IdentityProvider;
 import com.antonio.authserver.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,6 +26,7 @@ public class AppUserDto implements Serializable {
     private String email;
     private Boolean isActivated;
     private String emailCode;
+    private Realm realm;
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private IdentityProvider identityProvider;
 
