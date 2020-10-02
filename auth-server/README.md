@@ -1,20 +1,20 @@
-### Docker Composer Steps
+## Docker Composer Steps
 
-## // Make sure you have the right application.properties setup for mysql ( this are default settings for docker ) 
+#### // Make sure you have the right application.properties setup for mysql ( this are default settings for docker ) 
     spring.datasource.username=root
     spring.datasource.password=password
 
-## // To generate jar files
+#### // To generate jar files
 
     mvn clean install 
 
-## // to build image for backend
+#### // to build image for backend
     
     docker build -t authserver . 
 
-## // create network 
+#### // create network 
 
     docker network create heimdallnetwork
 
-## // Compose your docker-compose file
+#### // Compose your docker-compose file
     docker-compose up
