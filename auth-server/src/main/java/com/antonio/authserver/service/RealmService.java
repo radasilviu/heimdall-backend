@@ -19,24 +19,26 @@ public class RealmService {
     private RealmRepository realmRepository;
 
     public Realm updateGeneralSettings(RealmGeneralSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findById(realm.getId());
-        temp.get().setName(realm.getName());
-        temp.get().setDisplayName(realm.getDisplayName());
-        temp.get().setEnabled(realm.isEnabled());
+        Realm temp = realmRepository.findById(realm.getId()).orElseThrow(
+                () -> new CustomException(ErrorMessage.REALM_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND));
+        temp.setName(realm.getName());
+        temp.setDisplayName(realm.getDisplayName());
+        temp.setEnabled(realm.isEnabled());
 
-        return realmRepository.save(temp.get());
+        return realmRepository.save(temp);
     }
 
     public Realm updateLoginSettings(RealmLoginSettingRequest realm) {
-        Optional<Realm> temp = realmRepository.findById(realm.getId());
-        temp.get().setUserRegistration(realm.isUserRegistration());
-        temp.get().setEditUsername(realm.isEditUsername());
-        temp.get().setForgotPassword(realm.isForgotUsername());
-        temp.get().setRememberMe(realm.isRememberMe());
-        temp.get().setVerifyEmail(realm.isVerifyEmail());
-        temp.get().setLoginWithEmail(realm.isLoginWithEmail());
+        Realm temp = realmRepository.findById(realm.getId()).orElseThrow(
+                () -> new CustomException(ErrorMessage.REALM_NOT_FOUND.getMessage(), HttpStatus.NOT_FOUND));
+        temp.setUserRegistration(realm.isUserRegistration());
+        temp.setEditUsername(realm.isEditUsername());
+        temp.setForgotPassword(realm.isForgotPassword());
+        temp.setRememberMe(realm.isRememberMe());
+        temp.setVerifyEmail(realm.isVerifyEmail());
+        temp.setLoginWithEmail(realm.isLoginWithEmail());
 
-        return realmRepository.save(temp.get());
+        return realmRepository.save(temp);
     }
 
     public Realm getRealmByName(String realm) {
