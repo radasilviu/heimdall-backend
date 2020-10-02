@@ -1,6 +1,6 @@
 ## Docker Composer Steps
 
-#### // Make sure you have the right application.properties setup for mysql ( this are default settings for docker ) 
+#### // Make sure you have the right application.properties setup for mysql
     spring.datasource.username=root
     spring.datasource.password=password
 
