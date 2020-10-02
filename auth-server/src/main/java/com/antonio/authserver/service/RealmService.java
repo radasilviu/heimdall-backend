@@ -39,8 +39,8 @@ public class RealmService {
         return realmMapper.toRealmDto(temp);
     }
 
-    public RealmDto updateLoginSettings(RealmLoginSettingRequest realm) {
-        Realm temp = realmRepository.findByName(realm.getName()).orElseThrow(() -> new CustomException("Realm with the name [" + realm.getName() + "] could not be found!",HttpStatus.NOT_FOUND));
+    public RealmDto updateLoginSettings(String name,RealmLoginSettingRequest realm) {
+        Realm temp = realmRepository.findByName(name).orElseThrow(() -> new CustomException("Realm with the name [" + name + "] could not be found!",HttpStatus.NOT_FOUND));
         temp.setUserRegistration(realm.isUserRegistration());
         temp.setEditUsername(realm.isEditUsername());
         temp.setForgotPassword(realm.isForgotPassword());
@@ -55,6 +55,7 @@ public class RealmService {
     public List<RealmDto> getAllRealms(){
         return realmMapper.toRealmDtoList(realmRepository.findAll());
     }
+
     public RealmDto getRealmByName(String name){
         Realm realm = realmRepository.findByName(name)
                 .orElseThrow(() -> new CustomException("Realm with the name [" + name + "] could not be found!",

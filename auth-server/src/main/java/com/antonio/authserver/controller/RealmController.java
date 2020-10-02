@@ -25,46 +25,46 @@ public class RealmController {
         this.realmService = realmService;
     }
 
-    @GetMapping("/list")
+    @GetMapping("/admin/realm//list")
     public ResponseEntity<List<RealmDto>> getAllRealms() {
         return ResponseEntity.ok().body(realmService.getAllRealms());
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/admin/realm//{name}")
     public ResponseEntity<RealmDto> getRealmByName(@PathVariable String name){
         return ResponseEntity.ok().body(realmService.getRealmByName(name));
     }
-    @PostMapping
+    @PostMapping("/admin/realm/")
     public ResponseEntity<ResponseMessage> createRealm(@RequestBody RealmDto realmDto){
         realmService.createRealm(realmDto);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully created");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @PutMapping("/{name}")
+    @PutMapping("/admin/realm//{name}")
     public ResponseEntity<ResponseMessage> updateRealmByName(@PathVariable String name,@RequestBody RealmDto realmDto){
         realmService.updateRealmByName(name,realmDto);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully updated");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @DeleteMapping("/{name}")
+    @DeleteMapping("/admin/realm//{name}")
     public ResponseEntity<ResponseMessage> deleteRealmByName(@PathVariable String name){
         realmService.deleteRealmByName(name);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully deleted");
         return ResponseEntity.ok().body(responseMessage);
     }
 
-    @PutMapping("/general-update/{name}")
+    @PutMapping("/admin/realm/general-update/{name}")
     public RealmDto generalSettingUpdate(@PathVariable String name,@RequestBody final RealmGeneralSettingRequest realm) {
         return realmService.updateGeneralSettings(name,realm);
     }
 
-    @PutMapping("/login-update")
-    public RealmDto loginSettingUpdate(@RequestBody final RealmLoginSettingRequest realm) {
-        return realmService.updateLoginSettings(realm);
+    @PutMapping("/admin/realm/login-update/{name}")
+    public RealmDto loginSettingUpdate(@PathVariable String name,@RequestBody final RealmLoginSettingRequest realm) {
+        return realmService.updateLoginSettings(name,realm);
     }
 
     @GetMapping("/realm/check/{realm}")
-    public Realm checkRealmExists(@PathVariable final String realm) {
+    public RealmDto checkRealmExists(@PathVariable final String realm) {
         return realmService.getRealmByName(realm);
     }
 }
