@@ -49,7 +49,7 @@ class RealmServiceTest {
         CustomException exception = assertThrows(CustomException.class,() -> realmService.updateGeneralSettings("Dummy",new RealmGeneralSettingRequest("NewDummy","NewDummy",true)));
         assertTrue(exception.getMessage().contains(" could not be found!"));
     }
-    @Test
+/*    @Test
     void withGivenRealmLoginSettingRequest_shouldUpdateLoginSettings() {
         when(realmMapper.toRealmDto(any(Realm.class))).thenReturn(new RealmDto("Dummy","Dummy",false,false,false,false,false,false,false));
         when(realmRepository.findByName(anyString())).thenReturn(Optional.of(new Realm("Dummy","Dummy",false,false,false,false,false,false,false)));
@@ -61,7 +61,7 @@ class RealmServiceTest {
         when(realmRepository.findByName(anyString())).thenReturn(Optional.empty());
         CustomException exception = assertThrows(CustomException.class,() -> realmService.updateLoginSettings(new RealmLoginSettingRequest("Dummy",true,true,true,true,true,true)));
         assertTrue(exception.getMessage().contains(" could not be found!"));
-    }
+    }*/
     @Test
     void shouldGetAllRealms() {
         List<Realm> realms = new ArrayList<>();
