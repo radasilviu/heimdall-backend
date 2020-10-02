@@ -22,7 +22,8 @@ import com.antonio.authserver.repository.AppUserRepository;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 @Service
-public class EmailService {
+public class EmailService{
+
 	private AppUserRepository appUserRepository;
 	private EmailProperties emailProperties;
 	private AppUserMapper appUserMapper;
@@ -40,25 +41,14 @@ public class EmailService {
 	public void sendActivationEmail(AppUserDto appUserDto, String siteUrl)
 			throws IOException, TemplateException, MessagingException {
 		String verifyUrl = siteUrl + "/oauth/activate?emailCode=" + appUserDto.getEmailCode();
-		JavaMailSenderImpl javaMailSender = configureMailSender();
-
-		MimeMessage message = javaMailSender.createMimeMessage();
-
-		MimeMessageHelper helper = new MimeMessageHelper(message);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put("Name", "Heimdall Team");
 		model.put("VerifyUrl", verifyUrl);
 		model.put("Username", appUserDto.getUsername());
 
-		Template freemarkerTemplate = freemarkerConfigurer.createConfiguration().getTemplate("email.ftl");
-		String htmlBody = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerTemplate, model);
-
-		helper.setTo(appUserDto.getEmail()); // !!! IMPORTANT CHANGE
-		helper.setText(htmlBody, true);
-		helper.setSubject("Activate your account");
-		helper.setFrom(emailProperties.getUsername());
-		javaMailSender.send(message);
+		new Thread(() -> sendEmail("email.ftl", model, appUserDto.getEmail(), "Activate your account",
+				emailProperties.getUsername())).start();
 	}
 
 	public AppUserDto verifyAndActivateEmailCode(String emailCode) throws CustomException {
@@ -119,4 +109,5 @@ public class EmailService {
 
 		return message;
 	}
+
 }
