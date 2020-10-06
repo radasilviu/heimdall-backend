@@ -2,6 +2,9 @@ package com.antonio.authserver.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -16,7 +19,8 @@ public class Client {
     private String clientName;
     private String clientSecret;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
     public Client() {

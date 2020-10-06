@@ -19,8 +19,6 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-;
-
 @Service
 @Transactional
 public class UserService {
@@ -132,6 +130,16 @@ public class UserService {
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
         appUserRepository.delete(appUser);
 
+    }
+
+    public AppUserDto findByUsernameAndRealmName(String username, String realm) {
+        Optional<AppUser> user = appUserRepository.findByUsernameAndRealmName(username, realm);
+
+        if (!user.isPresent()) {
+            throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        AppUserDto userDto = appUserMapper.toAppUserDto(user.get());
+        return userDto;
     }
 
     public AppUserDto findByUsernameAndPasswordAndRealm(String username, String password, String realmName) {

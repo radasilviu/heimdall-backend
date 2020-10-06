@@ -2,6 +2,7 @@ package com.antonio.authserver.configuration.constants;
 
 public enum ErrorMessage {
     INVALID_CREDENTIALS("Invalid credentials"),
+    REALM_NOT_FOUND("Realm not found"),
     INVALID_CLIENT("Client is invalid"),
     IDENTITY_PROVIDER_NOT_FOUND("Identity Provider not found"),
     IDENTITY_PROVIDER_EXIST("Identity Provider already exist"),

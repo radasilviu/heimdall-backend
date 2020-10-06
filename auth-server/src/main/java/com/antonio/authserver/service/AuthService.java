@@ -213,4 +213,10 @@ public class AuthService {
         appUserRepository.save(user.get());
     }
 
+	public JwtObject profileLogin(String username, String password, String realm) {
+		AppUserDto user = userService.findByUsernameAndRealmName(username, realm);
+        JwtObject jwtObject = createNewJWtObject(user);
+
+		return jwtObject;
+	}
 }

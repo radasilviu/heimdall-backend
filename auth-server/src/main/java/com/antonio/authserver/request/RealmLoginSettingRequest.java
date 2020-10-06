@@ -7,17 +7,27 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RealmLoginSettingRequest {
-    private Long id;
 
     private boolean userRegistration;
 
     private boolean editUsername;
 
-    private boolean forgotUsername;
+    private boolean forgotPassword;
 
     private boolean rememberMe;
 
     private boolean verifyEmail;
 
     private boolean loginWithEmail;
+
+    public RealmLoginSettingRequest() {
+    }
+    public RealmLoginSettingRequest(boolean userRegistration, boolean editUsername, boolean forgotPassword, boolean rememberMe, boolean verifyEmail, boolean loginWithEmail) {
+        this.userRegistration = userRegistration;
+        this.editUsername = editUsername;
+        this.forgotPassword = forgotPassword;
+        this.rememberMe = rememberMe;
+        this.verifyEmail = verifyEmail;
+        this.loginWithEmail = loginWithEmail;
+    }
 }

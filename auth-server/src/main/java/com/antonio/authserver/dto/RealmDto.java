@@ -1,21 +1,9 @@
-package com.antonio.authserver.entity;
-
+package com.antonio.authserver.dto;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
 @Getter
 @Setter
-public class Realm {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RealmDto {
 
     private String name;
 
@@ -34,9 +22,10 @@ public class Realm {
     private boolean verifyEmail;
 
     private boolean loginWithEmail;
-    public Realm() {
+
+    public RealmDto() {
     }
-    public Realm(String name, String displayName, boolean enabled, boolean userRegistration, boolean editUsername, boolean forgotPassword, boolean rememberMe, boolean verifyEmail, boolean loginWithEmail) {
+    public RealmDto(String name, String displayName, boolean enabled, boolean userRegistration, boolean editUsername, boolean forgotPassword, boolean rememberMe, boolean verifyEmail, boolean loginWithEmail) {
         this.name = name;
         this.displayName = displayName;
         this.enabled = enabled;
