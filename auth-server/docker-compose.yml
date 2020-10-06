@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  ms:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: heimdall
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/mysql
+    expose:
+      - 3306
+    networks:
+      - heimdallnetwork
+
+  heimdall-backend:
+    container_name: heimdallbackend
+    image: authserver
+    restart: on-failure
+    depends_on:
+      - ms
+    ports:
+      - 8081:8081
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://ms:3306/heimdall?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      authorizationServerFrontedURL: http://localhost:4201
+      clientFrontedURL: http://localhost:4200
+      clientBackendURL: http://localhost:8080
+    networks:
+      - heimdallnetwork
+
+networks:
+  heimdallnetwork:
+    external: true
+
+volumes:
+  db-data:
