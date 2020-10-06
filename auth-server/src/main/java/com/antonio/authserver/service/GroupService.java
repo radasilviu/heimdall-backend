@@ -18,9 +18,11 @@ public class GroupService {
     private GroupMapper groupMapper;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper) {
         this.groupRepository = groupRepository;
+        this.groupMapper = groupMapper;
     }
+
     public List<GroupDto> findAllGroups(){
         return groupMapper.toGroupDtoList(groupRepository.findAll());
     }
