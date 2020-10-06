@@ -1,7 +1,7 @@
 package com.antonio.authserver.controller;
 
 import com.antonio.authserver.dto.GroupDto;
-import com.antonio.authserver.entity.Group;
+import com.antonio.authserver.entity.UserGroup;
 import com.antonio.authserver.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +19,8 @@ public class GroupController {
     }
 
     @PostMapping("/group")
-    public void createGroup(@RequestBody Group group) {
-        groupService.createGroup(group);
+    public void createGroup(@RequestBody UserGroup userGroup) {
+        groupService.createGroup(userGroup);
     }
 
     @GetMapping("/group")

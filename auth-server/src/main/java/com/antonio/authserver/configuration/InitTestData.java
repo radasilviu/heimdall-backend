@@ -25,16 +25,18 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private BCryptPasswordEncoder passwordEncoder;
     private RealmRepository realmRepository;
     private IdentityProviderRepository identityProviderRepository;
+    private GroupRepository groupRepository;
 
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
         this.passwordEncoder = passwordEncoder;
         this.realmRepository = realmRepository;
         this.identityProviderRepository = identityProviderRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Override
@@ -68,9 +70,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             appUserRepository.save(admin);
             appUserRepository.save(admin_one);
             appUserRepository.save(admin_two);
-
-            Client client = new Client("myClient", "clientPass", realms.get(0));
-            clientRepository.save(client);
+            groupRepository.save(new UserGroup("Group1", new ArrayList<>()));
         }
     }
 }

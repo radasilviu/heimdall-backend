@@ -1,8 +1,7 @@
 package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.GroupDto;
-import com.antonio.authserver.entity.Client;
-import com.antonio.authserver.entity.Group;
+import com.antonio.authserver.entity.UserGroup;
 import com.antonio.authserver.mapper.GroupMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.GroupRepository;
@@ -25,17 +24,17 @@ public class GroupService {
     public List<GroupDto> findAllGroups(){
         return groupMapper.toGroupDtoList(groupRepository.findAll());
     }
-    public void createGroup(Group group) {
-        Optional<Group> byGroupName = groupRepository.findByName(group.getName());
+    public void createGroup(UserGroup userGroup) {
+        Optional<UserGroup> byGroupName = groupRepository.findByName(userGroup.getName());
         if (byGroupName.isPresent())
             throw new CustomException(
                     "Group with the name [ " + byGroupName.get().getName() + " ] already exists!",
                     HttpStatus.CONFLICT);
-        else if (group.getName().equals("")) {
+        else if (userGroup.getName().equals("")) {
             throw new CustomException("The inserted group cannot be null!", HttpStatus.BAD_REQUEST);
         } else {
 
-            groupRepository.save(group);
+            groupRepository.save(userGroup);
         }
     }
 
@@ -50,7 +49,7 @@ public class GroupService {
     }
 
     public GroupDto findGroupByName(String name) {
-        Optional<Group> byGroupName = groupRepository.findByName(name);
+        Optional<UserGroup> byGroupName = groupRepository.findByName(name);
         if (byGroupName.isPresent()) {
             return groupMapper.toGroupDto(byGroupName.get());
         }
