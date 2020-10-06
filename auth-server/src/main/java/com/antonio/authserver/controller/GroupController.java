@@ -33,7 +33,7 @@ public class GroupController {
         return groupService.findGroupByName(name);
     }
 
-    @GetMapping("/group/{name}")
+    @DeleteMapping("/group/{name}")
     public void deleteGroupByName(@PathVariable String name) {
         groupService.deleteGroupByName(name);
     }
