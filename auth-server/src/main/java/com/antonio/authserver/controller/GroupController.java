@@ -6,6 +6,7 @@ import com.antonio.authserver.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.acl.Group;
 import java.util.List;
 
 @RestController
@@ -38,5 +39,9 @@ public class GroupController {
         groupService.deleteGroupByName(name);
     }
 
+    @PutMapping("/group/{name}")
+    public void updateByName(@PathVariable String name, @RequestBody GroupDto group) {
+        groupService.updateByName(name, group);
+    }
 
 }

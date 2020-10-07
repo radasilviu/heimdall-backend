@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class GroupService {
     private GroupRepository groupRepository;
     private GroupMapper groupMapper;
@@ -23,9 +25,10 @@ public class GroupService {
         this.groupMapper = groupMapper;
     }
 
-    public List<GroupDto> findAllGroups(){
+    public List<GroupDto> findAllGroups() {
         return groupMapper.toGroupDtoList(groupRepository.findAll());
     }
+
     public void createGroup(UserGroup userGroup) {
         Optional<UserGroup> byGroupName = groupRepository.findByName(userGroup.getName());
         if (byGroupName.isPresent())
@@ -54,11 +57,25 @@ public class GroupService {
         Optional<UserGroup> byGroupName = groupRepository.findByName(name);
         if (byGroupName.isPresent()) {
             return groupMapper.toGroupDto(byGroupName.get());
-        }
-        else {
+        } else {
             throw new CustomException(
                     "Group with the name [ " + byGroupName.get().getName() + " ] does not exists!",
                     HttpStatus.CONFLICT);
         }
+    }
+
+    public void updateByName(String name, GroupDto group) {
+        Optional<UserGroup> oldGroup = groupRepository.findByName(name);
+
+        if (oldGroup.isPresent()) {
+            if (!group.getName().isEmpty() || !group.getName().equals(" ")) {
+                oldGroup.get().setName(group.getName());
+            }
+            if (!group.getUsers().isEmpty() || group.getUsers().size() > 0) {
+                oldGroup.get().setAppUserGroup(group.getUsers());
+            }
+        }
+
+
     }
 }
