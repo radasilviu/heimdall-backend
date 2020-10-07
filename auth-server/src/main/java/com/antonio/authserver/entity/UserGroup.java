@@ -31,12 +31,7 @@ public class UserGroup {
 
     public UserGroup(String name, List<AppUser> appUserGroup) {
         this.name = name;
-        this.appUserGroup = appUserGroup;
+        this.appUserGroup = new ArrayList<>(appUserGroup);
     }
 
-    public UserGroup(long id, String name, List<AppUser> appUserGroup) {
-        this.id = id;
-        this.name = name;
-        this.appUserGroup = appUserGroup;
-    }
 }

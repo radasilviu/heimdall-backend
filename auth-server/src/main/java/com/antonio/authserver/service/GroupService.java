@@ -3,6 +3,7 @@ package com.antonio.authserver.service;
 import com.antonio.authserver.dto.GroupDto;
 import com.antonio.authserver.entity.UserGroup;
 import com.antonio.authserver.mapper.GroupMapper;
+import com.antonio.authserver.mapper.GroupMapperClass;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +19,17 @@ import java.util.Optional;
 public class GroupService {
     private GroupRepository groupRepository;
     private GroupMapper groupMapper;
+    private GroupMapperClass groupMapperClass;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
+        this.groupMapperClass = groupMapperClass;
     }
 
     public List<GroupDto> findAllGroups() {
-        return groupMapper.toGroupDtoList(groupRepository.findAll());
+        return groupMapperClass.daoListToDto(groupRepository.findAll());
     }
 
     public void createGroup(UserGroup userGroup) {
@@ -78,4 +81,17 @@ public class GroupService {
 
 
     }
+
+//    public void addRoleForGroup(String name, Role role){
+//        Optional<UserGroup> group = groupRepository.findByName(name);
+//        if(group.isPresent()){
+//            List<AppUser> users = group.get().getAppUserGroup();
+//            for(AppUser user : users){
+//                user.getRoles()
+//                        .stream()
+//                        .filter(r -> !r.getName().equals(role.getName()))
+//                        .
+//            }
+//        }
+//    }
 }
