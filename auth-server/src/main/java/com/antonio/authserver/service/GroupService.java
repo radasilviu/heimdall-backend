@@ -59,7 +59,7 @@ public class GroupService {
     public GroupDto findGroupByName(String name) {
         Optional<UserGroup> byGroupName = groupRepository.findByName(name);
         if (byGroupName.isPresent()) {
-            return groupMapper.toGroupDto(byGroupName.get());
+            return groupMapperClass.daoToDto(byGroupName.get());
         } else {
             throw new CustomException(
                     "Group with the name [ " + byGroupName.get().getName() + " ] does not exists!",
