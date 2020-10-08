@@ -108,8 +108,19 @@ public class GroupService {
     }
 
     public List<AppUser> getUsersFromGroup(String groupName) {
-       UserGroup userGroup = groupRepository.findByName(groupName).orElseThrow(() -> new CustomException("Group with name" + groupName + " not found", HttpStatus.BAD_REQUEST));
-       return userGroup.getAppUserGroup();
+        UserGroup userGroup = groupRepository.findByName(groupName).orElseThrow(() -> new CustomException("Group with name" + groupName + " not found", HttpStatus.BAD_REQUEST));
+        return userGroup.getAppUserGroup();
+    }
+
+    public void deleteUserFromGroupByName(String groupName, String username) {
+        UserGroup userGroup = groupRepository
+                .findByName(groupName)
+                .orElseThrow(() -> new CustomException("Group with name" + groupName + " not found", HttpStatus.BAD_REQUEST));
+
+        userGroup.getAppUserGroup().stream()
+                .filter(u -> u.getUsername().equals(username))
+                .findFirst()
+                .ifPresent(u -> userGroup.getAppUserGroup().remove(u));
     }
 
 }
