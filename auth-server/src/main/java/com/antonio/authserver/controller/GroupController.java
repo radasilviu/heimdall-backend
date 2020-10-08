@@ -1,6 +1,8 @@
 package com.antonio.authserver.controller;
 
 import com.antonio.authserver.dto.GroupDto;
+import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.entity.UserGroup;
 import com.antonio.authserver.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,14 @@ public class GroupController {
     @PutMapping("/group/{name}")
     public void updateByName(@PathVariable String name, @RequestBody GroupDto group) {
         groupService.updateByName(name, group);
+    }
+    @PostMapping("/group/{name}/addRole")
+    public void addRoleToGroup(@PathVariable String name, @RequestBody Role role){
+        groupService.addRoleForGroup(name,role);
+    }
+    @PostMapping("/group/{name}/addUser")
+    public void addUserToGroup(@PathVariable String name, @RequestBody AppUser user){
+        groupService.addUserToGroup(name,user);
     }
 
 }

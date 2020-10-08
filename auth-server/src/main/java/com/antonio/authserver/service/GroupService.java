@@ -1,10 +1,13 @@
 package com.antonio.authserver.service;
 
 import com.antonio.authserver.dto.GroupDto;
+import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.entity.UserGroup;
 import com.antonio.authserver.mapper.GroupMapper;
 import com.antonio.authserver.mapper.GroupMapperClass;
 import com.antonio.authserver.model.CustomException;
+import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,12 +23,14 @@ public class GroupService {
     private GroupRepository groupRepository;
     private GroupMapper groupMapper;
     private GroupMapperClass groupMapperClass;
+    private AppUserRepository appUserRepository;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass, AppUserRepository appUserRepository) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
         this.groupMapperClass = groupMapperClass;
+        this.appUserRepository = appUserRepository;
     }
 
     public List<GroupDto> findAllGroups() {
@@ -82,16 +87,24 @@ public class GroupService {
 
     }
 
-//    public void addRoleForGroup(String name, Role role){
-//        Optional<UserGroup> group = groupRepository.findByName(name);
-//        if(group.isPresent()){
-//            List<AppUser> users = group.get().getAppUserGroup();
-//            for(AppUser user : users){
-//                user.getRoles()
-//                        .stream()
-//                        .filter(r -> !r.getName().equals(role.getName()))
-//                        .
-//            }
-//        }
-//    }
+    public void addRoleForGroup(String name, Role role) {
+        Optional<UserGroup> group = groupRepository.findByName(name);
+        if (group.isPresent()) {
+            List<AppUser> users = group.get().getAppUserGroup();
+            for (AppUser user : users) {
+                if (!user.getRoles().contains(role)) {
+                    user.getRoles().add(role);
+                    appUserRepository.save(user);
+                }
+            }
+        }
+    }
+
+    public void addUserToGroup(String name, AppUser user) {
+        Optional<UserGroup> group = groupRepository.findByName(name);
+        group.ifPresent(g -> g.getAppUserGroup().add(user));
+        groupRepository.save(group.get());
+
+    }
+
 }
