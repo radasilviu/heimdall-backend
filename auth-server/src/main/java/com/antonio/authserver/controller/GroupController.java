@@ -53,5 +53,9 @@ public class GroupController {
     public void addUserToGroup(@PathVariable String name, @RequestBody AppUser user){
         groupService.addUserToGroup(name,user);
     }
+    @GetMapping("/group/{name}/users")
+    public List<AppUser> getUsersFromGroup(@PathVariable String name){
+        return groupService.getUsersFromGroup(name);
+    }
 
 }
