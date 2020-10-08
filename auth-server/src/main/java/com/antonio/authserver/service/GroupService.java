@@ -121,6 +121,7 @@ public class GroupService {
                 .filter(u -> u.getUsername().equals(username))
                 .findFirst()
                 .ifPresent(u -> userGroup.getAppUserGroup().remove(u));
+        groupRepository.save(userGroup);
     }
 
 }

@@ -57,7 +57,7 @@ public class GroupController {
     public List<AppUser> getUsersFromGroup(@PathVariable String name){
         return groupService.getUsersFromGroup(name);
     }
-    @DeleteMapping("/group/{name}/deleteUser/{username}")
+    @PutMapping("/group/{name}/deleteUser/{username}")
     public void deleteUserFromGroup(@PathVariable String name, @PathVariable String username){
         groupService.deleteUserFromGroupByName(name, username);
     }
