@@ -18,19 +18,19 @@ public class GroupMapperClass {
     }
 
     public GroupDto daoToDto(UserGroup userGroup){
-        return new GroupDto(userGroup.getName(),appUserMapper.toAppUserDtoList(userGroup.getAppUserGroup()));
+        return new GroupDto(userGroup.getName(),appUserMapper.toAppUserDtoList(userGroup.getAppUserGroup()),userGroup.getRealm());
     }
 
     public List<GroupDto> daoListToDto(List<UserGroup> groups){
         List<GroupDto> groupDtos = new ArrayList<>();
         for (UserGroup group: groups){
-            groupDtos.add(new GroupDto(group.getName(),appUserMapper.toAppUserDtoList(group.getAppUserGroup())));
+            groupDtos.add(new GroupDto(group.getName(),appUserMapper.toAppUserDtoList(group.getAppUserGroup()),group.getRealm()));
         }
         return groupDtos;
     }
 
     public UserGroup dtoToDao(GroupDto groupDto){
         List<AppUser> userDtos = appUserMapper.toAppUserDaoList(groupDto.getUsers());
-        return new UserGroup(groupDto.getName(),userDtos);
+        return new UserGroup(groupDto.getName(),userDtos, groupDto.getRealm());
     }
 }

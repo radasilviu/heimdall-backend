@@ -27,14 +27,14 @@ public class GroupController {
         groupService.createGroup(userGroup);
     }
 
-    @GetMapping("/group")
-    public List<GroupDto> getAllGroups() {
-        return groupService.findAllGroups();
+    @GetMapping("/group/{name}")
+    public List<GroupDto> getAllGroups(@PathVariable String name) {
+        return groupService.findAllGroups(name);
     }
 
-    @GetMapping("/group/{name}")
-    public GroupDto getGroupByName(@PathVariable String name) {
-        return groupService.findGroupByName(name);
+    @GetMapping("/group/{name}/{realmName}")
+    public GroupDto getGroupByName(@PathVariable String name, @PathVariable String realmName) {
+        return groupService.findGroupByName(name, realmName);
     }
 
     @DeleteMapping("/group/{name}")

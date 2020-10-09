@@ -39,12 +39,12 @@ public class GroupService {
         this.appUserMapper = appUserMapper;
     }
 
-    public List<GroupDto> findAllGroups() {
-        return groupMapperClass.daoListToDto(groupRepository.findAll());
+    public List<GroupDto> findAllGroups(String name) {
+        return groupMapperClass.daoListToDto(groupRepository.findAllByRealmName(name));
     }
 
     public void createGroup(UserGroup userGroup) {
-        Optional<UserGroup> byGroupName = groupRepository.findByName(userGroup.getName());
+        Optional<UserGroup> byGroupName = groupRepository.findByNameAndRealmName(userGroup.getName(), userGroup.getRealm().getName());
 
         if (byGroupName.isPresent())
             throw new CustomException(
@@ -68,8 +68,8 @@ public class GroupService {
         }
     }
 
-    public GroupDto findGroupByName(String name) {
-        Optional<UserGroup> byGroupName = groupRepository.findByName(name);
+    public GroupDto findGroupByName(String name, String realmName) {
+        Optional<UserGroup> byGroupName = groupRepository.findByNameAndRealmName(name, realmName);
 
         if (byGroupName.isPresent()) {
             return groupMapperClass.daoToDto(byGroupName.get());
