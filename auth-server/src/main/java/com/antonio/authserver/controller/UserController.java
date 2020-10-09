@@ -72,7 +72,7 @@ public class UserController {
 
 	@PostMapping("/{realmName}/{username}/addRole")
 	public void addRoleToUser(@PathVariable String realmName,@PathVariable String username, @RequestBody String roleName) {
-		Role newRole = roleService.findRoleByNameDAO(roleName);
+		Role newRole = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
 		userService.addRole(realmName,username, newRole);
 	}
 
@@ -83,7 +83,7 @@ public class UserController {
 
 	@DeleteMapping("/{realmName}/{username}/removeRole")
 	public void removeRoleFromUser(@PathVariable String realmName,@PathVariable String username, @RequestBody String roleName) {
-		Role newRole = roleService.findRoleByNameDAO(roleName);
+		Role newRole = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
 		userService.removeRole(realmName,username, newRole);
 
 	}

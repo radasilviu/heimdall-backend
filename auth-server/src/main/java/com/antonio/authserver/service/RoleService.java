@@ -83,8 +83,8 @@ public class RoleService {
 		}
 	}
 
-	public Role findRoleByNameDAO(String name) {
-		return roleRepository.findByName(name)
+	public Role findRoleByNameDaoAndRealmName(String name,String realmName) {
+		return roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 	}
