@@ -70,6 +70,10 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             appUserRepository.save(admin);
             appUserRepository.save(admin_one);
             appUserRepository.save(admin_two);
+
+            Client client = new Client("myClient", "clientPass", realms.get(0));
+            clientRepository.save(client);
+
             groupRepository.save(new UserGroup("Group1", new ArrayList<>()));
         }
     }

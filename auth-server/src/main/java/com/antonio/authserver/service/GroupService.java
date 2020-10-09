@@ -1,9 +1,11 @@
 package com.antonio.authserver.service;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.GroupDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.entity.UserGroup;
+import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.mapper.GroupMapper;
 import com.antonio.authserver.mapper.GroupMapperClass;
 import com.antonio.authserver.model.CustomException;
@@ -24,13 +26,17 @@ public class GroupService {
     private GroupMapper groupMapper;
     private GroupMapperClass groupMapperClass;
     private AppUserRepository appUserRepository;
+    private UserService userService;
+    private AppUserMapper appUserMapper;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass, AppUserRepository appUserRepository) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass, AppUserRepository appUserRepository, UserService userService, AppUserMapper appUserMapper) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
         this.groupMapperClass = groupMapperClass;
         this.appUserRepository = appUserRepository;
+        this.userService = userService;
+        this.appUserMapper = appUserMapper;
     }
 
     public List<GroupDto> findAllGroups() {
@@ -107,9 +113,10 @@ public class GroupService {
 
     }
 
-    public List<AppUser> getUsersFromGroup(String groupName) {
+    public List<AppUserDto> getUsersFromGroup(String groupName) {
         UserGroup userGroup = groupRepository.findByName(groupName).orElseThrow(() -> new CustomException("Group with name" + groupName + " not found", HttpStatus.BAD_REQUEST));
-        return userGroup.getAppUserGroup();
+        List<AppUser> appUsers =  userGroup.getAppUserGroup();
+        return appUserMapper.toAppUserDtoList(appUsers);
     }
 
     public void deleteUserFromGroupByName(String groupName, String username) {

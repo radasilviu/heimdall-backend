@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.GroupDto;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
@@ -49,12 +50,12 @@ public class GroupController {
     public void addRoleToGroup(@PathVariable String name, @RequestBody Role role){
         groupService.addRoleForGroup(name,role);
     }
-    @PostMapping("/group/{name}/addUser")
+    @PutMapping("/group/{name}/addUser")
     public void addUserToGroup(@PathVariable String name, @RequestBody AppUser user){
         groupService.addUserToGroup(name,user);
     }
     @GetMapping("/group/{name}/users")
-    public List<AppUser> getUsersFromGroup(@PathVariable String name){
+    public List<AppUserDto> getUsersFromGroup(@PathVariable String name){
         return groupService.getUsersFromGroup(name);
     }
     @PutMapping("/group/{name}/deleteUser/{username}")
