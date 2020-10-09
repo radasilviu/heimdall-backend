@@ -71,6 +71,7 @@ public class UserService {
             appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
             appUserDto.setEmailCode(randomCode);
             appUserDto.setIsActivated(false);
+            appUserDto.setRealm(realmRepository.findByName(realmName).get());
             appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
 
         }
