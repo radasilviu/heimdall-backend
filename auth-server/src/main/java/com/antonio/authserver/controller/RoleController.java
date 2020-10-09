@@ -21,7 +21,7 @@ public class RoleController {
 		this.roleService = roleService;
 	}
 
-	@GetMapping("{realmName}")
+	@GetMapping("/{realmName}")
 	public ResponseEntity<List<RoleDto>> getRoles(@PathVariable String realmName) {
 		List<RoleDto> roles = roleService.getAllRoles(realmName);
 		return ResponseEntity.ok().body(roles);
