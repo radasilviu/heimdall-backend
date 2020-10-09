@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//REALM
 @RestController
 @RequestMapping("api/role")
 public class RoleController {
