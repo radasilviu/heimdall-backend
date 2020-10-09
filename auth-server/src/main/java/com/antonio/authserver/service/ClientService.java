@@ -35,8 +35,7 @@ public class ClientService {
     }
 
     public List<ClientDto> getAllClients(String realmName) {
-        System.out.println(clientRepository.findAllByRealmName(realmName));
-        return clientMapper.toClientDtoList(clientRepository.findAll());
+        return clientMapper.toClientDtoList(clientRepository.findAllByRealmName(realmName));
     }
 
     public ClientDto getClientBySecretAndNameWithRealm(String realmName, String clientName, String clientSecret) {
