@@ -17,4 +17,6 @@ public interface AppUserMapper {
     AppUserDto toAppUserDto(AppUser appUser);
 
     List<AppUserDto> toAppUserDtoList(List<AppUser> list);
+
+    List<AppUser> toAppUserDaoList(List<AppUserDto> list);
 }
