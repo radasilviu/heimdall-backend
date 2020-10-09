@@ -19,8 +19,7 @@ public class Role {
     @Column(unique = true)
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne
     private Realm realm;
 
     public Role() {
