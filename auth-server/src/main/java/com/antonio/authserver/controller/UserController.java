@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.antonio.authserver.utils.EmailUtility;
 import freemarker.template.TemplateException;
+//REALM
 @RestController
 @RequestMapping("api/user")
 public class UserController {

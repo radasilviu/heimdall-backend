@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//REALM
 @RestController
 @RequestMapping("api/client")
 public class ClientController {
@@ -25,13 +26,11 @@ public class ClientController {
 		List<ClientDto> clients = clientService.getAllClients();
 		return clients;
 	}
-
 	@GetMapping("/{clientName}")
 	public ResponseEntity<ClientDto> getClientByName(@PathVariable String clientName) {
 		ClientDto client = clientService.getClientByName(clientName);
 		return ResponseEntity.ok().body(client);
 	}
-
 	@PostMapping
 	public ResponseEntity<ResponseMessage> saveClient(@RequestBody ClientDto client) {
 		clientService.saveClient(client);

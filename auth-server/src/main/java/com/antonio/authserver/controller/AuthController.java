@@ -69,7 +69,7 @@ public class AuthController {
         return ResponseEntity.ok().body(responseMessage);
     }
 
-
+//REALM
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody AppUserDto user, HttpServletRequest httpServletRequest)
             throws TemplateException, IOException, MessagingException {

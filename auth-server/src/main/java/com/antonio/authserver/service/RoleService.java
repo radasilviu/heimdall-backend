@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.antonio.authserver.entity.Realm;
+import com.antonio.authserver.repository.RealmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,42 +23,44 @@ public class RoleService {
 	private RoleRepository roleRepository;
 	private AppUserRepository appUserRepository;
 	private RoleMapper roleMapper;
+	private RealmRepository realmRepository;
 
 	@Autowired
-	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper) {
+	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
 		this.roleMapper = roleMapper;
+		this.realmRepository = realmRepository;
 	}
 
-	public void saveRole(RoleDto role) throws CustomException {
+	public void saveRole(String realmName,RoleDto role) throws CustomException {
 		role.setName(role.getName().replaceAll("\\s+", ""));
-		Optional<Role> byName = roleRepository.findByName(role.getName());
+		Optional<Role> byName = roleRepository.findByNameAndRealmName(role.getName(),realmName);
 		if (byName.isPresent())
 			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!",
 					HttpStatus.CONFLICT);
 		else if (role.getName().equals("")) {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
-
+			role.setRealm(realmRepository.findByName(realmName).get());
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}
 	}
 
-	public List<RoleDto> getAllRoles() {
-		return roleMapper.toRoleDtoList(roleRepository.findAll());
+	public List<RoleDto> getAllRoles(String realmName) {
+		return roleMapper.toRoleDtoList(roleRepository.findAllByRealmName(realmName));
 	}
 
-	public RoleDto getRoleByName(String name) throws CustomException {
-		Role role = roleRepository.findByName(name)
+	public RoleDto getRoleByName(String realmName,String name) throws CustomException {
+		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 		return roleMapper.toRoleDto(role);
 	}
 
-	public void updateRoleByName(String name, RoleDto roleDto) throws CustomException {
+	public void updateRoleByName(String realmName,String name, RoleDto roleDto) throws CustomException {
 		roleDto.setName(roleDto.getName().replaceAll("\\s+", ""));
-		Role role = roleRepository.findByName(name)
+		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 		if (roleDto.getName().equals(""))
@@ -65,8 +69,8 @@ public class RoleService {
 		roleRepository.save(role);
 	}
 
-	public void deleteRoleByName(String name) {
-		Optional<Role> role = roleRepository.findByName(name);
+	public void deleteRoleByName(String realmName,String name) {
+		Optional<Role> role = roleRepository.findByNameAndRealmName(name,realmName);
 		Set<Role> roles = new HashSet<>();
 		roles.add(role.get());
 		List<AppUser> users = appUserRepository.findAllByRolesIn(roles);

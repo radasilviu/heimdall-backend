@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 import com.antonio.authserver.dto.ClientDto;
 import com.antonio.authserver.entity.Client;
 
-@Mapper(componentModel = "spring",injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring",uses = {RealmMapper.class},injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ClientMapper {
 
     Client toClientDao(ClientDto clientDto);
