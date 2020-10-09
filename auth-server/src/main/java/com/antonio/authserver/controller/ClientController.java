@@ -21,34 +21,34 @@ public class ClientController {
 		this.clientService = clientService;
 	}
 
-	@GetMapping
-	public List<ClientDto> getAllClients() {
-		List<ClientDto> clients = clientService.getAllClients();
+	@GetMapping("/{realmName}")
+	public List<ClientDto> getAllClients(@PathVariable String realmName) {
+		List<ClientDto> clients = clientService.getAllClients(realmName);
 		return clients;
 	}
-	@GetMapping("/{clientName}")
-	public ResponseEntity<ClientDto> getClientByName(@PathVariable String clientName) {
-		ClientDto client = clientService.getClientByName(clientName);
+	@GetMapping("/{realmName}/{clientName}")
+	public ResponseEntity<ClientDto> getClientByName(@PathVariable String realmName,@PathVariable String clientName) {
+		ClientDto client = clientService.getClientByName(realmName,clientName);
 		return ResponseEntity.ok().body(client);
 	}
-	@PostMapping
-	public ResponseEntity<ResponseMessage> saveClient(@RequestBody ClientDto client) {
-		clientService.saveClient(client);
+	@PostMapping("/{realmName}")
+	public ResponseEntity<ResponseMessage> saveClient(@PathVariable String realmName,@RequestBody ClientDto client) {
+		clientService.saveClient(realmName,client);
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@PutMapping("/{clientName}")
-	public ResponseEntity<ResponseMessage> updateClientByName(@PathVariable String clientName,
+	@PutMapping("/{realmName}/{clientName}")
+	public ResponseEntity<ResponseMessage> updateClientByName(@PathVariable String realmName,@PathVariable String clientName,
 			@RequestBody ClientDto clientDto) {
-		clientService.updateClientByName(clientName, clientDto);
+		clientService.updateClientByName(realmName,clientName, clientDto);
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully updated");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@DeleteMapping("/{clientName}")
-	public ResponseEntity<ResponseMessage> deleteClient(@PathVariable String clientName) {
-		clientService.deleteClientByName(clientName);
+	@DeleteMapping("/{realmName}/{clientName}")
+	public ResponseEntity<ResponseMessage> deleteClient(@PathVariable String realmName,@PathVariable String clientName) {
+		clientService.deleteClientByName(realmName,clientName);
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
 		return ResponseEntity.ok().body(responseMessage);
 	}
