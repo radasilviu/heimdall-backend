@@ -45,11 +45,12 @@ public class GroupService {
 
     public void createGroup(UserGroup userGroup) {
         Optional<UserGroup> byGroupName = groupRepository.findByName(userGroup.getName());
+
         if (byGroupName.isPresent())
             throw new CustomException(
                     "Group with the name [ " + byGroupName.get().getName() + " ] already exists!",
                     HttpStatus.CONFLICT);
-        else if (userGroup.getName().equals("")) {
+        else if (userGroup.getName().equals("") || userGroup.getName().matches("^\\s*$")){
             throw new CustomException("The inserted group cannot be null!", HttpStatus.BAD_REQUEST);
         } else {
 
@@ -62,36 +63,36 @@ public class GroupService {
             groupRepository.deleteByName(name);
         } else {
             throw new CustomException(
-                    "Group with name [ " + groupRepository.findByName(name) + "does not exist", HttpStatus.BAD_REQUEST
+                    "Group with name [ " + name + "does not exist", HttpStatus.BAD_REQUEST
             );
         }
     }
 
     public GroupDto findGroupByName(String name) {
         Optional<UserGroup> byGroupName = groupRepository.findByName(name);
+
         if (byGroupName.isPresent()) {
             return groupMapperClass.daoToDto(byGroupName.get());
         } else {
             throw new CustomException(
-                    "Group with the name [ " + byGroupName.get().getName() + " ] does not exists!",
+                    "Group with the name [ " + name + " ] does not exists!",
                     HttpStatus.CONFLICT);
         }
     }
 
     public void updateByName(String name, GroupDto group) {
-        Optional<UserGroup> oldGroup = groupRepository.findByName(name);
-
-        if (oldGroup.isPresent()) {
-            if (!group.getName().isEmpty() || !group.getName().equals(" ")) {
-                oldGroup.get().setName(group.getName());
-            }
-            if (!group.getUsers().isEmpty() || group.getUsers().size() > 0) {
-                oldGroup.get().setAppUserGroup(group.getUsers());
-            }
+       UserGroup oldGroup = groupRepository.findByName(name).orElseThrow(() -> new CustomException("Group with name " + name + " not found", HttpStatus.BAD_REQUEST));
+       UserGroup newGroup = groupMapperClass.dtoToDao(group);
+        if (!group.getName().isEmpty() || !group.getName().equals(" ")) {
+            oldGroup.setName(group.getName());
         }
+        if (!group.getUsers().isEmpty() || group.getUsers().size() > 0) {
 
-
+            oldGroup.setAppUserGroup(newGroup.getAppUserGroup());
+        }
+       groupRepository.save(oldGroup);
     }
+
 
     public void addRoleForGroup(String name, Role role) {
         Optional<UserGroup> group = groupRepository.findByName(name);
@@ -115,7 +116,7 @@ public class GroupService {
 
     public List<AppUserDto> getUsersFromGroup(String groupName) {
         UserGroup userGroup = groupRepository.findByName(groupName).orElseThrow(() -> new CustomException("Group with name" + groupName + " not found", HttpStatus.BAD_REQUEST));
-        List<AppUser> appUsers =  userGroup.getAppUserGroup();
+        List<AppUser> appUsers = userGroup.getAppUserGroup();
         return appUserMapper.toAppUserDtoList(appUsers);
     }
 

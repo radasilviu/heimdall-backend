@@ -11,6 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class GroupDto {
     private String name;
-    private List<AppUser> users;
+    private List<AppUserDto> users;
 
 }
