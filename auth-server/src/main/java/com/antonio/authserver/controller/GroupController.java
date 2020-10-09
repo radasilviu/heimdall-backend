@@ -22,45 +22,46 @@ public class GroupController {
         this.groupService = groupService;
     }
 
-    @PostMapping("/group")
-    public void createGroup(@RequestBody UserGroup userGroup) {
-        groupService.createGroup(userGroup);
+    @GetMapping("/{realmName}/group")
+    public List<GroupDto> getAllGroups(@PathVariable String realmName) {
+        return groupService.findAllGroups(realmName);
     }
 
-    @GetMapping("/group/{name}")
-    public List<GroupDto> getAllGroups(@PathVariable String name) {
-        return groupService.findAllGroups(name);
+    @GetMapping("/{realmName}/group/{name}")
+    public GroupDto getGroupByName(@PathVariable String realmName,@PathVariable String name) {
+        return groupService.findGroupByName(name,realmName);
     }
 
-    @GetMapping("/group/{name}/{realmName}")
-    public GroupDto getGroupByName(@PathVariable String name, @PathVariable String realmName) {
-        return groupService.findGroupByName(name, realmName);
+    @PostMapping("{realmName}/group")
+    public void createGroup(@PathVariable String realmName,@RequestBody UserGroup userGroup) {
+        groupService.createGroup(realmName,userGroup);
     }
 
-    @DeleteMapping("/group/{name}")
-    public void deleteGroupByName(@PathVariable String name) {
-        groupService.deleteGroupByName(name);
+    @PutMapping("{realName}/group/{name}")
+    public void updateByName(@PathVariable String realmName,@PathVariable String name, @RequestBody GroupDto group) {
+        groupService.updateByName(realmName,name, group);
     }
 
-    @PutMapping("/group/{name}")
-    public void updateByName(@PathVariable String name, @RequestBody GroupDto group) {
-        groupService.updateByName(name, group);
+    @DeleteMapping("{realmName}/group/{name}")
+    public void deleteGroupByName(@PathVariable String realmName,@PathVariable String name) {
+        groupService.deleteGroupByName(realmName,name);
     }
-    @PostMapping("/group/{name}/addRole")
-    public void addRoleToGroup(@PathVariable String name, @RequestBody Role role){
-        groupService.addRoleForGroup(name,role);
+
+    @PostMapping("{realmName}/group/{name}/addRole")
+    public void addRoleToGroup(@PathVariable String realmName,@PathVariable String name, @RequestBody Role role){
+        groupService.addRoleForGroup(realmName,name,role);
     }
-    @PutMapping("/group/{name}/addUser")
-    public void addUserToGroup(@PathVariable String name, @RequestBody AppUser user){
-        groupService.addUserToGroup(name,user);
+    @PutMapping("{realmName}/group/{name}/addUser")
+    public void addUserToGroup(@PathVariable String realmName,@PathVariable String name, @RequestBody AppUser user){
+        groupService.addUserToGroup(realmName,name,user);
     }
-    @GetMapping("/group/{name}/users")
-    public List<AppUserDto> getUsersFromGroup(@PathVariable String name){
-        return groupService.getUsersFromGroup(name);
+    @GetMapping("{realmName}/group/{name}/users")
+    public List<AppUserDto> getUsersFromGroup(@PathVariable String realmName,@PathVariable String name){
+        return groupService.getUsersFromGroup(realmName,name);
     }
-    @PutMapping("/group/{name}/deleteUser/{username}")
-    public void deleteUserFromGroup(@PathVariable String name, @PathVariable String username){
-        groupService.deleteUserFromGroupByName(name, username);
+    @PutMapping("{realmName}/group/{name}/deleteUser/{username}")
+    public void deleteUserFromGroup(@PathVariable String realmName,@PathVariable String name, @PathVariable String username){
+        groupService.deleteUserFromGroupByName(realmName,name, username);
     }
 
 }
