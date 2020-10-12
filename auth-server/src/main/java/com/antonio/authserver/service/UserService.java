@@ -10,6 +10,7 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.IdentityProviderRepository;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.repository.RoleRepository;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserService {
@@ -66,7 +67,8 @@ public class UserService {
                     HttpStatus.CONFLICT);
         else if (appUserDto.getUsername().equals("")) {
             throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
-        } else {
+        }
+            else {
             String randomCode = RandomString.make(64);
             appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
             appUserDto.setEmailCode(randomCode);
@@ -115,6 +117,8 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
+        if(roleOptional.getName().equals("ROLE_ADMIN"))
+            adminAlreadyExists(username);
         appUser.getRoles().add(roleOptional);
         appUserRepository.save(appUser);
 
@@ -234,5 +238,20 @@ public class UserService {
         }
 
         return appUserMapper.toAppUserDto(userOptional.get());
+    }
+
+    public void adminAlreadyExists(String username){
+        List<AppUser> byUsername = appUserRepository.findAllByUsername(username);
+        byUsername.forEach(appUser -> {
+            boolean isAdmin = false;
+            for (Role role : appUser.getRoles()) {
+                if (role.getName().equals("ROLE_ADMIN")) {
+                    isAdmin=true;
+                    break;
+                }
+            }
+            if(isAdmin)
+                throw new CustomException("Admin with the name " + username +" already exists!",HttpStatus.CONFLICT);
+        });
     }
 }
