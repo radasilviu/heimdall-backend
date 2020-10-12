@@ -72,6 +72,7 @@ public class UserService {
             appUserDto.setEmailCode(randomCode);
             appUserDto.setIsActivated(false);
             appUserDto.setRealm(realmRepository.findByName(realmName).get());
+            appUserDto.setIdentityProvider(identityProviderRepository.findByProvider("USERNAME_AND_PASSWORD").get());
             appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
 
         }
@@ -110,12 +111,11 @@ public class UserService {
     public AppUser addRole(String realmName,String username, Role role) throws CustomException {
         AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        roleRepository.findByName(role.getName())
+        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(),realmName)
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
-
-        appUser.getRoles().add(role);
+        appUser.getRoles().add(roleOptional);
         appUserRepository.save(appUser);
 
         return appUser;
@@ -124,12 +124,11 @@ public class UserService {
     public void removeRole(String realmName,String username, Role role) throws CustomException {
         AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        roleRepository.findByName(role.getName())
+        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(),realmName)
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
-
-        appUser.getRoles().remove(role);
+        appUser.getRoles().remove(roleOptional);
         appUserRepository.save(appUser);
 
     }

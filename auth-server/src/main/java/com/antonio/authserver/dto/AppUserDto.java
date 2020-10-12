@@ -29,12 +29,23 @@ public class AppUserDto implements Serializable {
     private Realm realm;
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private IdentityProvider identityProvider;
-
     @Override
     public String toString() {
-        return "AppUserDto{" + "username='" + username + '\'' + ", roles=" + roles + '}';
+        return "AppUserDto{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", token='" + token + '\'' +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", code='" + code + '\'' +
+                ", roles=" + roles +
+                ", email='" + email + '\'' +
+                ", isActivated=" + isActivated +
+                ", emailCode='" + emailCode + '\'' +
+                ", realm=" + realm +
+                ", identityProvider=" + identityProvider +
+                '}';
     }
-
     public AppUserDto() {
     }
 
