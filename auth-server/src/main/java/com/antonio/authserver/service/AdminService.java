@@ -70,7 +70,7 @@ public class AdminService {
         final long accessTokenExpirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
         final long refreshTokenExpirationTime = System.currentTimeMillis()
                 + SecurityConstants.REFRESH_TOKEN_EXPIRATION_TIME;
-        final String accessToken = jwtService.createAccessToken(appUser.getUsername(), accessTokenExpirationTime,
+        final String accessToken = jwtService.createAccessToken(appUser, accessTokenExpirationTime,
                 getGrantedAuthoritySet(appUser.getRoles()), SecurityConstants.TOKEN_SECRET);
         final String refreshToken = jwtService.createRefreshToken(refreshTokenExpirationTime,
                 SecurityConstants.TOKEN_SECRET);

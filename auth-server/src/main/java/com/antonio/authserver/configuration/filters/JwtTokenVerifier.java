@@ -3,11 +3,13 @@ package com.antonio.authserver.configuration.filters;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
+import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -76,7 +78,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     private AppUserDto extractUserFromToken(String token) {
         final Claims claims = jwtService.decodeJWT(token);
         final String username = claims.getIssuer();
-        final AppUserDto user = userService.getUserByUsername(username);
+        final AppUserDto user = userService.findByUsername(username);
 
         return user;
     }

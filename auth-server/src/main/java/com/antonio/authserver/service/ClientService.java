@@ -105,7 +105,7 @@ public class ClientService {
 
         long expirationTime = System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION_TIME;
 
-        String token = jwtService.createAccessToken(userDto.getUsername(), expirationTime, new ArrayList<>(),
+        String token = jwtService.createAccessToken(userDto, expirationTime, new ArrayList<>(),
                 SecurityConstants.TOKEN_SECRET);
 
         return token;
