@@ -34,8 +34,7 @@ public class AdminService {
     }
 
     public JwtObject adminLogin(AdminCredential adminCredential) {
-
-        final AppUserDto appUser = userService.getUserByUsername(adminCredential.getUsername());
+        final AppUserDto appUser = userService.getUserByUsernameAndRealmName(adminCredential.getRealm(),adminCredential.getUsername());
         verifyIfUserIsAuthorized(appUser);
 
         setAuthentication(adminCredential);
