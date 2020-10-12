@@ -18,4 +18,5 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     void deleteByName(String name);
     List<Role> findAllByRealmName(String name);
     Optional<Role> findByNameAndRealmName(String name,String realmName);
+    Optional<Role> findByNameAndAndRealmName(String name,String realmName);
 }
