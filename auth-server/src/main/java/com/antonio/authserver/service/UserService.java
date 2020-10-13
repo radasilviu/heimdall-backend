@@ -3,6 +3,7 @@ package com.antonio.authserver.service;
 import com.antonio.authserver.configuration.constants.ErrorMessage;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.AppUserMapper;
 import com.antonio.authserver.model.CustomException;
@@ -80,23 +81,23 @@ public class UserService {
         }
     }
 
-    public List<AppUserDto> isLoggedIn() {
-        List<AppUserDto> users = getAllUsers();
+    public List<AppUserDto> isLoggedIn(String realmName) {
+        List<AppUserDto> users = getAllUsers(realmName);
         for (AppUserDto appUserDto : users) {
-            if (appUserDto.getToken().isEmpty()) {
-                appUserDto.setLoggedIn(false);
-            } else {
+            if (!appUserDto.getToken().isEmpty() || !appUserDto.getRefreshToken().isEmpty()) {
                 appUserDto.setLoggedIn(true);
+            } else {
+                appUserDto.setLoggedIn(false);
             }
             appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
         }
         return users;
     }
 
-    public void logOutAll() {
-        List<AppUserDto> users = getAllUsers();
+    public void logOutAll(Realm realm) {
+        List<AppUserDto> users = getAllUsers(realm.getName());
         for (AppUserDto appUserDto : users) {
-           if(!appUserDto.getRoles().contains(new Role("ROLE_ADMIN"))){
+           if(!appUserDto.getRoles().contains(new Role("ROLE_ADMIN", realm))){
                appUserDto.setLoggedIn(false);
                appUserDto.setToken(null);
            }

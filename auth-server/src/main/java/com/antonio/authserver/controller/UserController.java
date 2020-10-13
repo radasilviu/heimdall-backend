@@ -4,6 +4,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.antonio.authserver.entity.Realm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,14 +90,14 @@ public class UserController {
 	}
 
 	@PutMapping("/updateState")
-	public ResponseEntity<Object> updateUserState(){
-		userService.isLoggedIn();
+	public ResponseEntity<Object> updateUserState(@RequestBody String realmName){
+		userService.isLoggedIn(realmName);
 		return ResponseEntity.ok().body(new ResponseMessage("User state saved"));
 	}
 
 	@PutMapping("/logoutAll")
-	public ResponseEntity<Object> logoutAll(){
-		userService.logOutAll();
+	public ResponseEntity<Object> logoutAll(@RequestBody Realm realm){
+		userService.logOutAll(realm);
 		return ResponseEntity.ok().body(new ResponseMessage("All users loggedOut"));
 	}
 
