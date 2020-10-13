@@ -27,13 +27,19 @@ public class UserGroup {
     @JoinColumn(name="usergroup")
     private List<AppUser> appUserGroup;
 
+    @ManyToOne
+    private Realm realm;
+
     public UserGroup(){
 
     }
 
-    public UserGroup(String name, List<AppUser> appUserGroup) {
+    public UserGroup(String name, List<AppUser> appUserGroup, Realm realm) {
         this.name = name;
         this.appUserGroup = new ArrayList<>(appUserGroup);
+        this.realm = realm;
     }
+
+
 
 }

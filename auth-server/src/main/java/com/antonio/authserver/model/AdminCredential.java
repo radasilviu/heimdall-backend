@@ -4,7 +4,13 @@ public class AdminCredential {
 
     private String username;
     private String password;
-
+    private String realm;
+    public String getRealm() {
+        return realm;
+    }
+    public void setRealm(String realm) {
+        this.realm = realm;
+    }
     public String getUsername() {
         return username;
     }

@@ -20,31 +20,31 @@ public class RoleController {
 		this.roleService = roleService;
 	}
 
-	@GetMapping
-	public ResponseEntity<List<RoleDto>> getRoles() {
-		List<RoleDto> roles = roleService.getAllRoles();
+	@GetMapping("/{realmName}")
+	public ResponseEntity<List<RoleDto>> getRoles(@PathVariable String realmName) {
+		List<RoleDto> roles = roleService.getAllRoles(realmName);
 		return ResponseEntity.ok().body(roles);
 	}
-	@GetMapping("/{name}")
-	public ResponseEntity<RoleDto> getRoleByName(@PathVariable String name) {
-		return ResponseEntity.ok().body(roleService.getRoleByName(name));
+	@GetMapping("/{realmName}/{name}")
+	public ResponseEntity<RoleDto> getRoleByName(@PathVariable String realmName,@PathVariable String name) {
+		return ResponseEntity.ok().body(roleService.getRoleByName(realmName,name));
 	}
-	@PutMapping("/{name}")
-	public ResponseEntity<ResponseMessage> updateRoleByName(@PathVariable String name, @RequestBody RoleDto roleDto) {
-		roleService.updateRoleByName(name, roleDto);
+	@PutMapping("/{realmName}/{name}")
+	public ResponseEntity<ResponseMessage> updateRoleByName(@PathVariable String realmName,@PathVariable String name, @RequestBody RoleDto roleDto) {
+		roleService.updateRoleByName(realmName,name, roleDto);
 		final ResponseMessage responseMessage = new ResponseMessage("Role successfully updated");
 		return ResponseEntity.ok().body(responseMessage);
 	}
-	@PostMapping
-	public ResponseEntity<ResponseMessage> createRole(@RequestBody RoleDto role) {
-		roleService.saveRole(role);
+	@PostMapping("/{realmName}")
+	public ResponseEntity<ResponseMessage> createRole(@PathVariable String realmName,@RequestBody RoleDto role) {
+		roleService.saveRole(realmName,role);
 		final ResponseMessage responseMessage = new ResponseMessage("Role successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@DeleteMapping("/{name}")
-	public ResponseEntity<ResponseMessage> deleteRole(@PathVariable String name) {
-		roleService.deleteRoleByName(name);
+	@DeleteMapping("/{realmName}/{name}")
+	public ResponseEntity<ResponseMessage> deleteRole(@PathVariable String realmName,@PathVariable String name) {
+		roleService.deleteRoleByName(realmName,name);
 		final ResponseMessage responseMessage = new ResponseMessage("Role successfully deleted");
 		return ResponseEntity.ok().body(responseMessage);
 

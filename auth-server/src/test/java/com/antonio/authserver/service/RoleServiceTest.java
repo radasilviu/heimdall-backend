@@ -1,10 +1,12 @@
 package com.antonio.authserver.service;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
+import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
+import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.repository.RoleRepository;
 import org.checkerframework.checker.units.qual.A;
 import org.junit.Assert;
@@ -28,100 +30,127 @@ class RoleServiceTest {
     private AppUserRepository appUserRepository;
     @Mock
     private RoleMapper roleMapper;
+    @Mock
+    private RealmRepository realmRepository;
     @InjectMocks
     private RoleService roleService;
 
     @Test
-    void withGivenRoleDto_shouldSaveRole() {
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
-        when(roleMapper.toRoleDao(any(RoleDto.class))).thenReturn(new Role("DummyRole"));
-        roleService.saveRole(new RoleDto("DummRole"));
+    void withGivenRealmNameAndRoleDto_shouldSaveRole() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.empty());
+        when(realmRepository.findByName(anyString())).thenReturn(Optional.of(realm));
+        when(roleMapper.toRoleDao(any(RoleDto.class))).thenReturn(new Role("DummyRole",realm));
+        roleService.saveRole("Realm",new RoleDto("DummRole",realm));
         verify(roleRepository,times(1)).save(any(Role.class));
     }
     @Test
-    void withGivenRoleDto_shouldReturnRoleAlreadyExistsException(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(new Role("Dummy")));
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.saveRole(new RoleDto("Dummy")));
+    void withGivenRealmNameAndRoleDto_shouldReturnRoleAlreadyExistsException(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(new Role("Dummy",realm)));
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.saveRole("Realm",new RoleDto("Dummy",realm)));
         assertTrue(exception.getMessage().contains(" ] already exists!"));
     }
     @Test
-    void withGivenRoleDto_shouldReturnNullRoleException(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.saveRole(new RoleDto("")));
+    void withRealmNameAndRoleDto_shouldReturnNullRoleException(){
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.empty());
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.saveRole("Realm",new RoleDto("",null)));
         assertTrue(exception.getMessage().contains("The inserted Role cannot be null!"));
     }
     @Test
-    void shouldGetAllRoles() {
+    void withGivenRealmNameAndRoleDto_shouldReturnYouCantCreateMoreAdminRolesExceptionForSave(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.saveRole("Realm",new RoleDto("ROLE_ADMIN",realm)));
+        assertTrue(exception.getMessage().contains("You are not allowed to create additional ADMIN roles."));
+    }
+
+    @Test
+    void withGivenRealmName_shouldGetAllRoles() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
         List<Role> roles = new ArrayList<>();
-        roles.add(new Role(""));
+        roles.add(new Role("",realm));
+        roles.add(new Role("ROLE_ADMIN",realm));
         List<RoleDto> roleDtos = new ArrayList<>();
-        roleDtos.add(new RoleDto(""));
-        when(roleRepository.findAll()).thenReturn(roles);
+        roleDtos.add(new RoleDto("",realm));
+        when(roleRepository.findAllByRealmName(anyString())).thenReturn(roles);
         when(roleMapper.toRoleDtoList(any())).thenReturn(roleDtos);
-        List<RoleDto> fromServ = roleService.getAllRoles();
+        List<RoleDto> fromServ = roleService.getAllRoles("Realm");
         assertEquals(fromServ.size(),roles.size());
     }
     @Test
-    void getRoleByName() {
-        Role role = new Role("DummyRole");
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(role));
-        when(roleMapper.toRoleDto(any())).thenReturn(new RoleDto("DummyRole"));
-        RoleDto roleDto = roleService.getRoleByName("DummyRole");
+    void withGivenRealmNameAndRoleName_shouldReturnRole() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        Role role = new Role("DummyRole",realm);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(role));
+        when(roleMapper.toRoleDto(any())).thenReturn(new RoleDto("DummyRole",realm));
+        RoleDto roleDto = roleService.getRoleByName("Realm","DummyRole");
         Assert.assertEquals(roleDto.getName(),role.getName());
     }
     @Test
-    void withGivenRoleName_shouldReturnRoleNotFoundException(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.getRoleByName("Dummy"));
+    void withGivenRealmNameAndRoleName_shouldReturnRoleNotFoundException(){
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.empty());
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.getRoleByName("Dummy","Realm"));
         assertTrue(exception.getMessage().contains(" could not be found!"));
     }
     @Test
-    void withGiveName_shouldUpdateRole() {
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(new Role("Dummy")));
-        roleService.updateRoleByName("Dummy",new RoleDto("NewDummy"));
+    void withGivenRealmNameAndRoleNameAndRoleDto_shouldUpdateRole() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(new Role("Dummy",realm)));
+        roleService.updateRoleByName("Realm","Dummy",new RoleDto("NewDummy",realm));
         verify(roleRepository,times(1)).save(any(Role.class));
     }
     @Test
-    void withGivenRoleNameAndRoleDto_shouldReturnRoleNotFoundExceptionForUpdate(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.updateRoleByName("Dummy",new RoleDto("NewDummy")));
+    void withGivenRealmNameAndRoleDto_shouldReturnYouCantCreateMoreAdminRolesException(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.updateRoleByName("Realm","Dummy",new RoleDto("ROLE_ADMIN",realm)));
+        assertTrue(exception.getMessage().contains("You are not allowed to create additional ADMIN roles."));
+    }
+    @Test
+    void withGivenRealmNameAndRoleNameAndRoleDto_shouldReturnRoleNotFoundExceptionForUpdate(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.empty());
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.updateRoleByName("Realm","Dummy",new RoleDto("NewDummy",realm)));
         assertTrue(exception.getMessage().contains("Role with the name ["));
     }
     @Test
-    void withGivenRoleNameAndRoleDto_shouldReturnNullRoleExceptionForUpdate(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(new Role("Dummy")));
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.updateRoleByName("Dummy",new RoleDto("")));
+    void withGivenRealmNameAndRoleNameAndRoleDto_shouldReturnNullRoleExceptionForUpdate(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(new Role("Dummy",realm)));
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.updateRoleByName("Realm","Dummy",new RoleDto("",null)));
         assertTrue(exception.getMessage().contains("The inserted Role cannot be null!"));
     }
 
     @Test
-    void withGivenName_shouldDeleteRole() {
+    void withGivenNameAndRealmName_shouldDeleteRole() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
         List<AppUser> list = new ArrayList<>();
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(new Role("Dummy")));
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(new Role("Dummy",realm)));
         when(appUserRepository.findAllByRolesIn(anySet())).thenReturn(list);
-        roleService.deleteRoleByName("Dummy");
+        roleService.deleteRoleByName("Realm","Dummy");
         verify(roleRepository,times(1)).deleteByName("Dummy");
     }
     @Test
-    void withGivenName_shouldReturnDeleteAssignedRoleException(){
+    void withGivenNameAndRealmName_shouldReturnDeleteAssignedRoleException(){
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
         List<AppUser> list = new ArrayList<>();
         list.add(new AppUser());
-        when(roleRepository.findByName(any())).thenReturn(Optional.of(new Role("Dummy")));
+        when(roleRepository.findByNameAndRealmName(any(),anyString())).thenReturn(Optional.of(new Role("Dummy",realm)));
         when(appUserRepository.findAllByRolesIn(any())).thenReturn(list);
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.deleteRoleByName("Dummy"));
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.deleteRoleByName("Realm","Dummy"));
         assertTrue(exception.getMessage().contains("Please make sure that all users don't have the role ["));
     }
     @Test
-    void withGivenName_shouldFindRole() {
-        Role found = new Role("Dummy");
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(found));
-        Role role = roleService.findRoleByNameDAO("Dummy");
+    void withGivenNameAndRealmName_shouldFindRole() {
+        Realm realm = new Realm("Realm","Realm",false,false,false,false,false,false,false);
+        Role found = new Role("Dummy",realm);
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.of(found));
+        Role role = roleService.findRoleByNameDaoAndRealmName("Dummy","Realm");
         Assert.assertEquals(role.getName(),found.getName());
     }
     @Test
-    void withGivenName_shouldReturnRoleNotFoundException(){
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
-        CustomException exception = assertThrows(CustomException.class,() -> roleService.findRoleByNameDAO("Dummy"));
+    void withGivenNameAndRealmName_shouldReturnRoleNotFoundException(){
+        when(roleRepository.findByNameAndRealmName(anyString(),anyString())).thenReturn(Optional.empty());
+        CustomException exception = assertThrows(CustomException.class,() -> roleService.findRoleByNameDaoAndRealmName("Dummy","Realm"));
         assertTrue(exception.getMessage().contains("could not be found!"));
     }
 

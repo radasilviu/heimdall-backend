@@ -11,8 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface RealmMapper {
 
-    RealmMapper INSTANCE = Mappers.getMapper(RealmMapper.class);
-
     Realm toRealmDao(RealmDto realmDto);
     RealmDto toRealmDto(Realm realm);
     List<RealmDto> toRealmDtoList(List<Realm> list);

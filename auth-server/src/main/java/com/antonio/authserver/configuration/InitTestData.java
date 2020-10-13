@@ -59,22 +59,18 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
             identityProviderRepository.saveAll(identityProviders);
 
-            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER"));
+            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN",realms.get(0)), new Role("ROLE_USER",realms.get(0)));
             roleRepository.saveAll(roleList);
 
             AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
             AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
-            AppUser admin_one = new AppUser("gabi", passwordEncoder.encode("gabi"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
-            AppUser admin_two = new AppUser("toni", passwordEncoder.encode("toni"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
             appUserRepository.save(user);
             appUserRepository.save(admin);
-            appUserRepository.save(admin_one);
-            appUserRepository.save(admin_two);
 
             Client client = new Client("myClient", "clientPass", realms.get(0));
             clientRepository.save(client);
 
-            groupRepository.save(new UserGroup("Group1", new ArrayList<>()));
+            groupRepository.save(new UserGroup("Group1", new ArrayList<>(), realms.get(1)));
         }
     }
 }

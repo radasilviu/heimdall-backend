@@ -2,6 +2,8 @@ package com.antonio.authserver.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -14,14 +16,16 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true)
     private String name;
 
+    @ManyToOne
+    private Realm realm;
 
     public Role() {
     }
 
-    public Role(String name) {
+    public Role(String name,Realm realm) {
         this.name = name;
+        this.realm = realm;
     }
 }

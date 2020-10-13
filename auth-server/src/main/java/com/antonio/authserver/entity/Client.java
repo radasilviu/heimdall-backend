@@ -19,8 +19,7 @@ public class Client {
     private String clientName;
     private String clientSecret;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne
     private Realm realm;
 
     public Client() {

@@ -1,9 +1,8 @@
 package com.antonio.authserver.service;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import com.antonio.authserver.entity.Realm;
+import com.antonio.authserver.repository.RealmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,42 +20,55 @@ public class RoleService {
 	private RoleRepository roleRepository;
 	private AppUserRepository appUserRepository;
 	private RoleMapper roleMapper;
+	private RealmRepository realmRepository;
 
 	@Autowired
-	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper) {
+	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
 		this.roleMapper = roleMapper;
+		this.realmRepository = realmRepository;
 	}
 
-	public void saveRole(RoleDto role) throws CustomException {
+	public void saveRole(String realmName,RoleDto role) throws CustomException {
 		role.setName(role.getName().replaceAll("\\s+", ""));
-		Optional<Role> byName = roleRepository.findByName(role.getName());
+		if(role.getName().equals("ROLE_ADMIN"))
+			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
+		Optional<Role> byName = roleRepository.findByNameAndRealmName(role.getName(),realmName);
 		if (byName.isPresent())
-			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!",
-					HttpStatus.CONFLICT);
+			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!", HttpStatus.CONFLICT);
 		else if (role.getName().equals("")) {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
-
+			role.setRealm(realmRepository.findByName(realmName).get());
 			roleRepository.save(roleMapper.toRoleDao(role));
 		}
 	}
 
-	public List<RoleDto> getAllRoles() {
-		return roleMapper.toRoleDtoList(roleRepository.findAll());
+	public List<RoleDto> getAllRoles(String realmName) {
+		List<Role> allByRealmName = roleRepository.findAllByRealmName(realmName);
+		List<Role> found = new ArrayList<Role>();
+		for(Role role : allByRealmName){
+			if(role.getName().equals("ROLE_ADMIN")){
+				found.add(role);
+			}
+		}
+		allByRealmName.removeAll(found);
+		return roleMapper.toRoleDtoList(allByRealmName);
 	}
 
-	public RoleDto getRoleByName(String name) throws CustomException {
-		Role role = roleRepository.findByName(name)
+	public RoleDto getRoleByName(String realmName,String name) throws CustomException {
+		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 		return roleMapper.toRoleDto(role);
 	}
 
-	public void updateRoleByName(String name, RoleDto roleDto) throws CustomException {
+	public void updateRoleByName(String realmName,String name, RoleDto roleDto) throws CustomException {
 		roleDto.setName(roleDto.getName().replaceAll("\\s+", ""));
-		Role role = roleRepository.findByName(name)
+		if(roleDto.getName().equals("ROLE_ADMIN"))
+			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
+		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 		if (roleDto.getName().equals(""))
@@ -65,8 +77,8 @@ public class RoleService {
 		roleRepository.save(role);
 	}
 
-	public void deleteRoleByName(String name) {
-		Optional<Role> role = roleRepository.findByName(name);
+	public void deleteRoleByName(String realmName,String name) {
+		Optional<Role> role = roleRepository.findByNameAndRealmName(name,realmName);
 		Set<Role> roles = new HashSet<>();
 		roles.add(role.get());
 		List<AppUser> users = appUserRepository.findAllByRolesIn(roles);
@@ -79,8 +91,8 @@ public class RoleService {
 		}
 	}
 
-	public Role findRoleByNameDAO(String name) {
-		return roleRepository.findByName(name)
+	public Role findRoleByNameDaoAndRealmName(String name,String realmName) {
+		return roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
 	}
