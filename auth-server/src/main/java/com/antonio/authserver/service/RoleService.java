@@ -1,8 +1,5 @@
 package com.antonio.authserver.service;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.repository.RealmRepository;
@@ -35,6 +32,8 @@ public class RoleService {
 
 	public void saveRole(String realmName,RoleDto role) throws CustomException {
 		role.setName(role.getName().replaceAll("\\s+", ""));
+		if(role.getName().equals("ROLE_ADMIN"))
+			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
 		Optional<Role> byName = roleRepository.findByNameAndRealmName(role.getName(),realmName);
 		if (byName.isPresent())
 			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!",
@@ -48,7 +47,15 @@ public class RoleService {
 	}
 
 	public List<RoleDto> getAllRoles(String realmName) {
-		return roleMapper.toRoleDtoList(roleRepository.findAllByRealmName(realmName));
+		List<Role> allByRealmName = roleRepository.findAllByRealmName(realmName);
+		List<Role> found = new ArrayList<Role>();
+		for(Role role : allByRealmName){
+			if(role.getName().equals("ROLE_ADMIN")){
+				found.add(role);
+			}
+		}
+		allByRealmName.removeAll(found);
+		return roleMapper.toRoleDtoList(allByRealmName);
 	}
 
 	public RoleDto getRoleByName(String realmName,String name) throws CustomException {
@@ -60,6 +67,8 @@ public class RoleService {
 
 	public void updateRoleByName(String realmName,String name, RoleDto roleDto) throws CustomException {
 		roleDto.setName(roleDto.getName().replaceAll("\\s+", ""));
+		if(roleDto.getName().equals("ROLE_ADMIN"))
+			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
 		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
