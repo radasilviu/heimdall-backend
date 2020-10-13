@@ -67,6 +67,29 @@ public class UserService {
         }
     }
 
+    public List<AppUserDto> isLoggedIn() {
+        List<AppUserDto> users = getAllUsers();
+        for (AppUserDto appUserDto : users) {
+            if (appUserDto.getToken().isEmpty()) {
+                appUserDto.setLoggedIn(false);
+            } else {
+                appUserDto.setLoggedIn(true);
+            }
+            appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
+        }
+        return users;
+    }
+
+    public void logOutAll() {
+        List<AppUserDto> users = getAllUsers();
+        for (AppUserDto appUserDto : users) {
+           if(!appUserDto.getRoles().contains(new Role("ROLE_ADMIN"))){
+               appUserDto.setLoggedIn(false);
+               appUserDto.setToken(null);
+           }
+        }
+    }
+
     public AppUserDto update(AppUserDto appUserDto) {
 
         appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));

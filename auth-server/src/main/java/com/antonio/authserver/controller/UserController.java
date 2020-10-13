@@ -92,4 +92,16 @@ public class UserController {
 
 	}
 
+	@PutMapping("/updateState")
+	public ResponseEntity<Object> updateUserState(){
+		userService.isLoggedIn();
+		return ResponseEntity.ok().body(new ResponseMessage("User state saved"));
+	}
+
+	@PutMapping("/logoutAll")
+	public ResponseEntity<Object> logoutAll(){
+		userService.logOutAll();
+		return ResponseEntity.ok().body(new ResponseMessage("All users loggedOut"));
+	}
+
 }

@@ -50,6 +50,8 @@ public class AppUser {
     @ManyToOne(targetEntity = IdentityProvider.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private IdentityProvider identityProvider;
 
+    private boolean isLoggedIn;
+
     public AppUser() {
 
     }
@@ -75,4 +77,5 @@ public class AppUser {
         this.realm = realm;
         this.identityProvider = identityProvider;
     }
+
 }
