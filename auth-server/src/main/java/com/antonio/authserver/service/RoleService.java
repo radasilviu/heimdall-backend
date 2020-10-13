@@ -36,8 +36,7 @@ public class RoleService {
 			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
 		Optional<Role> byName = roleRepository.findByNameAndRealmName(role.getName(),realmName);
 		if (byName.isPresent())
-			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!",
-					HttpStatus.CONFLICT);
+			throw new CustomException("Role with the name [ " + byName.get().getName() + " ] already exists!", HttpStatus.CONFLICT);
 		else if (role.getName().equals("")) {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
