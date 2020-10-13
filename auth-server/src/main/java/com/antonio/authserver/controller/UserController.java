@@ -25,70 +25,66 @@ import java.util.List;
 
 import com.antonio.authserver.utils.EmailUtility;
 import freemarker.template.TemplateException;
+
 @RestController
 @RequestMapping("api/user")
 public class UserController {
 
 	private UserService userService;
 	private RoleService roleService;
-	private PasswordEncoder passwordEncoder;
-	private RoleRepository roleRepository;
 	private EmailService emailService;
 
 	@Autowired
-	public UserController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder,
+	public UserController(UserService userService, RoleService roleService,
 			EmailService emailService) {
 		this.userService = userService;
 		this.roleService = roleService;
-		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
 	}
 
-	@GetMapping
-	public ResponseEntity<List<AppUserDto>> getUsers() {
-
-		List<AppUserDto> users = userService.getAllUsers();
-		return ResponseEntity.ok().body(users);
+	@GetMapping("/{realmName}")
+	public ResponseEntity<List<AppUserDto>> getUsers(@PathVariable String realmName) {
+		return ResponseEntity.ok().body(userService.getAllUsers(realmName));
 	}
 
-	@GetMapping("/{username}")
-	public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String username) {
-		return ResponseEntity.ok().body(userService.getUserByUsername(username));
+	@GetMapping("/{realmName}/{username}")
+	public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String realmName,@PathVariable String username) {
+		return ResponseEntity.ok().body(userService.getUserByUsernameAndRealmName(realmName,username));
 	}
 
-	@PostMapping
-	public ResponseEntity<?> saveUser(@RequestBody final AppUserDto user, HttpServletRequest request)
+	@PostMapping("/{realmName}")
+	public ResponseEntity<?> saveUser(@PathVariable String realmName,@RequestBody final AppUserDto user, HttpServletRequest request)
 			throws IOException, MessagingException, TemplateException {
 		String siteUrl = EmailUtility.getSiteUrl(request);
-		userService.create(user);
+		userService.create(realmName,user);
 		emailService.sendActivationEmail(user, siteUrl);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@PutMapping("/{username}")
-	public ResponseEntity<ResponseMessage> updateUserByUsername(@PathVariable String username,
+	@PutMapping("/{realmName}/{username}")
+	public ResponseEntity<ResponseMessage> updateUserByUsername(@PathVariable String realmName,@PathVariable String username,
 			@RequestBody AppUserDto appUserDto) {
-		userService.updateUserByUsername(username, appUserDto);
+		userService.updateUserByUsername(realmName,username, appUserDto);
 		final ResponseMessage responseMessage = new ResponseMessage("User successfully updated");
 		return ResponseEntity.ok().body(responseMessage);
 	}
 
-	@PostMapping("/{username}/addRole")
-	public void addRoleToUser(@PathVariable String username, @RequestBody String roleName) {
-		Role newRole = roleService.findRoleByNameDAO(roleName);
-		userService.addRole(username, newRole);
+	@PostMapping("/{realmName}/{username}/addRole")
+	public void addRoleToUser(@PathVariable String realmName,@PathVariable String username, @RequestBody String roleName) {
+		Role newRole = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
+		userService.addRole(realmName,username, newRole);
 	}
 
-	@DeleteMapping("/{username}")
-	public void deleteUser(@PathVariable String username) {
-		userService.deleteUser(username);
+	@DeleteMapping("/{realmName}/{username}")
+	public void deleteUser(@PathVariable String realmName,@PathVariable String username) {
+		userService.deleteUser(realmName,username);
 	}
 
-	@DeleteMapping("/{username}/removeRole")
-	public void removeRoleFromUser(@PathVariable String username, @RequestBody String roleName) {
-		Role newRole = roleService.findRoleByNameDAO(roleName);
-		userService.removeRole(username, newRole);
+	@DeleteMapping("/{realmName}/{username}/removeRole")
+	public void removeRoleFromUser(@PathVariable String realmName,@PathVariable String username, @RequestBody String roleName) {
+		Role newRole = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
+		userService.removeRole(realmName,username, newRole);
 
 	}
 

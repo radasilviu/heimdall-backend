@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.request.ForgotPasswordRequest;
 import com.antonio.authserver.request.ChangePasswordRequest;
 import com.antonio.authserver.request.ProfileLoginRequest;
@@ -35,6 +36,11 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+    private RealmRepository realmRepository;
+    @Autowired
+    public AuthController(RealmRepository realmRepository) {
+        this.realmRepository = realmRepository;
+    }
     @PostMapping(path = "/client-login")
     public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
@@ -74,7 +80,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody AppUserDto user, HttpServletRequest httpServletRequest)
             throws TemplateException, IOException, MessagingException {
         String siteUrl = EmailUtility.getSiteUrl(httpServletRequest);
-        userService.create(user);
+        userService.create(realmRepository.findByName("master0").get().getName(),user); ///NEEDS FIX (REGISTERS ALL NEW USERS TO MASTER0)
         emailService.sendActivationEmail(user, siteUrl);
         final ResponseMessage responseMessage = new ResponseMessage("User successfully saved");
         return ResponseEntity.ok().body(responseMessage);

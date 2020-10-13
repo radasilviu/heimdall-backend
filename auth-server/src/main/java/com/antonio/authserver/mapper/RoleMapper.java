@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring",uses = {RealmMapper.class},injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface RoleMapper {
 
     Role toRoleDao(RoleDto roleDto);

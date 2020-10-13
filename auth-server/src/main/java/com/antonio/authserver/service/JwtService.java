@@ -20,17 +20,14 @@ import javax.transaction.Transactional;
 public class JwtService {
 
     private Environment env;
-    private UserService userService;
 
     @Autowired
-    public JwtService(Environment env, UserService userService) {
+    public JwtService(Environment env ) {
         this.env = env;
-        this.userService = userService;
     }
 
-    public String createAccessToken(String issuer, long expirationTime,
+    public String createAccessToken(AppUserDto userDto, long expirationTime,
                                     Collection<? extends GrantedAuthority> authorities, String secretKey) {
-        final AppUserDto userDto = userService.getUserByUsername(issuer);
 
         String token = buildToken(userDto.getUsername(), userDto.toString(), expirationTime, authorities, secretKey);
 

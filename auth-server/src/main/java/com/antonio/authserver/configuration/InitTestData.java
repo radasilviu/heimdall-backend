@@ -59,7 +59,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
             identityProviderRepository.saveAll(identityProviders);
 
-            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN"), new Role("ROLE_USER"));
+            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN",realms.get(0)), new Role("ROLE_USER",realms.get(0)));
             roleRepository.saveAll(roleList);
 
             AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
@@ -74,7 +74,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             Client client = new Client("myClient", "clientPass", realms.get(0));
             clientRepository.save(client);
 
-            groupRepository.save(new UserGroup("Group1", new ArrayList<>()));
+            groupRepository.save(new UserGroup("Group1", new ArrayList<>(), realms.get(1)));
         }
     }
 }
