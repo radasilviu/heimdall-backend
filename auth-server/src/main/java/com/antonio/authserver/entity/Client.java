@@ -20,6 +20,7 @@ public class Client {
     private String clientSecret;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
     public Client() {
