@@ -27,7 +27,8 @@ public class UserGroup {
     @JoinColumn(name="usergroup")
     private List<AppUser> appUserGroup;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
     public UserGroup(){
