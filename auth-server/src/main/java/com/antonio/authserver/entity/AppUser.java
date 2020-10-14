@@ -38,9 +38,10 @@ public class AppUser {
 
     @ManyToMany
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Role> roles = new HashSet<>();
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
 	private Realm realm;
 
