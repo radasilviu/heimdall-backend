@@ -45,7 +45,7 @@ public class AppUser {
     @ManyToOne(targetEntity = IdentityProvider.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private IdentityProvider identityProvider;
 
-    private boolean isLoggedIn;
+    private boolean loggedIn;
 
     public AppUser() {
 

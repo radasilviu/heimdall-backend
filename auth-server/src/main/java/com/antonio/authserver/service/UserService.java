@@ -81,18 +81,19 @@ public class UserService {
         }
     }
 
-    public List<AppUserDto> isLoggedIn(String realmName) {
-        List<AppUserDto> users = getAllUsers(realmName);
-        for (AppUserDto appUserDto : users) {
-            if (!appUserDto.getToken().isEmpty() || !appUserDto.getRefreshToken().isEmpty()) {
-                appUserDto.setLoggedIn(true);
+    public List<AppUser> isLoggedIn(String realmName) {
+        List<AppUser> users = appUserRepository.findAllByRealmName(realmName);
+        for (AppUser appUser : users) {
+            if (appUser.getToken() == null) {
+                appUser.setLoggedIn(false);
             } else {
-                appUserDto.setLoggedIn(false);
+                appUser.setLoggedIn(true);
             }
-            appUserRepository.save(appUserMapper.toAppUserDao(appUserDto));
+            appUserRepository.save(appUser);
         }
         return users;
     }
+
 
     public void logOutAll(Realm realm) {
         List<AppUserDto> users = getAllUsers(realm.getName());
