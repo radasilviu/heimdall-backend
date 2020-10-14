@@ -47,9 +47,9 @@ public class GroupController {
         groupService.deleteGroupByName(realmName,name);
     }
 
-    @PostMapping("/{realmName}/group/{name}/addRole")
-    public void addRoleToGroup(@PathVariable String realmName,@PathVariable String name, @RequestBody Role role){
-        groupService.addRoleForGroup(realmName,name,role);
+    @PostMapping("/{realmName}/group/{name}/addRole/{roleName}")
+    public void addRoleToGroup(@PathVariable String realmName,@PathVariable String name, @PathVariable String roleName){
+        groupService.addRoleForGroup(realmName,name,roleName);
     }
     @PutMapping("/{realmName}/group/{name}/addUser")
     public void addUserToGroup(@PathVariable String realmName,@PathVariable String name, @RequestBody AppUser user){
