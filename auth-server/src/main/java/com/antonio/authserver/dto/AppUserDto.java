@@ -29,7 +29,7 @@ public class AppUserDto implements Serializable {
     private Realm realm;
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private IdentityProvider identityProvider;
-    private boolean isLoggedIn;
+    private boolean loggedIn;
 
     @Override
     public String toString() {

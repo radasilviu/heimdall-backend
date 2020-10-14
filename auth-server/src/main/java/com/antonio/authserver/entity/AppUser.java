@@ -39,13 +39,13 @@ public class AppUser {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-	@ManyToOne
+	@ManyToOne()
 	private Realm realm;
 
     @ManyToOne(targetEntity = IdentityProvider.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     private IdentityProvider identityProvider;
 
-    private boolean isLoggedIn;
+    private boolean loggedIn;
 
     public AppUser() {
 
