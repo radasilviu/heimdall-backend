@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Realm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,8 @@ import java.util.List;
 
 import com.antonio.authserver.utils.EmailUtility;
 import freemarker.template.TemplateException;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequestMapping("api/user")

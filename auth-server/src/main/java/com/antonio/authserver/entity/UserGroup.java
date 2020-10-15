@@ -40,6 +40,4 @@ public class UserGroup {
         this.realm = realm;
     }
 
-
-
 }
