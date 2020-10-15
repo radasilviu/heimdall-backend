@@ -101,6 +101,7 @@ public class UserService {
                 .forEach(u -> {
                     u.setToken(null);
                     u.setLoggedIn(false);
+                    u.setRefreshToken(null);
                 });
 
         appUserRepository.saveAll(users);
