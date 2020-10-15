@@ -6,7 +6,8 @@ import javax.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
-
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "app_user")
 @Getter
@@ -37,9 +38,11 @@ public class AppUser {
 
     @ManyToMany
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Role> roles = new HashSet<>();
 
 	@ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
 	private Realm realm;
 
     @ManyToOne(targetEntity = IdentityProvider.class, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
