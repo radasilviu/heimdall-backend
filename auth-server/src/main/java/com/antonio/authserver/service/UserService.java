@@ -84,6 +84,8 @@ public class UserService {
         for (AppUser appUser : users) {
             if (appUser.getToken() == null) {
                 appUser.setLoggedIn(false);
+            } else if (appUser.getRefreshToken() == null) {
+                appUser.setLoggedIn(false);
             } else {
                 appUser.setLoggedIn(true);
             }
