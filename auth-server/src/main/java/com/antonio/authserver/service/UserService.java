@@ -11,7 +11,6 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.IdentityProviderRepository;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.repository.RoleRepository;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -84,26 +82,28 @@ public class UserService {
     public List<AppUser> isLoggedIn(String realmName) {
         List<AppUser> users = appUserRepository.findAllByRealmName(realmName);
         for (AppUser appUser : users) {
-            if (appUser.getToken() != null) {
-                appUser.setLoggedIn(true);
-            } else if (appUser.getRefreshToken() != null) {
-                appUser.setLoggedIn(true);
-            } else {
+            if (appUser.getToken() == null) {
                 appUser.setLoggedIn(false);
+            } else {
+                appUser.setLoggedIn(true);
             }
             appUserRepository.save(appUser);
         }
         return users;
     }
 
+
     public void logOutAll(Realm realm) {
-        List<AppUserDto> users = getAllUsers(realm.getName());
-        for (AppUserDto appUserDto : users) {
-            if (!appUserDto.getRoles().contains(new Role("ROLE_ADMIN", realm))) {
-                appUserDto.setLoggedIn(false);
-                appUserDto.setToken(null);
-            }
-        }
+        List<AppUser> users = appUserRepository.findAllByRealmName(realm.getName());
+        Role role = roleRepository.findByName("ROLE_ADMIN").get();
+        users.stream()
+                .filter(u -> !u.getRoles().contains(role))
+                .forEach(u -> {
+                    u.setToken(null);
+                    u.setLoggedIn(false);
+                });
+
+        appUserRepository.saveAll(users);
     }
 
     public AppUserDto update(AppUserDto appUserDto) {
