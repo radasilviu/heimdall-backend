@@ -99,8 +99,8 @@ public class UserService {
         users.stream()
                 .filter(u -> !u.getRoles().contains(role))
                 .forEach(u -> {
-                    u.setLoggedIn(false);
                     u.setToken(null);
+                    u.setLoggedIn(false);
                 });
 
         appUserRepository.saveAll(users);
