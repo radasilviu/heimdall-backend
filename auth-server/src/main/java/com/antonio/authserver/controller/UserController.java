@@ -4,6 +4,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Realm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -89,10 +90,10 @@ public class UserController {
 
 	}
 
+
 	@PutMapping("/updateState")
-	public ResponseEntity<Object> updateUserState(@RequestBody String realmName){
-		userService.isLoggedIn(realmName);
-		return ResponseEntity.ok().body(new ResponseMessage("User state saved"));
+	public List<AppUser> updateUserState(@RequestBody String realmName){
+		return userService.isLoggedIn(realmName);
 	}
 
 	@PutMapping("/logoutAll")
