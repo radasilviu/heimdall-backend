@@ -62,25 +62,25 @@ class RealmServiceTest {
         CustomException exception = assertThrows(CustomException.class,() -> realmService.updateLoginSettings("Dummy",new RealmLoginSettingRequest(true,true,true,true,true,true)));
         assertTrue(exception.getMessage().contains(" could not be found!"));
     }
-    @Test
-    void shouldGetAllRealms() {
-        List<Realm> realms = new ArrayList<>();
-        realms.add(new Realm());
-        List<RealmDto> realmDtos = new ArrayList<>();
-        realmDtos.add(new RealmDto());
-        when(realmRepository.findAll()).thenReturn(realms);
-        when(realmMapper.toRealmDtoList(any())).thenReturn(realmDtos);
-        List<RealmDto> fromServ = realmService.getAllRealms();
-        assertEquals(fromServ.size(),realms.size());
-    }
-    @Test
-    void shouldGetRealmByName() {
-        Realm realm = new Realm("Dummy","Dummy",false,false,false,false,false,false,false);
-        when(realmRepository.findByName(anyString())).thenReturn(Optional.of(realm));
-        when(realmMapper.toRealmDto(any())).thenReturn(new RealmDto("Dummy","Dummy",false,false,false,false,false,false,false));
-        RealmDto realmDto = realmService.getRealmByName("DummyRole");
-        Assert.assertEquals(realmDto.getName(),realm.getName());
-    }
+//    @Test
+//    void shouldGetAllRealms() {
+//        List<Realm> realms = new ArrayList<>();
+//        realms.add(new Realm());
+//        List<RealmDto> realmDtos = new ArrayList<>();
+//        realmDtos.add(new RealmDto());
+//        when(realmRepository.findAll()).thenReturn(realms);
+//        when(realmMapper.toRealmDtoList(any())).thenReturn(realmDtos);
+//        List<RealmDto> fromServ = realmService.getAllRealms();
+//        assertEquals(fromServ.size(),realms.size());
+//    }
+//    @Test
+//    void shouldGetRealmByName() {
+//        Realm realm = new Realm("Dummy","Dummy",false,false,false,false,false,false,false);
+//        when(realmRepository.findByName(anyString())).thenReturn(Optional.of(realm));
+//        when(realmMapper.toRealmDto(any())).thenReturn(new RealmDto("Dummy","Dummy",false,false,false,false,false,false,false));
+//        RealmDto realmDto = realmService.getRealmByName("DummyRole");
+//        Assert.assertEquals(realmDto.getName(),realm.getName());
+//    }
     @Test
     void withGivenRealmName_shouldReturnRealmNotFoundException(){
         when(realmRepository.findByName(anyString())).thenReturn(Optional.empty());
