@@ -13,6 +13,7 @@ import java.util.List;
 public class PrivilegeController {
 
     private final PrivilegeService privilegeService;
+
     @Autowired
     public PrivilegeController(PrivilegeService privilegeService) {
         this.privilegeService = privilegeService;
@@ -25,13 +26,13 @@ public class PrivilegeController {
     public ResponseEntity<PrivilegeDto> getPrivilegeByName(@PathVariable String name){
         return ResponseEntity.ok().body(privilegeService.getPrivilegeByName(name));
     }
-    @PutMapping("/{name}")
+    @PutMapping("/{name}/add")
     public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String name, @RequestBody RoleDto roleDto){
         privilegeService.addPrivilegeToRole(name,roleDto);
         ResponseMessage responseMessage = new ResponseMessage("Privilege added to role successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @PutMapping("/{name}")
+    @PutMapping("/{name}/remove")
     public ResponseEntity<ResponseMessage> removePrivilegeFromRole(@PathVariable String name,@RequestBody RoleDto roleDto){
         privilegeService.removePrivilegeFromRole(name,roleDto);
         ResponseMessage responseMessage = new ResponseMessage("Privilege removed from role successfully!");

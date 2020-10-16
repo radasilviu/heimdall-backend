@@ -1,10 +1,12 @@
 package com.antonio.authserver.service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
+import com.antonio.authserver.entity.Privilege;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,7 +40,30 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 				getAuthorities(user.getRoles()));
 	}
 
-	private static List<GrantedAuthority> getAuthorities(Set<Role> roles) {
-		return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+	private List<? extends GrantedAuthority> getAuthorities(
+			Set<Role> roles) {
+
+		return getAuthorities(getPrivileges(roles));
+	}
+
+	private List<String> getPrivileges(Set<Role> roles) {
+
+		List<String> privileges = new ArrayList<>();
+		List<Privilege> collection = new ArrayList<>();
+		for (Role role : roles) {
+			collection.addAll(role.getPrivileges());
+		}
+		for (Privilege item : collection) {
+			privileges.add(item.getName());
+		}
+		return privileges;
+	}
+
+	private static List<GrantedAuthority> getAuthorities(List<String> privileges) {
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		for (String privilege : privileges) {
+			authorities.add(new SimpleGrantedAuthority(privilege));
+		}
+		return authorities;
 	}
 }
