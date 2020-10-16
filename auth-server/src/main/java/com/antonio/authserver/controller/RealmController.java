@@ -25,12 +25,12 @@ public class RealmController {
         this.realmService = realmService;
     }
 
-    @GetMapping("/admin/realm//list")
+    @GetMapping("/admin/realm/list")
     public ResponseEntity<List<RealmDto>> getAllRealms() {
         return ResponseEntity.ok().body(realmService.getAllRealms());
     }
 
-    @GetMapping("/admin/realm//{name}")
+    @GetMapping("/admin/realm/{name}")
     public ResponseEntity<RealmDto> getRealmByName(@PathVariable String name){
         return ResponseEntity.ok().body(realmService.getRealmByName(name));
     }
@@ -40,13 +40,13 @@ public class RealmController {
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully created");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @PutMapping("/admin/realm//{name}")
+    @PutMapping("/admin/realm/{name}")
     public ResponseEntity<ResponseMessage> updateRealmByName(@PathVariable String name,@RequestBody RealmDto realmDto){
         realmService.updateRealmByName(name,realmDto);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully updated");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @DeleteMapping("/admin/realm//{name}")
+    @DeleteMapping("/admin/realm/{name}")
     public ResponseEntity<ResponseMessage> deleteRealmByName(@PathVariable String name){
         realmService.deleteRealmByName(name);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully deleted");
