@@ -43,34 +43,55 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     public void onApplicationEvent(ApplicationContextEvent applicationContextEvent) {
         // for demo purpose
         if (roleRepository.findAll().size() == 0) {
+            List<Realm> realms = initRealms();
+            final IdentityProvider usernameAndPassword = initIdentityProvider();
 
-            List<Realm> realms = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                Realm realm = new Realm();
-                realm.setName("master" + i);
-                realm.setDisplayName("Master " + i);
-                realm.setEnabled(true);
-                realms.add(realm);
-            }
-            realms = realmRepository.saveAll(realms);
-
-            final IdentityProvider google = new IdentityProvider("GOOGLE");
-            final IdentityProvider usernameAndPassword = new IdentityProvider("USERNAME_AND_PASSWORD");
-            List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
-            identityProviderRepository.saveAll(identityProviders);
-
-            List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN",realms.get(0)), new Role("ROLE_USER",realms.get(0)));
-            roleRepository.saveAll(roleList);
-
-            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
-            AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
-            appUserRepository.save(user);
-            appUserRepository.save(admin);
-
-            Client client = new Client("myClient", "clientPass", realms.get(0));
-            clientRepository.save(client);
-
-            groupRepository.save(new UserGroup("Group1", new ArrayList<>(), realms.get(1)));
+            initRoles(realms);
+            initUsers(realms, usernameAndPassword);
+            initClients(realms);
+            initGroups(realms);
         }
+    }
+
+    private void initGroups(List<Realm> realms) {
+        groupRepository.save(new UserGroup("Group1", new ArrayList<>(), realms.get(1)));
+    }
+
+    private void initClients(List<Realm> realms) {
+        Client client = new Client("myClient", "clientPass", realms.get(0));
+        clientRepository.save(client);
+    }
+
+    private void initUsers(List<Realm> realms, IdentityProvider usernameAndPassword) {
+        AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
+        AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "smtp.mailtrap.io", true, null, realms.get(0), usernameAndPassword);
+        appUserRepository.save(user);
+        appUserRepository.save(admin);
+    }
+
+    private IdentityProvider initIdentityProvider() {
+        final IdentityProvider google = new IdentityProvider("GOOGLE");
+        final IdentityProvider usernameAndPassword = new IdentityProvider("USERNAME_AND_PASSWORD");
+        List<IdentityProvider> identityProviders = Arrays.asList(google, usernameAndPassword);
+        identityProviderRepository.saveAll(identityProviders);
+        return usernameAndPassword;
+    }
+
+    private void initRoles(List<Realm> realms) {
+        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0)), new Role("ROLE_USER", realms.get(0)));
+        roleRepository.saveAll(roleList);
+    }
+
+    private List<Realm> initRealms() {
+        List<Realm> realms = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Realm realm = new Realm();
+            realm.setName("master" + i);
+            realm.setDisplayName("Master " + i);
+            realm.setEnabled(true);
+            realms.add(realm);
+        }
+        realms = realmRepository.saveAll(realms);
+        return realms;
     }
 }
