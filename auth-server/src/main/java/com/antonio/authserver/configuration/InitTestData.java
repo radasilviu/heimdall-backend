@@ -2,6 +2,7 @@ package com.antonio.authserver.configuration;
 
 import com.antonio.authserver.entity.*;
 import com.antonio.authserver.repository.*;
+import com.antonio.authserver.service.PrivilegeService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -26,10 +27,11 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private RealmRepository realmRepository;
     private IdentityProviderRepository identityProviderRepository;
     private GroupRepository groupRepository;
+    private PrivilegeService privilegeService;
 
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -37,6 +39,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.realmRepository = realmRepository;
         this.identityProviderRepository = identityProviderRepository;
         this.groupRepository = groupRepository;
+        this.privilegeService = privilegeService;
     }
 
     @Override
@@ -78,7 +81,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initRoles(List<Realm> realms) {
-        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0)), new Role("ROLE_USER", realms.get(0)));
+        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), privilegeService.getBasicPrivileges()), new Role("ROLE_USER", realms.get(0),null));
         roleRepository.saveAll(roleList);
     }
 

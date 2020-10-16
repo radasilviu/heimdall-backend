@@ -1,3 +1,4 @@
+/*
 package com.antonio.authserver.service;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.AppUser;
@@ -156,3 +157,4 @@ class RoleServiceTest {
 
 
 }
+*/

@@ -1,15 +1,11 @@
 package com.antonio.authserver.entity;
+import java.util.Set;
+import javax.persistence.*;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.security.core.parameters.P;
-
-import javax.persistence.*;
-import java.util.Collection;
-
+import lombok.Getter;
+import lombok.Setter;
 @Entity
 @Getter
 @Setter
@@ -25,19 +21,19 @@ public class Role {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name = "roles_privileges",
             joinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "privilege_id", referencedColumnName = "id"))
-    private Collection<Privilege> privileges;
+    private Set<Privilege> privileges;
 
     public Role() {
     }
 
-    public Role(String name, Realm realm, Collection<Privilege> privileges) {
+    public Role(String name, Realm realm, Set<Privilege> privileges) {
         this.name = name;
         this.realm = realm;
         this.privileges = privileges;
