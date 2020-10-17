@@ -19,28 +19,27 @@ public class RealmService {
 
     private RealmRepository realmRepository;
     private RealmMapper realmMapper;
-
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    AppUserRepository appUserRepository;
-    @Autowired
+    private RoleRepository roleRepository;
+    private AppUserRepository appUserRepository;
     private ClientRepository clientRepository;
-    @Autowired
     private GroupRepository groupRepository;
-    @Autowired
     private ClientMapper clientMapper;
-    @Autowired
     private AppUserMapper appUserMapper;
-    @Autowired
     private RoleMapper roleMapper;
-    @Autowired
     private GroupMapper groupMapper;
 
     @Autowired
-    public RealmService(RealmRepository realmRepository, RealmMapper realmMapper) {
+    public RealmService(RealmRepository realmRepository, RealmMapper realmMapper, RoleRepository roleRepository, AppUserRepository appUserRepository, ClientRepository clientRepository, GroupRepository groupRepository, ClientMapper clientMapper, AppUserMapper appUserMapper, RoleMapper roleMapper, GroupMapper groupMapper) {
         this.realmRepository = realmRepository;
         this.realmMapper = realmMapper;
+        this.roleRepository = roleRepository;
+        this.appUserRepository = appUserRepository;
+        this.clientRepository = clientRepository;
+        this.groupRepository = groupRepository;
+        this.clientMapper = clientMapper;
+        this.appUserMapper = appUserMapper;
+        this.roleMapper = roleMapper;
+        this.groupMapper = groupMapper;
     }
 
     public RealmDto updateGeneralSettings(String name, RealmGeneralSettingRequest realm) {
@@ -66,26 +65,15 @@ public class RealmService {
         return realmMapper.toRealmDto(temp);
     }
 
-    public ParentRealmDto getRealmByName(String realmName) {
+    public RealmRelationsDto getRealmByName(String realmName) {
 
-        ParentRealmDto parentRealmDto = new ParentRealmDto();
-        Optional<Realm> realm = realmRepository.findByName(realmName);
-            RealmDto realmDto = realmMapper.toRealmDto(realm.get());
-            List<ClientDto> clients = clientMapper.toClientDtoList(clientRepository.findAllByRealmName(realmName));
-            List<AppUserDto> users = appUserMapper.toAppUserDtoList(appUserRepository.findAllByRealmName(realmName));
-            List<RoleDto> roles = roleMapper.toRoleDtoList(roleRepository.findAllByRealmName(realmName));
-            List<GroupDto> groups = groupMapper.toGroupDtoList(groupRepository.findAllByRealmName(realmName));
-            parentRealmDto.setClients(clients);
-            parentRealmDto.setGroups(groups);
-            parentRealmDto.setRealm(realmDto);
-            parentRealmDto.setUsers(users);
-            parentRealmDto.setRoles(roles);
-
-        return parentRealmDto;
+        Realm realm = realmRepository.findByName(realmName).orElseThrow(() -> new CustomException("Realm with the name [" + realmName +" ] could not be found!",HttpStatus.NOT_FOUND));
+        RealmDto realmDto = realmMapper.toRealmDto(realm);
+        return transferDataToRealmRelationsDto(realmName,realmDto);
     }
 
     public List<RealmDto> getAllRealms() {
-        return this.realmMapper.toRealmDtoList(realmRepository.findAll());
+        return realmMapper.toRealmDtoList(realmRepository.findAll());
     }
 
     public void createRealm(RealmDto realmDto) {
@@ -117,5 +105,19 @@ public class RealmService {
         Realm realm = realmRepository.findByName(name).orElseThrow(() -> new CustomException(
                 "Realm with the name [ " + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         realmRepository.delete(realm);
+    }
+
+    public RealmRelationsDto transferDataToRealmRelationsDto(String realmName,RealmDto realmDto){
+        RealmRelationsDto realmRelationsDto = new RealmRelationsDto();
+        List<ClientDto> clients = clientMapper.toClientDtoList(clientRepository.findAllByRealmName(realmName));
+        List<AppUserDto> users = appUserMapper.toAppUserDtoList(appUserRepository.findAllByRealmName(realmName));
+        List<RoleDto> roles = roleMapper.toRoleDtoList(roleRepository.findAllByRealmName(realmName));
+        List<GroupDto> groups = groupMapper.toGroupDtoList(groupRepository.findAllByRealmName(realmName));
+        realmRelationsDto.setClients(clients);
+        realmRelationsDto.setGroups(groups);
+        realmRelationsDto.setRealm(realmDto);
+        realmRelationsDto.setUsers(users);
+        realmRelationsDto.setRoles(roles);
+        return  realmRelationsDto;
     }
 }

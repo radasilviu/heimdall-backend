@@ -1,10 +1,8 @@
 package com.antonio.authserver.controller;
 
-import com.antonio.authserver.dto.ParentRealmDto;
+import com.antonio.authserver.dto.RealmRelationsDto;
 import com.antonio.authserver.dto.RealmDto;
-import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.model.ResponseMessage;
-import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.request.RealmGeneralSettingRequest;
 import com.antonio.authserver.request.RealmLoginSettingRequest;
 import com.antonio.authserver.service.RealmService;
@@ -32,7 +30,7 @@ public class RealmController {
     }
 
     @GetMapping("/admin/realm/{name}")
-    public ResponseEntity<ParentRealmDto> getRealmByName(@PathVariable String name) {
+    public ResponseEntity<RealmRelationsDto> getRealmByName(@PathVariable String name) {
         return ResponseEntity.ok().body(realmService.getRealmByName(name));
     }
 
@@ -68,7 +66,7 @@ public class RealmController {
     }
 
     @GetMapping("/realm/check/{realm}")
-    public ParentRealmDto checkRealmExists(@PathVariable final String realm) {
+    public RealmRelationsDto checkRealmExists(@PathVariable final String realm) {
         return realmService.getRealmByName(realm);
     }
 }
