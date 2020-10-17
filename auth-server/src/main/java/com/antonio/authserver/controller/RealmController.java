@@ -34,7 +34,7 @@ public class RealmController {
     public ResponseEntity<RealmDto> getRealmByName(@PathVariable String name){
         return ResponseEntity.ok().body(realmService.getRealmByName(name));
     }
-    @PostMapping("/admin/realm/")
+    @PostMapping("/admin/realm")
     public ResponseEntity<ResponseMessage> createRealm(@RequestBody RealmDto realmDto){
         realmService.createRealm(realmDto);
         final ResponseMessage responseMessage = new ResponseMessage("Realm successfully created");
