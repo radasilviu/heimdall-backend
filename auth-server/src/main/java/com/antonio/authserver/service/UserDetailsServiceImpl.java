@@ -35,15 +35,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		}
 
 		final AppUser user = userOptional.get();
-
 		return new org.springframework.security.core.userdetails.User(username, user.getPassword(),
 				getAuthorities(user.getRoles()));
 	}
 
 	private List<? extends GrantedAuthority> getAuthorities(
 			Set<Role> roles) {
-
-		return getAuthorities(getPrivileges(roles));
+		return getGrantedAuthorities(getPrivileges(roles));
 	}
 
 	private List<String> getPrivileges(Set<Role> roles) {
@@ -59,11 +57,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return privileges;
 	}
 
-	private static List<GrantedAuthority> getAuthorities(List<String> privileges) {
+	private static List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		for (String privilege : privileges) {
 			authorities.add(new SimpleGrantedAuthority(privilege));
 		}
 		return authorities;
 	}
+
 }

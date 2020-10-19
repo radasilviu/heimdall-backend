@@ -22,11 +22,13 @@ public class PrivilegeService {
     private final PrivilegeRepository privilegeRepository;
     private final PrivilegeMapper privilegeMapper;
     private final RoleRepository roleRepository;
+    private final RoleService roleService;
     @Autowired
-    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository) {
+    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, RoleService roleService) {
         this.privilegeRepository = privilegeRepository;
         this.privilegeMapper = privilegeMapper;
         this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     public List<PrivilegeDto> getAllPrivileges(){
@@ -68,9 +70,15 @@ public class PrivilegeService {
             throw new CustomException("The privilege with the name [" + name + " ] already exists!",HttpStatus.CONFLICT);
         }
         else {
-            Privilege privilege1 = new Privilege(name,null);
+            Privilege privilege1 = new Privilege(name,null,null);
             privilegeRepository.save(privilege1);
             return privilege1;
         }
+    }
+
+    public Set<PrivilegeDto> getPrivilegesForRole(String realmName,String roleName){
+        RoleDto roleByName = roleService.getRoleByName(realmName, roleName);
+        Set<PrivilegeDto> privileges = roleByName.getPrivileges();
+        return privileges;
     }
 }

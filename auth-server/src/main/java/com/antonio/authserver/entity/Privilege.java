@@ -16,6 +16,7 @@ public class Privilege {
     private Long id;
 
     private String name;
+    private String resource;
 
     @ManyToMany(mappedBy = "privileges")
     @JsonIgnore
@@ -23,8 +24,9 @@ public class Privilege {
 
     public Privilege() {
     }
-    public Privilege(String name, Set<Role> roles) {
+    public Privilege(String name, String resource, Set<Role> roles) {
         this.name = name;
+        this.resource = resource;
         this.roles = roles;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 @RestController
 @RequestMapping("api/privilege")
 public class PrivilegeController {
@@ -26,6 +27,10 @@ public class PrivilegeController {
     public ResponseEntity<PrivilegeDto> getPrivilegeByName(@PathVariable String name){
         return ResponseEntity.ok().body(privilegeService.getPrivilegeByName(name));
     }
+    @GetMapping("/{realmName}/{roleName}")
+    public ResponseEntity<Set<PrivilegeDto>> getPrivilegesForRole(@PathVariable String realmName,@PathVariable String roleName){
+        return ResponseEntity.ok().body(privilegeService.getPrivilegesForRole(realmName,roleName));
+    }
     @PutMapping("/{name}/add")
     public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String name, @RequestBody RoleDto roleDto){
         privilegeService.addPrivilegeToRole(name,roleDto);
@@ -38,4 +43,5 @@ public class PrivilegeController {
         ResponseMessage responseMessage = new ResponseMessage("Privilege removed from role successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
+
 }
