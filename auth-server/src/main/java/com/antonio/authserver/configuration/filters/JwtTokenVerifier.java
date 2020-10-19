@@ -1,6 +1,7 @@
 package com.antonio.authserver.configuration.filters;
 
 import com.antonio.authserver.dto.AppUserDto;
+import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
@@ -23,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,7 +92,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     }
 
     private Set<GrantedAuthority> getGrantedAuthoritySet(Set<Role> authorities) {
-        return authorities.stream().map(authority -> new SimpleGrantedAuthority(authority.getName())).collect(Collectors.toSet());
+        Set<GrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
+        for(Role role : authorities){
+            simpleGrantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+            for(Privilege privilege : role.getPrivileges()){
+                simpleGrantedAuthorities.add(new SimpleGrantedAuthority(privilege.getName()));
+            }
+        }
+        return simpleGrantedAuthorities;
     }
 
     private void setAuthentication(String username, Set<GrantedAuthority> grantedAuthorities) {
