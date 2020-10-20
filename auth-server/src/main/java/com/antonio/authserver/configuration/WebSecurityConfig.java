@@ -59,8 +59,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().configurationSource(corsConfigurationSource())
                 .and().csrf().disable().
                 authorizeRequests()
-                .antMatchers("/api/user/**").hasRole("ADMIN") //GET STILL WORKS SOMEHOW
-                .antMatchers("/api/user/**").hasAuthority("READ_ACCESS") //GET STILL WORKS SOMEHOW
+                .antMatchers("/api/user/**").hasRole("ADMIN")
+                .antMatchers("/api/client/**").hasRole("ADMIN")
+                .antMatchers("/api/role/**").hasRole("ADMIN")
+                .antMatchers("/api/privilege/**").hasRole("ADMIN")
+                .antMatchers("/api/company/**").hasAnyRole("ADMIN","USER")
+                .antMatchers("/api/book/**").hasAnyRole("ADMIN","USER")
                 .antMatchers("/oauth/**", "/admin/**", "/api/**").permitAll()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

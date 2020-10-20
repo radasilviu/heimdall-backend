@@ -48,7 +48,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         if (roleRepository.findAll().size() == 0) {
             List<Realm> realms = initRealms();
             final IdentityProvider usernameAndPassword = initIdentityProvider();
-
+            initPrivileges();
             initRoles(realms);
             initUsers(realms, usernameAndPassword);
             initClients(realms);
@@ -58,6 +58,10 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
 
     private void initGroups(List<Realm> realms) {
         groupRepository.save(new UserGroup("Group1", new ArrayList<>(), realms.get(1)));
+    }
+
+    private void initPrivileges(){
+        privilegeService.createBookAndCompanyPrivileges();
     }
 
     private void initClients(List<Realm> realms) {
@@ -81,7 +85,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initRoles(List<Realm> realms) {
-        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), privilegeService.getBasicPrivileges()), new Role("ROLE_USER", realms.get(0),null));
+        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), null), new Role("ROLE_USER", realms.get(0),null));
         roleRepository.saveAll(roleList);
     }
 

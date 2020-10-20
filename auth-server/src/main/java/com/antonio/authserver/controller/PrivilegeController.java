@@ -31,6 +31,12 @@ public class PrivilegeController {
     public ResponseEntity<Set<PrivilegeDto>> getPrivilegesForRole(@PathVariable String realmName,@PathVariable String roleName){
         return ResponseEntity.ok().body(privilegeService.getPrivilegesForRole(realmName,roleName));
     }
+    @PostMapping
+    public ResponseEntity<ResponseMessage> createPrivilegesForNewResource(@RequestBody String resourceName){
+        privilegeService.createPrivileges(resourceName);
+        ResponseMessage responseMessage = new ResponseMessage("Privileges created successfully!");
+        return ResponseEntity.ok().body(responseMessage);
+    }
     @PutMapping("/{name}/add")
     public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String name, @RequestBody RoleDto roleDto){
         privilegeService.addPrivilegeToRole(name,roleDto);

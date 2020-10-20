@@ -38,14 +38,6 @@ public class PrivilegeService {
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDto(privilege);
     }
-    public Set<Privilege> getBasicPrivileges(){
-        Set<Privilege> privileges= new HashSet<>();
-        privileges.add(createPrivilegeIfNotFound("READ_ACCESS"));
-        privileges.add(createPrivilegeIfNotFound("WRITE_ACCESS"));
-        privileges.add(createPrivilegeIfNotFound("EDIT_ACCESS"));
-        privileges.add(createPrivilegeIfNotFound("DELETE_ACCESS"));
-        return privileges;
-    }
     public void addPrivilegeToRole(String name, RoleDto roleDto){
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         Role role = roleRepository.findByNameAndRealmName(roleDto.getName(), roleDto.getRealm().getName()).orElseThrow(() -> new CustomException("The role with the name [" + roleDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
@@ -63,14 +55,14 @@ public class PrivilegeService {
         roleRepository.save(role);
     }
     @Transactional
-    public Privilege createPrivilegeIfNotFound(String name) {
+    public Privilege createPrivilegeIfNotFound(String name,String resourceName) {
 
-        Optional<Privilege> privilege = privilegeRepository.findByName(name);
+        Optional<Privilege> privilege = privilegeRepository.findByNameAndResource(name,resourceName);
         if(privilege.isPresent()){
             throw new CustomException("The privilege with the name [" + name + " ] already exists!",HttpStatus.CONFLICT);
         }
         else {
-            Privilege privilege1 = new Privilege(name,null,null);
+            Privilege privilege1 = new Privilege(resourceName + name,resourceName,null);
             privilegeRepository.save(privilege1);
             return privilege1;
         }
@@ -78,7 +70,16 @@ public class PrivilegeService {
 
     public Set<PrivilegeDto> getPrivilegesForRole(String realmName,String roleName){
         RoleDto roleByName = roleService.getRoleByName(realmName, roleName);
-        Set<PrivilegeDto> privileges = roleByName.getPrivileges();
-        return privileges;
+        return roleByName.getPrivileges();
+    }
+    public void createPrivileges(String resourceName){
+        createPrivilegeIfNotFound("_READ_PRIVILEGE",resourceName);
+        createPrivilegeIfNotFound("_WRITE_PRIVILEGE",resourceName);
+        createPrivilegeIfNotFound("_EDIT_PRIVILEGE",resourceName);
+        createPrivilegeIfNotFound("_DELETE_PRIVILEGE",resourceName);
+    }
+    public void createBookAndCompanyPrivileges(){
+        createPrivileges("BOOK");
+        createPrivileges("COMPANY");
     }
 }
