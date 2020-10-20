@@ -1,5 +1,7 @@
 package com.antonio.authserver.service;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -22,14 +24,14 @@ public class JwtService {
     private Environment env;
 
     @Autowired
-    public JwtService(Environment env ) {
+    public JwtService(Environment env) {
         this.env = env;
     }
 
     public String createAccessToken(AppUserDto userDto, long expirationTime,
                                     Collection<? extends GrantedAuthority> authorities, String secretKey) {
 
-        String token = buildToken(userDto.getUsername(), userDto.toString(), expirationTime, authorities, secretKey);
+        String token = buildToken(userDto.getUsername(),userDto.toString(),expirationTime, authorities, secretKey);
 
         return token;
     }
@@ -67,7 +69,7 @@ public class JwtService {
 
     private String buildToken(String issuer, String subject, long expirationTime,
                               Collection<? extends GrantedAuthority> authorities, String secretKey) {
-        String token = Jwts.builder().setIssuer(issuer).setSubject(subject).claim("authorities", authorities)
+        String token = Jwts.builder().setIssuer(issuer).setSubject(subject).claim("authorities", authorities).setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(new Date(expirationTime)).signWith(SignatureAlgorithm.HS512, secretKey).compact();
 
         return token;
