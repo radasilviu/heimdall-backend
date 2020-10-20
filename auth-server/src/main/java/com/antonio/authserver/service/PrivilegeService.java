@@ -38,17 +38,17 @@ public class PrivilegeService {
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDto(privilege);
     }
-    public void addPrivilegeToRole(String name, RoleDto roleDto){
+    public void addPrivilegeToRole(String name, String realmName, String roleName){
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Role role = roleRepository.findByNameAndRealmName(roleDto.getName(), roleDto.getRealm().getName()).orElseThrow(() -> new CustomException("The role with the name [" + roleDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
+        Role role = roleRepository.findByNameAndRealmName(roleName, realmName).orElseThrow(() -> new CustomException("The role with the name [" + roleName + "] could not be found!", HttpStatus.NOT_FOUND));
         Set<Privilege> privileges = role.getPrivileges();
         privileges.add(privilege);
         role.setPrivileges(privileges);
         roleRepository.save(role);
     }
-    public void removePrivilegeFromRole(String name,RoleDto roleDto){
+    public void removePrivilegeFromRole(String name,String realmName, String roleName){
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Role role = roleRepository.findByNameAndRealmName(roleDto.getName(), roleDto.getRealm().getName()).orElseThrow(() -> new CustomException("The role with the name [" + roleDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
+        Role role = roleRepository.findByNameAndRealmName(roleName, realmName).orElseThrow(() -> new CustomException("The role with the name [" + roleName + "] could not be found!", HttpStatus.NOT_FOUND));
         Set<Privilege> privileges = role.getPrivileges();
         privileges.remove(privilege);
         role.setPrivileges(privileges);

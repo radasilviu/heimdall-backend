@@ -38,14 +38,14 @@ public class PrivilegeController {
         return ResponseEntity.ok().body(responseMessage);
     }
     @PutMapping("/{name}/add")
-    public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String name, @RequestBody RoleDto roleDto){
-        privilegeService.addPrivilegeToRole(name,roleDto);
+    public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String name, @PathVariable String realmName,@PathVariable String roleName){
+        privilegeService.addPrivilegeToRole(name,realmName,roleName);
         ResponseMessage responseMessage = new ResponseMessage("Privilege added to role successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
     @PutMapping("/{name}/remove")
-    public ResponseEntity<ResponseMessage> removePrivilegeFromRole(@PathVariable String name,@RequestBody RoleDto roleDto){
-        privilegeService.removePrivilegeFromRole(name,roleDto);
+    public ResponseEntity<ResponseMessage> removePrivilegeFromRole(@PathVariable String name, @PathVariable String realmName,@PathVariable String roleName){
+        privilegeService.removePrivilegeFromRole(name,realmName,roleName);
         ResponseMessage responseMessage = new ResponseMessage("Privilege removed from role successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
