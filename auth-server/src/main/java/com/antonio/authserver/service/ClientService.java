@@ -47,16 +47,16 @@ public class ClientService {
         return clientMapper.toClientDto(client);
     }
 
-    public ClientDto getClientByName(String realmName,String clientName) throws CustomException {
-        Client client = clientRepository.findByClientNameAndRealmName(clientName,realmName).orElseThrow(() -> new CustomException(
+    public ClientDto getClientByName(String realmName, String clientName) throws CustomException {
+        Client client = clientRepository.findByClientNameAndRealmName(clientName, realmName).orElseThrow(() -> new CustomException(
                 "Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));
         return clientMapper.toClientDto(client);
 
     }
 
-    public void saveClient(String realmName,ClientDto client) throws CustomException {
+    public void saveClient(String realmName, ClientDto client) throws CustomException {
         client.setClientName(client.getClientName().replaceAll("\\s+", ""));
-        Optional<Client> byClientName = clientRepository.findByClientNameAndRealmName(client.getClientName(),realmName);
+        Optional<Client> byClientName = clientRepository.findByClientNameAndRealmName(client.getClientName(), realmName);
         if (byClientName.isPresent())
             throw new CustomException(
                     "Client with the name [ " + byClientName.get().getClientName() + " ] already exists!",
@@ -69,9 +69,9 @@ public class ClientService {
         }
     }
 
-    public void updateClientByName(String realmName,String name, ClientDto clientDto) throws CustomException {
+    public void updateClientByName(String realmName, String name, ClientDto clientDto) throws CustomException {
         clientDto.setClientName(clientDto.getClientName().replaceAll("\\s+", ""));
-        Client client = clientRepository.findByClientNameAndRealmName(name,realmName)
+        Client client = clientRepository.findByClientNameAndRealmName(name, realmName)
                 .orElseThrow(() -> new CustomException("Client with the name [ " + name + " ] could not be found!",
                         HttpStatus.NOT_FOUND));
         if (clientDto.getClientName().equals(""))
@@ -80,8 +80,8 @@ public class ClientService {
         clientRepository.save(client);
     }
 
-    public void deleteClientByName(String realmName,String clientName) throws CustomException {
-        Client client = clientRepository.findByClientNameAndRealmName(clientName,realmName).orElseThrow(() -> new CustomException(
+    public void deleteClientByName(String realmName, String clientName) throws CustomException {
+        Client client = clientRepository.findByClientNameAndRealmName(clientName, realmName).orElseThrow(() -> new CustomException(
                 "Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));
         clientRepository.delete(client);
     }
@@ -114,7 +114,7 @@ public class ClientService {
         return token;
     }
 
-    public void setProperties(Client client, String envKey, String envValue){
+    public void setProperties(Client client, String envKey, String envValue) {
         MutablePropertySources propertySources = environment.getPropertySources();
         System.out.println(environment.getProperty(envKey));
         Map<String, Object> myMap = new HashMap<>();
@@ -123,14 +123,14 @@ public class ClientService {
         System.out.println(environment.getProperty(envKey));
     }
 
-    public void setClientFrontedURL(String realm, Client client){
+    public void setClientFrontedURL(String realm, Client client) {
         Client newClient = clientRepository
-                .findByClientNameAndRealmName(client.getClientName(),client.getRealm().getName())
+                .findByClientNameAndRealmName(client.getClientName(), client.getRealm().getName())
                 .orElseThrow(() -> new CustomException("Client not found", HttpStatus.BAD_REQUEST));
 
         MutablePropertySources propertySources = environment.getPropertySources();
         Map<String, Object> myMap = new HashMap<>();
-        myMap.put("clientFrontedURL", newClient.getClientFrontedURL());
+        myMap.put("clientFrontedURL", newClient.getClientFrontendUrl());
         propertySources.addFirst(new MapPropertySource("appFile", myMap));
         clientRepository.save(newClient);
     }

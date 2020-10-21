@@ -2,7 +2,6 @@ package com.antonio.authserver.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -23,9 +22,10 @@ public class Client {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
-    private String authorizationFrontedURL;
-    private String clientFrontedURL;
+    private String clientFrontendUrl;
+    private String authorizationServerFrontendURL;
     private String clientBackendURL;
+    ;
 
     public Client() {
     }
@@ -40,8 +40,8 @@ public class Client {
         this.clientName = clientName;
         this.clientSecret = clientSecret;
         this.realm = realm;
-        this.authorizationFrontedURL = authorizationFrontedURL;
+        this.authorizationServerFrontendURL = authorizationFrontedURL;
         this.clientBackendURL = clientBackendURL;
-        this.clientFrontedURL = clientFrontedURL;
+        this.clientFrontendUrl = clientFrontedURL;
     }
 }
