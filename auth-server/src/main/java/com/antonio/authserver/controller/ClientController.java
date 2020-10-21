@@ -52,9 +52,6 @@ public class ClientController {
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
 		return ResponseEntity.ok().body(responseMessage);
 	}
-	@GetMapping("/{realmName}/setProperties")
-	public void setProperties(@PathVariable String realmName, @RequestBody Client client){
-		clientService.setClientFrontedURL(realmName, client);
-	}
+
 
 }
