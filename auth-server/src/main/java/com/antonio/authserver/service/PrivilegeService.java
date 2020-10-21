@@ -1,4 +1,5 @@
 package com.antonio.authserver.service;
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.PrivilegeDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Privilege;
@@ -12,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 @Service
 public class PrivilegeService {
 
@@ -81,5 +79,27 @@ public class PrivilegeService {
     public void createBookAndCompanyPrivileges(){
         createPrivileges("BOOK");
         createPrivileges("COMPANY");
+    }
+
+    public Boolean getUserResourcesAccess(AppUserDto appUserDto,String resourceName){
+        Boolean hasPermission=false;
+        List<String> resources = new ArrayList<>();
+        Set<Privilege> userPrivileges = getUserPrivileges(appUserDto);
+        for(Privilege privilege : userPrivileges){
+            resources.add(privilege.getResource());
+        }
+        for(String resource : resources){
+            if(resource.equals(resourceName))
+                hasPermission = true;
+        }
+        return hasPermission;
+    }
+    public Set<Privilege> getUserPrivileges(AppUserDto appUserDto){
+        Set<Role> roles = appUserDto.getRoles();
+        Set<Privilege> userPrivileges = new HashSet<>();
+        for(Role role : roles){
+            userPrivileges.addAll(role.getPrivileges());
+        }
+        return userPrivileges;
     }
 }
