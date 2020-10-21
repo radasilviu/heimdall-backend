@@ -65,8 +65,10 @@ public class ClientService {
             throw new CustomException("The inserted client cannot be null!", HttpStatus.BAD_REQUEST);
         } else {
             client.setRealm(realmRepository.findByName(realmName).get());
+            setClientFrontedURL(realmName, client);
             clientRepository.save(clientMapper.toClientDao(client));
         }
+
     }
 
     public void updateClientByName(String realmName,String name, ClientDto clientDto) throws CustomException {
@@ -77,6 +79,7 @@ public class ClientService {
         if (clientDto.getClientName().equals(""))
             throw new CustomException("The inserted client cannot be null!", HttpStatus.BAD_REQUEST);
         client.setClientName(clientDto.getClientName());
+        setClientFrontedURL(realmName, clientDto);
         clientRepository.save(client);
     }
 
@@ -123,7 +126,7 @@ public class ClientService {
         System.out.println(environment.getProperty(envKey));
     }
 
-    public void setClientFrontedURL(String realm, Client client){
+    private void setClientFrontedURL(String realm, ClientDto client){
         Client newClient = clientRepository
                 .findByClientNameAndRealmName(client.getClientName(),client.getRealm().getName())
                 .orElseThrow(() -> new CustomException("Client not found", HttpStatus.BAD_REQUEST));
