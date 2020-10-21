@@ -1,6 +1,7 @@
 package com.antonio.authserver.controller;
 
 import com.antonio.authserver.dto.ClientDto;
+import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,9 @@ public class ClientController {
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
 		return ResponseEntity.ok().body(responseMessage);
 	}
-	@GetMapping("/setProperties")
-	public void setProperties(@RequestBody String envKey,@RequestBody String envValue){
-		clientService.setProperties(envKey,envValue);
+	@GetMapping("/{realmName}/setProperties")
+	public void setProperties(@PathVariable String realmName, @RequestBody Client client){
+		clientService.setClientFrontedURL(realmName, client);
 	}
 
 }

@@ -114,13 +114,25 @@ public class ClientService {
         return token;
     }
 
-    public void setProperties(String envKey, String envValue){
+    public void setProperties(Client client, String envKey, String envValue){
         MutablePropertySources propertySources = environment.getPropertySources();
         System.out.println(environment.getProperty(envKey));
         Map<String, Object> myMap = new HashMap<>();
         myMap.put(envKey, envValue);
         propertySources.addFirst(new MapPropertySource("appFile", myMap));
         System.out.println(environment.getProperty(envKey));
+    }
+
+    public void setClientFrontedURL(String realm, Client client){
+        Client newClient = clientRepository
+                .findByClientNameAndRealmName(client.getClientName(),client.getRealm().getName())
+                .orElseThrow(() -> new CustomException("Client not found", HttpStatus.BAD_REQUEST));
+
+        MutablePropertySources propertySources = environment.getPropertySources();
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("clientFrontedURL", newClient.getClientFrontedURL());
+        propertySources.addFirst(new MapPropertySource("appFile", myMap));
+        clientRepository.save(newClient);
     }
 
 
