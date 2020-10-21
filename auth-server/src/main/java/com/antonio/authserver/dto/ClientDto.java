@@ -8,6 +8,9 @@ import lombok.Setter;
 @Setter
 public class ClientDto {
     private String clientName;
+    private String clientFrontendUrl;
+    private String authorizationServerFrontendURL;
+    private String clientBackendURL;
     private String clientSecret;
     private Realm realm;
 
