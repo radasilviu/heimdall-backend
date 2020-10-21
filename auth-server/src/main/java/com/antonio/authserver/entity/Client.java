@@ -23,6 +23,10 @@ public class Client {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
+    private String authorizationFrontedURL;
+    private String clientFrontedURL;
+    private String clientBackendURL;
+
     public Client() {
     }
 
@@ -30,5 +34,14 @@ public class Client {
         this.clientName = clientName;
         this.clientSecret = clientSecret;
         this.realm = realm;
+    }
+
+    public Client(String clientName, String clientSecret, Realm realm, String authorizationFrontedURL, String clientBackendURL, String clientFrontedURL) {
+        this.clientName = clientName;
+        this.clientSecret = clientSecret;
+        this.realm = realm;
+        this.authorizationFrontedURL = authorizationFrontedURL;
+        this.clientBackendURL = clientBackendURL;
+        this.clientFrontedURL = clientFrontedURL;
     }
 }

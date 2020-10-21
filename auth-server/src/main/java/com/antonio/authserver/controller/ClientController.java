@@ -51,4 +51,9 @@ public class ClientController {
 		final ResponseMessage responseMessage = new ResponseMessage("Client successfully deleted");
 		return ResponseEntity.ok().body(responseMessage);
 	}
+	@GetMapping("/setProperties")
+	public void setProperties(@RequestBody String envKey,@RequestBody String envValue){
+		clientService.setProperties(envKey,envValue);
+	}
+
 }

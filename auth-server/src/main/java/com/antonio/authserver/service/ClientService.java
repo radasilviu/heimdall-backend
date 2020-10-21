@@ -11,12 +11,13 @@ import com.antonio.authserver.repository.ClientRepository;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ClientService {
@@ -25,13 +26,15 @@ public class ClientService {
     private JwtService jwtService;
     private ClientMapper clientMapper;
     private RealmRepository realmRepository;
+    private ConfigurableEnvironment environment;
 
     @Autowired
-    public ClientService(ClientRepository clientRepository, JwtService jwtService, ClientMapper clientMapper, RealmRepository realmRepository) {
+    public ClientService(ClientRepository clientRepository, JwtService jwtService, ClientMapper clientMapper, RealmRepository realmRepository, ConfigurableEnvironment environment) {
         this.clientRepository = clientRepository;
         this.jwtService = jwtService;
         this.clientMapper = clientMapper;
         this.realmRepository = realmRepository;
+        this.environment = environment;
     }
 
     public List<ClientDto> getAllClients(String realmName) {
@@ -109,6 +112,15 @@ public class ClientService {
                 SecurityConstants.TOKEN_SECRET);
 
         return token;
+    }
+
+    public void setProperties(String envKey, String envValue){
+        MutablePropertySources propertySources = environment.getPropertySources();
+        System.out.println(environment.getProperty(envKey));
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put(envKey, envValue);
+        propertySources.addFirst(new MapPropertySource("appFile", myMap));
+        System.out.println(environment.getProperty(envKey));
     }
 
 
