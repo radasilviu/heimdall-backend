@@ -4,13 +4,12 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
-import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.var;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
+
+
+        String header = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
+        System.out.println(header);
 
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
