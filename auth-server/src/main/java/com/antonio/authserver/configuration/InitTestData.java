@@ -28,10 +28,11 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private IdentityProviderRepository identityProviderRepository;
     private GroupRepository groupRepository;
     private PrivilegeService privilegeService;
+    private PrivilegeRepository privilegeRepository;
 
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, PrivilegeRepository privilegeRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -40,6 +41,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.identityProviderRepository = identityProviderRepository;
         this.groupRepository = groupRepository;
         this.privilegeService = privilegeService;
+        this.privilegeRepository = privilegeRepository;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initRoles(List<Realm> realms) {
-        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), null), new Role("ROLE_USER", realms.get(0),null));
+        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), null), new Role("ROLE_USER", realms.get(0),privilegeService.transferFromListToSet(privilegeRepository.findAll())));
         roleRepository.saveAll(roleList);
     }
 
