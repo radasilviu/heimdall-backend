@@ -47,7 +47,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
         String header = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
+        String request = httpServletRequest.getHeader(SecurityConstants.REQUEST);
+
         System.out.println(header);
+        System.out.println(request);
+
 
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
