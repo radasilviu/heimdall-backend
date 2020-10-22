@@ -77,11 +77,11 @@ public class PrivilegeService {
         createPrivilegeIfNotFound("_DELETE_PRIVILEGE",resourceName);
     }
     public void createBookAndCompanyPrivileges(){
-        createPrivileges("BOOK");
-        createPrivileges("COMPANY");
+        createPrivileges("BOOKS");
+        createPrivileges("COMPANIES");
     }
 
-    public Boolean getUserResourcesAccess(AppUserDto appUserDto,String resourceName){
+    public Boolean checkIfUserHasResource(AppUserDto appUserDto,String resourceName){
         Boolean hasPermission=false;
         List<String> resources = new ArrayList<>();
         Set<Privilege> userPrivileges = getUserPrivileges(appUserDto);
@@ -101,5 +101,34 @@ public class PrivilegeService {
             userPrivileges.addAll(role.getPrivileges());
         }
         return userPrivileges;
+    }
+
+    public void checkIfUserHasPrivilegeForResource(AppUserDto appUserDto, String resourceName,String requestType){
+        String privilegeName = "";
+        Set<Privilege> userPrivileges = getUserPrivileges(appUserDto);
+        String privilegeType = getPrivilegeTypeByRequestType(requestType);
+        Privilege privilege = privilegeRepository.findByName(resourceName + privilegeType).orElseThrow(() -> new CustomException("Privilege with the name [" + resourceName + privilegeType + " ] could not be found!", HttpStatus.NOT_FOUND));
+        for (Privilege userPrivilege : userPrivileges) {
+            if (userPrivilege.getName().equals(privilege.getName()))
+                privilegeName = privilege.getName();
+        }
+            if (privilegeName.equals(""))
+                throw new CustomException("The user does not have the privilege to do this!",HttpStatus.UNAUTHORIZED);
+    }
+    private String getPrivilegeTypeByRequestType(String requestType){
+        if (requestType.equals("GET"))
+            return "_READ_PRIVILEGE";
+        else if(requestType.equals("POST"))
+            return "_WRITE_PRIVILEGE";
+        else if(requestType.equals("PUT"))
+            return "_EDIT_PRIVILEGE";
+        else if(requestType.equals("DELETE"))
+            return "_DELETE_PRIVILEGE";
+        else
+            return "FAIL";
+    }
+    public Set<Privilege> transferFromListToSet(List<Privilege> list){
+        Set<Privilege> privileges = new HashSet<>(list);
+        return privileges;
     }
 }
