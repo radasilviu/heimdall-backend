@@ -128,7 +128,6 @@ public class PrivilegeService {
             return "FAIL";
     }
     public Set<Privilege> transferFromListToSet(List<Privilege> list){
-        Set<Privilege> privileges = new HashSet<>(list);
-        return privileges;
+        return new HashSet<>(list);
     }
 }
