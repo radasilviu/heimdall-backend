@@ -5,11 +5,14 @@ import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.JwtService;
+import com.antonio.authserver.service.PrivilegeService;
+import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
 import lombok.var;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,24 +38,24 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private final PrivilegeService  privilegeService;
+    private final RoleService roleService;
 
-    public JwtTokenVerifier(JwtService jwtService, UserService userService) {
+    @Autowired
+    public JwtTokenVerifier(JwtService jwtService, UserService userService,PrivilegeService privilegeService,RoleService roleService) {
         this.jwtService = jwtService;
         this.userService = userService;
+        this.privilegeService = privilegeService;
+        this.roleService = roleService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
-
-
-        String header = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
-        String request = httpServletRequest.getHeader(SecurityConstants.REQUEST);
-
-        System.out.println(header);
-        System.out.println(request);
-
-
+        String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
+        resourceHeader = resourceHeader.toUpperCase();
+        String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
+        requestTypeHeader = requestTypeHeader.toUpperCase();
 
         if (Strings.isNullOrEmpty(authorizationHeader)) {
             throw new CustomException("The user is not authorized to do this.", HttpStatus.UNAUTHORIZED);
@@ -64,6 +67,15 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final AppUserDto user = extractUserFromToken(token);
 
             verifyToken(token, user.getToken());
+
+            if(roleService.checkIfUserHasDesiredRole(user,"ROLE_USER")){
+            if(!resourceHeader.equals("PUBLIC")){
+                if(privilegeService.checkIfUserHasResource(user,resourceHeader))
+                    privilegeService.checkIfUserHasPrivilegeForResource(user,resourceHeader,requestTypeHeader);
+                else
+                    throw new CustomException("You don't have the privileges to do that.",HttpStatus.UNAUTHORIZED);
+            }
+            }
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
@@ -133,4 +145,5 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         return shouldNotFilter;
     }
+
 }
