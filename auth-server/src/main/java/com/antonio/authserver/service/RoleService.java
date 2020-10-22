@@ -1,8 +1,10 @@
 package com.antonio.authserver.service;
 import java.util.*;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Realm;
 import com.antonio.authserver.repository.RealmRepository;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -95,5 +97,16 @@ public class RoleService {
 		return roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));
+	}
+
+	public Boolean checkIfUserHasDesiredRole(AppUserDto appUserDto,String roleName){
+		boolean hasRole = false;
+		Set<Role> roles = appUserDto.getRoles();
+		for (Role role:roles)
+			if (role.getName().equals(roleName)) {
+				hasRole = true;
+				break;
+			}
+		return hasRole;
 	}
 }
