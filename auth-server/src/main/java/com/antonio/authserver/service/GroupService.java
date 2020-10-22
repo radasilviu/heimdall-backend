@@ -12,6 +12,7 @@ import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.GroupRepository;
 import com.antonio.authserver.repository.RealmRepository;
+import com.antonio.authserver.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,10 @@ public class GroupService {
     private UserService userService;
     private AppUserMapper appUserMapper;
     private RealmRepository realmRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass, AppUserRepository appUserRepository, UserService userService, AppUserMapper appUserMapper, RealmRepository realmRepository) {
+    public GroupService(GroupRepository groupRepository, GroupMapper groupMapper, GroupMapperClass groupMapperClass, AppUserRepository appUserRepository, UserService userService, AppUserMapper appUserMapper, RealmRepository realmRepository, RoleRepository roleRepository) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
         this.groupMapperClass = groupMapperClass;
@@ -40,6 +42,7 @@ public class GroupService {
         this.userService = userService;
         this.appUserMapper = appUserMapper;
         this.realmRepository = realmRepository;
+        this.roleRepository = roleRepository;
     }
 
     public List<GroupDto> findAllGroups(String realmName) {
@@ -89,7 +92,8 @@ public class GroupService {
     }
 
 
-    public void addRoleForGroup(String realmName,String name, Role role) {
+    public void addRoleForGroup(String realmName,String name, String roleName) {
+        Role role = roleRepository.findByNameAndRealmName(roleName, realmName).orElseThrow(() -> new CustomException("Role with the name " + roleName + " could not be found!", HttpStatus.NOT_FOUND));
         Optional<UserGroup> group = groupRepository.findByNameAndRealmName(name,realmName);
         if (group.isPresent()) {
             List<AppUser> users = group.get().getAppUserGroup();
@@ -99,6 +103,9 @@ public class GroupService {
                     appUserRepository.save(user);
                 }
             }
+        }
+        else{
+            throw new CustomException("Group with the name "+ name +" could not be found!",HttpStatus.NOT_FOUND);
         }
     }
 
