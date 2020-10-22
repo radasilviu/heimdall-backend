@@ -5,6 +5,7 @@ import com.antonio.authserver.entity.Client;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,8 @@ import java.util.List;
 public class ClientController {
 
 	private ClientService clientService;
+	@Autowired
+	ConfigurableEnvironment environment;
 
 	@Autowired
 	public ClientController(ClientService clientService) {
@@ -23,6 +26,7 @@ public class ClientController {
 
 	@GetMapping("/{realmName}")
 	public List<ClientDto> getAllClients(@PathVariable String realmName) {
+
 		List<ClientDto> clients = clientService.getAllClients(realmName);
 		return clients;
 	}
