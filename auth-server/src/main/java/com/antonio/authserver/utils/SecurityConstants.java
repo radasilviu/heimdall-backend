@@ -10,6 +10,8 @@ public class SecurityConstants {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String TOKEN_SECRET = "ld3x2od2oska1nzc";
     public static final String RESOURCE = "Resource";
+    public static final String REQUEST = "Request_Type";
+
 
 }
 
