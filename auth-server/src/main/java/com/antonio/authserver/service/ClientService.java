@@ -13,8 +13,12 @@ import com.antonio.authserver.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +67,7 @@ public class ClientService {
         } else {
             client.setRealm(realmRepository.findByName(realmName).get());
             clientRepository.save(clientMapper.toClientDao(client));
-            setCorsUrls();
+            corsConfigurationSource();
         }
     }
 
@@ -78,7 +82,7 @@ public class ClientService {
         client.setFrontendUrl(clientDto.getFrontendUrl());
         client.setBackendUrl(clientDto.getBackendUrl());
         clientRepository.save(client);
-        setCorsUrls();
+        corsConfigurationSource();
     }
 
     public void deleteClientByName(String realmName, String clientName) throws CustomException {
@@ -124,8 +128,22 @@ public class ClientService {
             urls.add(client.getFrontendUrl());
         }
         urls.add("http://localhost:4201");
+
         return urls;
     }
+
+
+    public CorsConfigurationSource corsConfigurationSource(){
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(setCorsUrls());
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "whitelist", "X-Requested-With", "Origin", "Authorization", "Accept-Encoding", "X-Auth-Token"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+
 
 
 }
