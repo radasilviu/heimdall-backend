@@ -1,4 +1,5 @@
 package com.antonio.authserver.service;
+import com.antonio.authserver.configuration.constants.PrivilegeType;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.PrivilegeDto;
 import com.antonio.authserver.dto.RoleDto;
@@ -81,19 +82,6 @@ public class PrivilegeService {
         createPrivileges("COMPANIES");
     }
 
-    public Boolean checkIfUserHasResource(AppUserDto appUserDto,String resourceName){
-        Boolean hasPermission=false;
-        List<String> resources = new ArrayList<>();
-        Set<Privilege> userPrivileges = getUserPrivileges(appUserDto);
-        for(Privilege privilege : userPrivileges){
-            resources.add(privilege.getResource());
-        }
-        for(String resource : resources){
-            if(resource.equals(resourceName))
-                hasPermission = true;
-        }
-        return hasPermission;
-    }
     public Set<Privilege> getUserPrivileges(AppUserDto appUserDto){
         Set<Role> roles = appUserDto.getRoles();
         Set<Privilege> userPrivileges = new HashSet<>();
@@ -107,7 +95,7 @@ public class PrivilegeService {
         String privilegeName = "";
         Set<Privilege> userPrivileges = getUserPrivileges(appUserDto);
         String privilegeType = getPrivilegeTypeByRequestType(requestType);
-        Privilege privilege = privilegeRepository.findByName(resourceName + privilegeType).orElseThrow(() -> new CustomException("Privilege with the name [" + resourceName + privilegeType + " ] could not be found!", HttpStatus.NOT_FOUND));
+        Privilege privilege = privilegeRepository.findByName(resourceName + privilegeType).orElseThrow(() -> new CustomException("Privilege with the name [" + resourceName + privilegeType + " ] could not be found for the user!", HttpStatus.NOT_FOUND));
         for (Privilege userPrivilege : userPrivileges) {
             if (userPrivilege.getName().equals(privilege.getName()))
                 privilegeName = privilege.getName();
@@ -117,13 +105,13 @@ public class PrivilegeService {
     }
     private String getPrivilegeTypeByRequestType(String requestType){
         if (requestType.equals("GET"))
-            return "_READ_PRIVILEGE";
+            return PrivilegeType.READ.getMessage();
         else if(requestType.equals("POST"))
-            return "_WRITE_PRIVILEGE";
+            return PrivilegeType.WRITE.getMessage();
         else if(requestType.equals("PUT"))
-            return "_EDIT_PRIVILEGE";
+            return PrivilegeType.EDIT.getMessage();
         else if(requestType.equals("DELETE"))
-            return "_DELETE_PRIVILEGE";
+            return PrivilegeType.DELETE.getMessage();
         else
             return "FAIL";
     }

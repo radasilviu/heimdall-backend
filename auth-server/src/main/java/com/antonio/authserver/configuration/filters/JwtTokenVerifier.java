@@ -67,15 +67,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final AppUserDto user = extractUserFromToken(token);
 
             verifyToken(token, user.getToken());
+            checkIfUserHasNecessaryAuthorities(user,resourceHeader,requestTypeHeader);
 
-            if(roleService.checkIfUserHasDesiredRole(user,"ROLE_USER")){
-            if(!resourceHeader.equals("PUBLIC")){
-                if(privilegeService.checkIfUserHasResource(user,resourceHeader))
-                    privilegeService.checkIfUserHasPrivilegeForResource(user,resourceHeader,requestTypeHeader);
-                else
-                    throw new CustomException("You don't have the privileges to do that.",HttpStatus.UNAUTHORIZED);
-            }
-            }
         }
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
@@ -144,6 +137,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
         return shouldNotFilter;
+    }
+
+    private void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader){
+        if(roleService.checkIfUserHasDesiredRole(user,"ROLE_USER")){
+            if(!resourceHeader.equals("PUBLIC")){
+                    privilegeService.checkIfUserHasPrivilegeForResource(user,resourceHeader,requestTypeHeader);
+            }
+        }
     }
 
 }
