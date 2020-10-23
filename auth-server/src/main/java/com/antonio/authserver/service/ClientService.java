@@ -44,16 +44,16 @@ public class ClientService {
         return clientMapper.toClientDto(client);
     }
 
-    public ClientDto getClientByName(String realmName,String clientName) throws CustomException {
-        Client client = clientRepository.findByClientNameAndRealmName(clientName,realmName).orElseThrow(() -> new CustomException(
+    public ClientDto getClientByName(String realmName, String clientName) throws CustomException {
+        Client client = clientRepository.findByClientNameAndRealmName(clientName, realmName).orElseThrow(() -> new CustomException(
                 "Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));
         return clientMapper.toClientDto(client);
 
     }
 
-    public void saveClient(String realmName,ClientDto client) throws CustomException {
+    public void saveClient(String realmName, ClientDto client) throws CustomException {
         client.setClientName(client.getClientName().replaceAll("\\s+", ""));
-        Optional<Client> byClientName = clientRepository.findByClientNameAndRealmName(client.getClientName(),realmName);
+        Optional<Client> byClientName = clientRepository.findByClientNameAndRealmName(client.getClientName(), realmName);
         if (byClientName.isPresent())
             throw new CustomException(
                     "Client with the name [ " + byClientName.get().getClientName() + " ] already exists!",
@@ -63,12 +63,13 @@ public class ClientService {
         } else {
             client.setRealm(realmRepository.findByName(realmName).get());
             clientRepository.save(clientMapper.toClientDao(client));
+            setCorsUrls();
         }
     }
 
-    public void updateClientByName(String realmName,String name, ClientDto clientDto) throws CustomException {
+    public void updateClientByName(String realmName, String name, ClientDto clientDto) throws CustomException {
         clientDto.setClientName(clientDto.getClientName().replaceAll("\\s+", ""));
-        Client client = clientRepository.findByClientNameAndRealmName(name,realmName)
+        Client client = clientRepository.findByClientNameAndRealmName(name, realmName)
                 .orElseThrow(() -> new CustomException("Client with the name [ " + name + " ] could not be found!",
                         HttpStatus.NOT_FOUND));
         if (clientDto.getClientName().equals(""))
@@ -77,8 +78,8 @@ public class ClientService {
         clientRepository.save(client);
     }
 
-    public void deleteClientByName(String realmName,String clientName) throws CustomException {
-        Client client = clientRepository.findByClientNameAndRealmName(clientName,realmName).orElseThrow(() -> new CustomException(
+    public void deleteClientByName(String realmName, String clientName) throws CustomException {
+        Client client = clientRepository.findByClientNameAndRealmName(clientName, realmName).orElseThrow(() -> new CustomException(
                 "Client with the name [ " + clientName + " ] could not be found!", HttpStatus.NOT_FOUND));
         clientRepository.delete(client);
     }
@@ -109,6 +110,18 @@ public class ClientService {
                 SecurityConstants.TOKEN_SECRET);
 
         return token;
+    }
+
+    public List<String> setCorsUrls() {
+        List<Client> clients = clientRepository.findAll();
+        List<String> urls = new ArrayList<>();
+
+        for (Client client : clients) {
+            urls.add(client.getBackendUrl());
+            urls.add(client.getFrontendUrl());
+        }
+
+        return urls;
     }
 
 

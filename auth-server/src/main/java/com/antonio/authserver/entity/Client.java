@@ -7,6 +7,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,6 +19,8 @@ public class Client {
     private Long id;
     private String clientName;
     private String clientSecret;
+    private String backendUrl;
+    private String frontendUrl;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
