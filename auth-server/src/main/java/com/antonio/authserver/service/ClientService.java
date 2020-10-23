@@ -78,6 +78,7 @@ public class ClientService {
         client.setFrontendUrl(clientDto.getFrontendUrl());
         client.setBackendUrl(clientDto.getBackendUrl());
         clientRepository.save(client);
+        setCorsUrls();
     }
 
     public void deleteClientByName(String realmName, String clientName) throws CustomException {
