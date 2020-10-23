@@ -3,6 +3,7 @@ package com.antonio.authserver.configuration;
 import com.antonio.authserver.entity.*;
 import com.antonio.authserver.repository.*;
 import com.antonio.authserver.service.PrivilegeService;
+import com.antonio.authserver.service.ResourceService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -26,10 +27,12 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private GroupRepository groupRepository;
     private PrivilegeService privilegeService;
     private PrivilegeRepository privilegeRepository;
+    private ResourceService resourceService;
+    private ResourceRepository resourceRepository;
 
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, PrivilegeRepository privilegeRepository) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, PrivilegeRepository privilegeRepository, ResourceService resourceService, ResourceRepository resourceRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -39,6 +42,8 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.groupRepository = groupRepository;
         this.privilegeService = privilegeService;
         this.privilegeRepository = privilegeRepository;
+        this.resourceService = resourceService;
+        this.resourceRepository = resourceRepository;
     }
 
     @Override
@@ -48,6 +53,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             List<Realm> realms = initRealms();
             final IdentityProvider usernameAndPassword = initIdentityProvider();
             initPrivileges();
+            initResources();
             initRoles(realms);
             initUsers(realms, usernameAndPassword);
             initClients(realms);
@@ -60,8 +66,12 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initPrivileges(){
-        privilegeService.createBookAndCompanyPrivileges();
+        privilegeService.generatePrivileges();
     }
+
+    private void initResources(){
+        resourceService.generateCompaniesAndBooksResourcesForUserRole();
+    resourceService.assignPrivilegesToResources();}
 
     private void initClients(List<Realm> realms) {
         Client client = new Client("myClient", "clientPass", realms.get(0));
@@ -84,8 +94,12 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initRoles(List<Realm> realms) {
-        List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN", realms.get(0), null), new Role("ROLE_USER", realms.get(0),privilegeService.transferFromListToSet(privilegeRepository.findAll())));
+        Role admin =new Role("ROLE_ADMIN", realms.get(0),null);
+        Role user =new Role("ROLE_USER", realms.get(0),null);
+        List<Role> roleList = Arrays.asList(admin,user);
+        user.setRoleResources(resourceService.getBasicResources());
         roleRepository.saveAll(roleList);
+
     }
 
     private List<Realm> initRealms() {
