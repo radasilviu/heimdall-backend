@@ -12,8 +12,6 @@ public class ClientDto {
     private String clientName;
     private String clientSecret;
     private Realm realm;
-    private String backendUrl;
-    private String frontendUrl;
 
 
     public ClientDto() {

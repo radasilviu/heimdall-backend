@@ -79,8 +79,6 @@ public class ClientService {
         if (clientDto.getClientName().equals(""))
             throw new CustomException("The inserted client cannot be null!", HttpStatus.BAD_REQUEST);
         client.setClientName(clientDto.getClientName());
-        client.setFrontendUrl(clientDto.getFrontendUrl());
-        client.setBackendUrl(clientDto.getBackendUrl());
         clientRepository.save(client);
     }
 
