@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import com.antonio.authserver.entity.Privilege;
+import com.antonio.authserver.entity.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,7 +50,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		List<String> privileges = new ArrayList<>();
 		List<Privilege> collection = new ArrayList<>();
 		for (Role role : roles) {
-			collection.addAll(role.getPrivileges());
+			for(Resource resource : role.getRoleResources()) {
+				collection.addAll(resource.getPrivileges());
+			}
 		}
 		for (Privilege item : collection) {
 			privileges.add(item.getName());
