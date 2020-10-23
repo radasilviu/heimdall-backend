@@ -11,6 +11,7 @@ import com.antonio.authserver.repository.ClientRepository;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.cors.CorsConfiguration;
@@ -67,7 +68,6 @@ public class ClientService {
         } else {
             client.setRealm(realmRepository.findByName(realmName).get());
             clientRepository.save(clientMapper.toClientDao(client));
-            corsConfigurationSource();
         }
     }
 
@@ -82,7 +82,6 @@ public class ClientService {
         client.setFrontendUrl(clientDto.getFrontendUrl());
         client.setBackendUrl(clientDto.getBackendUrl());
         clientRepository.save(client);
-        corsConfigurationSource();
     }
 
     public void deleteClientByName(String realmName, String clientName) throws CustomException {
@@ -118,32 +117,5 @@ public class ClientService {
 
         return token;
     }
-
-    public List<String> setCorsUrls() {
-        List<Client> clients = clientRepository.findAll();
-        List<String> urls = new ArrayList<>();
-
-        for (Client client : clients) {
-            urls.add(client.getBackendUrl());
-            urls.add(client.getFrontendUrl());
-        }
-        urls.add("http://localhost:4201");
-
-        return urls;
-    }
-
-
-    public CorsConfigurationSource corsConfigurationSource(){
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(setCorsUrls());
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "whitelist", "X-Requested-With", "Origin", "Authorization", "Accept-Encoding", "X-Auth-Token"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-
-
 
 }
