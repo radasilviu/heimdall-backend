@@ -2,6 +2,7 @@ package com.antonio.authserver.configuration.filters;
 
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Privilege;
+import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.JwtService;
@@ -95,9 +96,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     private AppUserDto extractUserFromToken(String token) {
         final Claims claims = jwtService.decodeJWT(token);
         final String username = claims.getIssuer();
-        final AppUserDto user = userService.findByUsername(username);
-
-        return user;
+        return userService.findByUsername(username);
     }
 
     private void verifyToken(String currentToken, String userToken) {
@@ -110,8 +109,10 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         Set<GrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
         for(Role role : authorities){
             simpleGrantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-            for(Privilege privilege : role.getPrivileges()){
-                simpleGrantedAuthorities.add(new SimpleGrantedAuthority(privilege.getName()));
+            for (Resource resource : role.getRoleResources()){
+                for(Privilege privilege : resource.getPrivileges()){
+                    simpleGrantedAuthorities.add(new SimpleGrantedAuthority(privilege.getName()));
+                }
             }
         }
         return simpleGrantedAuthorities;
@@ -139,12 +140,17 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         return shouldNotFilter;
     }
 
-    private void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader){
-        if(roleService.checkIfUserHasDesiredRole(user,"ROLE_USER")){
-            if(!resourceHeader.equals("PUBLIC")){
-                    privilegeService.checkIfUserHasPrivilegeForResource(user,resourceHeader,requestTypeHeader);
+    private void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader) {
+        for (Role role : user.getRoles()) {
+            if (role.getName().equals("ROLE_ADMIN"))
+                return;
+            else {
+                if (!resourceHeader.equals("PUBLIC")) {
+                    if (!privilegeService.getResourceFromRoles(user, resourceHeader).getName().equals("")) {
+                        privilegeService.checkIfUserHasPrivilegeForResource(user, resourceHeader, requestTypeHeader);
+                    }
+                }
             }
         }
     }
-
 }
