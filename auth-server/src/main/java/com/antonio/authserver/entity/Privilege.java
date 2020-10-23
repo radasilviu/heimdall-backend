@@ -7,7 +7,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Set;
 @Entity
-@Table(name = "Privileges")
+@Table(name = "Privilege")
 @Getter
 @Setter
 public class Privilege {
@@ -16,17 +16,15 @@ public class Privilege {
     private Long id;
 
     private String name;
-    private String resource;
 
     @ManyToMany(mappedBy = "privileges")
     @JsonIgnore
-    private Set<Role> roles;
+    private Set<Resource> resources;
 
     public Privilege() {
     }
-    public Privilege(String name, String resource, Set<Role> roles) {
+    public Privilege(String name , Set<Resource> resources) {
         this.name = name;
-        this.resource = resource;
-        this.roles = roles;
+        this.resources = resources;
     }
 }
