@@ -12,15 +12,15 @@ public class RoleDto {
 
     private String name;
     private Realm realm;
-    private Set<PrivilegeDto> privileges;
+    private Set<ResourceDto> roleResources;
 
 
     public RoleDto() {
     }
 
-    public RoleDto(String name,Realm realm,Set<PrivilegeDto> privileges) {
+    public RoleDto(String name,Realm realm,Set<ResourceDto> roleResources) {
         this.name = name;
         this.realm = realm;
-        this.privileges=privileges;
+        this.roleResources = roleResources;
     }
 }

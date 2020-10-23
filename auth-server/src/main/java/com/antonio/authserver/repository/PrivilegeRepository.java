@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 @Repository
 public interface PrivilegeRepository extends JpaRepository<Privilege,Long> {
-    Optional<Privilege> findByNameAndResource(String name,String resourceName);
     Optional<Privilege> findByName(String name);
 }

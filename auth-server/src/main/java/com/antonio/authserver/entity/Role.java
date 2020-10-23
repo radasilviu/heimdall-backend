@@ -23,19 +23,19 @@ public class Role {
 
     @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinTable(
-            name = "roles_privileges",
+            name = "role_resources",
             joinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
-                    name = "privilege_id", referencedColumnName = "id"))
-    private Set<Privilege> privileges;
+                    name = "resource_id", referencedColumnName = "id"))
+    private Set<Resource> roleResources;
 
     public Role() {
     }
 
-    public Role(String name, Realm realm, Set<Privilege> privileges) {
+    public Role(String name, Realm realm,Set<Resource> resources) {
         this.name = name;
         this.realm = realm;
-        this.privileges = privileges;
+        this.roleResources = resources;
     }
 }
