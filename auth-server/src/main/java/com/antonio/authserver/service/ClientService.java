@@ -120,7 +120,7 @@ public class ClientService {
             urls.add(client.getBackendUrl());
             urls.add(client.getFrontendUrl());
         }
-
+        urls.add("http://localhost:4201");
         return urls;
     }
 
