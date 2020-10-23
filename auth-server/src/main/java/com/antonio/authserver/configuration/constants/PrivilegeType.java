@@ -1,10 +1,10 @@
 package com.antonio.authserver.configuration.constants;
 public enum PrivilegeType {
 
-    READ("_READ_PRIVILEGE"),
-    WRITE("_WRITE_PRIVILEGE"),
-    EDIT("_EDIT_PRIVILEGE"),
-    DELETE("_DELETE_PRIVILEGE");
+    READ("READ_PRIVILEGE"),
+    WRITE("WRITE_PRIVILEGE"),
+    EDIT("EDIT_PRIVILEGE"),
+    DELETE("DELETE_PRIVILEGE");
 
     private final String message;
 
