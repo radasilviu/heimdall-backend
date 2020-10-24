@@ -10,11 +10,9 @@ import java.util.Set;
 public class PrivilegeDto {
 
     private String name;
-    private Set<Resource> resources;
     public PrivilegeDto() {
     }
-    public PrivilegeDto(String name, Set<Resource> resources) {
+    public PrivilegeDto(String name) {
         this.name = name;
-        this.resources = resources;
     }
 }

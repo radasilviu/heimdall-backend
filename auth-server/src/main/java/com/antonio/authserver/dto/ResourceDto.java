@@ -10,14 +10,12 @@ import java.util.Set;
 public class ResourceDto {
 
     private String name;
-    private Set<Role> roles;
     private Set<Privilege> privileges;
 
     public ResourceDto() {
     }
-    public ResourceDto(String name, Set<Role> roles, Set<Privilege> privileges) {
+    public ResourceDto(String name, Set<Privilege> privileges) {
         this.name = name;
-        this.roles = roles;
         this.privileges = privileges;
     }
 }

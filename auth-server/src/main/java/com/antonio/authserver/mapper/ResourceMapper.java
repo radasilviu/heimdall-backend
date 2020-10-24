@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper(componentModel = "spring",uses = {RoleMapper.class},injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ResourceMapper {
 
+    Resource toResourceDao(ResourceDto resourceDto);
     ResourceDto toResourceDto(Resource resource);
     List<ResourceDto> toResourceDtoList(List<Resource> resources);
 }

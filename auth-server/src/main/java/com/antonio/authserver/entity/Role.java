@@ -21,7 +21,7 @@ public class Role {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "role_resources",
             joinColumns = @JoinColumn(

@@ -18,7 +18,7 @@ public class Resource {
     @ManyToMany(mappedBy = "roleResources")
     private Set<Role> roles;
 
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "resource_privileges",
             joinColumns = @JoinColumn(
