@@ -7,6 +7,7 @@ import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.PrivilegeMapper;
+import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.PrivilegeRepository;
 import com.antonio.authserver.repository.ResourceRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.*;
 @Service
+@Transactional
 public class PrivilegeService {
 
     private final PrivilegeRepository privilegeRepository;
@@ -26,14 +28,16 @@ public class PrivilegeService {
     private final RoleService roleService;
     private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;
+    private final RoleMapper roleMapper;
     @Autowired
-    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, RoleService roleService, ResourceService resourceService, ResourceRepository resourceRepository) {
+    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, RoleService roleService, ResourceService resourceService, ResourceRepository resourceRepository, RoleMapper roleMapper) {
         this.privilegeRepository = privilegeRepository;
         this.privilegeMapper = privilegeMapper;
         this.roleRepository = roleRepository;
         this.roleService = roleService;
         this.resourceService = resourceService;
         this.resourceRepository = resourceRepository;
+        this.roleMapper = roleMapper;
     }
 
     public List<PrivilegeDto> getAllPrivileges(){
@@ -43,16 +47,16 @@ public class PrivilegeService {
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDto(privilege);
     }
-    public void addPrivilegeToResource(String privilegeName, String resourceName, Role role){
+    public void addPrivilegeToResource(String privilegeName, String resourceName, RoleDto role){
         Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, role);
+        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
         Set<Privilege> privileges = resource.getPrivileges();
         privileges.add(privilege);
         resourceRepository.save(resource);
     }
-    public void removePrivilegeFromRole(String privilegeName,String resourceName, Role role){
+    public void removePrivilegeFromRole(String privilegeName,String resourceName, RoleDto role){
         Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, role);
+        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
         Set<Privilege> privileges = resource.getPrivileges();
         privileges.remove(privilege);
         resourceRepository.save(resource);
@@ -71,9 +75,9 @@ public class PrivilegeService {
         }
     }
 
-    public Set<Privilege> getPrivilegesForResource(String resourceName,Role role){
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, role);
-        return resource.getPrivileges();
+    public List<PrivilegeDto> getPrivilegesForResource(String resourceName,RoleDto role){
+        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
+        return privilegeMapper.toPrivilegeDtoList(transferPrivilegesFromSetToList(resource.getPrivileges()));
     }
     public void createPrivileges(){
         createPrivilegeIfNotFound(PrivilegeType.READ.getMessage());
@@ -123,4 +127,7 @@ public class PrivilegeService {
         }
     }
 
+    public List<Privilege> transferPrivilegesFromSetToList(Set<Privilege> set){
+        return new ArrayList<>(set);
+    }
 }

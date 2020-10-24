@@ -1,9 +1,11 @@
 package com.antonio.authserver.service;
 import com.antonio.authserver.dto.ResourceDto;
+import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.ResourceMapper;
+import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.PrivilegeRepository;
 import com.antonio.authserver.repository.ResourceRepository;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 @Service
 @Transactional
@@ -25,21 +28,23 @@ public class ResourceService {
     private final PrivilegeRepository privilegeRepository;
     private final RoleRepository roleRepository;
     private final RoleService roleService;
+    private final RoleMapper roleMapper;
 
     @Autowired
-    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository, RoleService roleService) {
+    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository, RoleService roleService, RoleMapper roleMapper) {
         this.resourceRepository = resourceRepository;
         this.resourceMapper = resourceMapper;
         this.privilegeRepository = privilegeRepository;
         this.roleRepository = roleRepository;
         this.roleService = roleService;
+        this.roleMapper = roleMapper;
     }
 
     public List<ResourceDto> getAllResources(){
         return resourceMapper.toResourceDtoList(resourceRepository.findAll());
     }
-    public List<ResourceDto> getAllResourcesForRole(Role role){
-        return resourceMapper.toResourceDtoList(resourceRepository.findAllByRolesContains(role));
+    public List<ResourceDto> getAllResourcesForRole(RoleDto role){
+        return resourceMapper.toResourceDtoList(resourceRepository.findAllByRolesContains(roleMapper.toRoleDao(role)));
     }
     public Resource getResourceByNameAndRole(String resourceName,Role role){
         return findResourceByNameAndRole(resourceName,role);
@@ -57,10 +62,6 @@ public class ResourceService {
         Set<Resource> roleResources = role.getRoleResources();
         roleResources.remove(resource);
         roleRepository.save(role);
-    }
-    public Set<Privilege> getPrivilegesForResource(String resourceName,Role role){
-        Resource resource = findResourceByNameAndRole(resourceName, role);
-        return resource.getPrivileges();
     }
     private Resource findResourceByNameAndRole(String resourceName,Role role){
         return resourceRepository.findByNameAndRolesContains(resourceName, role).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + " ] could not be found!", HttpStatus.NOT_FOUND));
@@ -88,5 +89,17 @@ public class ResourceService {
             }
             resourceRepository.save(resource);
         }
+    }
+    public void createResource(ResourceDto resourceDto){
+        Optional<Resource> byName = resourceRepository.findByName(resourceDto.getName());
+        if (byName.isPresent())
+            throw new CustomException("Resource with the name [" + byName.get().getName() + "] already exists!",HttpStatus.CONFLICT);
+        else{
+            resourceRepository.save(resourceMapper.toResourceDao(resourceDto));
+        }
+    }
+    public void deleteResource(ResourceDto resourceDto){
+        Resource resource = resourceRepository.findByName(resourceDto.getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
+        resourceRepository.delete(resource);
     }
 }

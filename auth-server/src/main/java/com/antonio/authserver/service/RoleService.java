@@ -16,7 +16,9 @@ import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.RoleRepository;
 
+import javax.transaction.Transactional;
 @Service
+@Transactional
 public class RoleService {
 
 	private RoleRepository roleRepository;
