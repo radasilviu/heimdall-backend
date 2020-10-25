@@ -1,7 +1,6 @@
 package com.antonio.authserver.controller;
 import com.antonio.authserver.dto.PrivilegeDto;
 import com.antonio.authserver.dto.RoleDto;
-import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.PrivilegeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 @RestController
 @RequestMapping("api/privilege")
 public class PrivilegeController {
@@ -30,7 +28,7 @@ public class PrivilegeController {
     }
     @PutMapping("/{privilegeName}/{resourceName}/add")
     public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String privilegeName, @PathVariable String resourceName,@RequestBody RoleDto role){
-        privilegeService.addPrivilegeToResource(privilegeName,resourceName,role);
+        privilegeService.addPrivilegeToResourceForRole(privilegeName,resourceName,role);
         ResponseMessage responseMessage = new ResponseMessage("Privilege added to role successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }

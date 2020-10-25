@@ -47,19 +47,36 @@ public class PrivilegeService {
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDto(privilege);
     }
-    public void addPrivilegeToResource(String privilegeName, String resourceName, RoleDto role){
+    public void addPrivilegeToResourceForRole(String privilegeName, String resourceName, RoleDto role){
         Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
-        Set<Privilege> privileges = resource.getPrivileges();
-        privileges.add(privilege);
-        resourceRepository.save(resource);
+        Optional<Role> byNameAndRealmName = roleRepository.findByNameAndRealmName(role.getName(), role.getRealm().getName());
+        Set<Resource> roleResources = byNameAndRealmName.get().getRoleResources();
+        for(Resource resource : roleResources){
+            if(resource.getName().equals(resourceName)) {
+                resource.getPrivileges().add(privilege);
+                resourceRepository.save(resource); // Need?
+            }
+            else
+            {
+                throw new CustomException("Resource could not be found!",HttpStatus.NOT_FOUND);
+            }
+        }
     }
+
     public void removePrivilegeFromRole(String privilegeName,String resourceName, RoleDto role){
         Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
-        Set<Privilege> privileges = resource.getPrivileges();
-        privileges.remove(privilege);
-        resourceRepository.save(resource);
+        Optional<Role> byNameAndRealmName = roleRepository.findByNameAndRealmName(role.getName(), role.getRealm().getName());
+        Set<Resource> roleResources = byNameAndRealmName.get().getRoleResources();
+        for(Resource resource : roleResources){
+            if(resource.getName().equals(resourceName)) {
+                resource.getPrivileges().remove(privilege);
+                resourceRepository.save(resource); // Need?
+            }
+            else
+            {
+                throw new CustomException("Resource could not be found!",HttpStatus.NOT_FOUND);
+            }
+        }
     }
     @Transactional
     public Privilege createPrivilegeIfNotFound(String name) {

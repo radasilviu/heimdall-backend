@@ -18,6 +18,13 @@ public class Resource {
     @ManyToMany(mappedBy = "roleResources")
     private Set<Role> roles;
 
+    private String roleName;
+    public Resource(String name, Set<Role> roles, String roleName, Set<Privilege> privileges) {
+        this.name = name;
+        this.roles = roles;
+        this.roleName = roleName;
+        this.privileges = privileges;
+    }
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "resource_privileges",
@@ -28,10 +35,5 @@ public class Resource {
     private Set<Privilege> privileges;
 
     public Resource() {
-    }
-    public Resource(String name, Set<Role> roles,Set<Privilege> privileges) {
-        this.name = name;
-        this.roles = roles;
-        this.privileges = privileges;
     }
 }

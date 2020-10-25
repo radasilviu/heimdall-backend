@@ -51,14 +51,14 @@ public class ResourceService {
     }
     public void addResourceToRole(String realmName,String roleName,String resourceName){
         Role role = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
-        Resource resource = findResourceByNameAndRole(resourceName,role);
+        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
         Set<Resource> roleResources = role.getRoleResources();
         roleResources.add(resource);
         roleRepository.save(role);
     }
     public void removeResourceFromRole(String realmName,String roleName,String resourceName){
         Role role = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
-        Resource resource = findResourceByNameAndRole(resourceName, role);
+        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
         Set<Resource> roleResources = role.getRoleResources();
         roleResources.remove(resource);
         roleRepository.save(role);
@@ -67,8 +67,8 @@ public class ResourceService {
         return resourceRepository.findByNameAndRolesContains(resourceName, role).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + " ] could not be found!", HttpStatus.NOT_FOUND));
     }
     public void generateCompaniesAndBooksResourcesForUserRole(){
-        Resource companies = new Resource("COMPANIES",null,new HashSet<>());
-        Resource books = new Resource("BOOKS",null,new HashSet<>());
+        Resource companies = new Resource("COMPANIES",null,"ROLE_USER",new HashSet<>());
+        Resource books = new Resource("BOOKS",null,"ROLE_USER",new HashSet<>());
         resourceRepository.save(companies);
         resourceRepository.save(books);
     }
@@ -90,16 +90,23 @@ public class ResourceService {
             resourceRepository.save(resource);
         }
     }
-    public void createResource(ResourceDto resourceDto){
-        Optional<Resource> byName = resourceRepository.findByName(resourceDto.getName());
-        if (byName.isPresent())
-            throw new CustomException("Resource with the name [" + byName.get().getName() + "] already exists!",HttpStatus.CONFLICT);
-        else{
+    public void createResourceForRole(ResourceDto resourceDto){
+        Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(),resourceDto.getRoleName());
+        if (!byName.isPresent())
             resourceRepository.save(resourceMapper.toResourceDao(resourceDto));
+
+    }
+    public void createResourcesForAllRoles(ResourceDto resourceDto){
+        List<Role> all = roleRepository.findAll();
+        for (Role role : all){
+            if(!role.getName().equals("ROLE_ADMIN")){
+                resourceDto.setRoleName(role.getName());
+                createResourceForRole(resourceDto);
+            }
         }
     }
-    public void deleteResource(ResourceDto resourceDto){
-        Resource resource = resourceRepository.findByName(resourceDto.getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
+    public void deleteResourceForRole(ResourceDto resourceDto){
+        Resource resource = resourceRepository.findByNameAndRoleName(resourceDto.getName(),resourceDto.getRoleName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
         resourceRepository.delete(resource);
     }
 }

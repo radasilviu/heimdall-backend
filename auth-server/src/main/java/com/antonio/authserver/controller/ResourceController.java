@@ -36,7 +36,7 @@ public class ResourceController {
     }
     @PostMapping
     public ResponseEntity<ResponseMessage> addResourceToDatabase(@RequestBody ResourceDto resourceDto){
-        resourceService.createResource(resourceDto);
+        resourceService.createResourceForRole(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource created successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
@@ -54,7 +54,7 @@ public class ResourceController {
     }
     @DeleteMapping
     public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@RequestBody ResourceDto resourceDto){
-        resourceService.deleteResource(resourceDto);
+        resourceService.deleteResourceForRole(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
