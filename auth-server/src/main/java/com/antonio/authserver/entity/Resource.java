@@ -1,4 +1,5 @@
 package com.antonio.authserver.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,15 +17,11 @@ public class Resource {
 
     private String name;
     @ManyToMany(mappedBy = "roleResources")
+    @JsonIgnore
     private Set<Role> roles;
 
     private String roleName;
-    public Resource(String name, Set<Role> roles, String roleName, Set<Privilege> privileges) {
-        this.name = name;
-        this.roles = roles;
-        this.roleName = roleName;
-        this.privileges = privileges;
-    }
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "resource_privileges",
@@ -35,5 +32,11 @@ public class Resource {
     private Set<Privilege> privileges;
 
     public Resource() {
+    }
+    public Resource(String name, Set<Role> roles, String roleName, Set<Privilege> privileges) {
+        this.name = name;
+        this.roles = roles;
+        this.roleName = roleName;
+        this.privileges = privileges;
     }
 }
