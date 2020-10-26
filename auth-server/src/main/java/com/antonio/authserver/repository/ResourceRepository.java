@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
     Optional<Resource> findByName(String name);
-    Optional<Resource> findByNameAndRoleName(String name,String roleName);
+    Optional<Resource> findByNameAndRoleNameAndRealmName(String name,String roleName,String realmName);
     Optional<Resource> findByNameAndRolesContains(String name, Role role);
     List<Resource> findAllByRolesContains(Role role);
 }

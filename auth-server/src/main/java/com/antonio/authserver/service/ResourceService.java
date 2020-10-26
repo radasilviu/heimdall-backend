@@ -51,14 +51,14 @@ public class ResourceService {
     }
     public void addResourceToRole(String realmName,String roleName,String resourceName){
         Role role = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
-        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
+        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName,roleName,realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
         Set<Resource> roleResources = role.getRoleResources();
         roleResources.add(resource);
         roleRepository.save(role);
     }
     public void removeResourceFromRole(String realmName,String roleName,String resourceName){
         Role role = roleService.findRoleByNameDaoAndRealmName(roleName,realmName);
-        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
+        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName,roleName,realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!",HttpStatus.NOT_FOUND));
         Set<Resource> roleResources = role.getRoleResources();
         roleResources.remove(resource);
         roleRepository.save(role);
@@ -67,16 +67,16 @@ public class ResourceService {
         return resourceRepository.findByNameAndRolesContains(resourceName, role).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + " ] could not be found!", HttpStatus.NOT_FOUND));
     }
     public void generateCompaniesAndBooksResourcesForUserRole(){
-        Resource companies = new Resource("COMPANIES",null,"ROLE_USER",new HashSet<>());
-        Resource books = new Resource("BOOKS",null,"ROLE_USER",new HashSet<>());
+        Resource companies = new Resource("COMPANIES",null,"ROLE_USER","master0",new HashSet<>());
+        Resource books = new Resource("BOOKS",null,"ROLE_USER","master0",new HashSet<>());
         resourceRepository.save(companies);
         resourceRepository.save(books);
     }
 
     public Set<Resource> getBasicResources(){
         Set<Resource> resources = new HashSet<>();
-        resources.add(resourceRepository.findByNameAndRoleName("COMPANIES","ROLE_USER").get());
-        resources.add(resourceRepository.findByNameAndRoleName("BOOKS","ROLE_USER").get());
+        resources.add(resourceRepository.findByNameAndRoleNameAndRealmName("COMPANIES","ROLE_USER","master0").get());
+        resources.add(resourceRepository.findByNameAndRoleNameAndRealmName("BOOKS","ROLE_USER","master0").get());
         return resources;
     }
 
@@ -91,7 +91,7 @@ public class ResourceService {
         }
     }
     public void createResourceForRole(ResourceDto resourceDto,RoleDto roleDto){
-        Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(),roleDto.getName());
+        Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(),roleDto.getName(),roleDto.getRealm().getName());
         if (!byName.isPresent()) {
             Resource resource = resourceMapper.toResourceDao(resourceDto);
             resource.setRoleName(roleDto.getName());
@@ -102,7 +102,7 @@ public class ResourceService {
         List<Role> all = roleRepository.findAll();
         for (Role role : all){
             if(!role.getName().equals("ROLE_ADMIN")) {
-                Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(), role.getName());
+                Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(),role.getRealm().getName());
                 if (!byName.isPresent()) {
                     Resource resource = resourceMapper.toResourceDao(resourceDto);
                     resource.setRoleName(role.getName());
@@ -112,7 +112,7 @@ public class ResourceService {
         }
     }
     public void deleteResourceForRole(String resourceName,RoleDto roleDto){
-        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleDto.getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
+        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName,roleDto.getName(),roleDto.getRealm().getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
         resourceRepository.delete(resource);
     }
 }

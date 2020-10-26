@@ -21,6 +21,7 @@ public class Resource {
     private Set<Role> roles;
 
     private String roleName;
+    private String realmName;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
@@ -33,10 +34,11 @@ public class Resource {
 
     public Resource() {
     }
-    public Resource(String name, Set<Role> roles, String roleName, Set<Privilege> privileges) {
+    public Resource(String name, Set<Role> roles, String roleName, String realmName, Set<Privilege> privileges) {
         this.name = name;
         this.roles = roles;
         this.roleName = roleName;
+        this.realmName = realmName;
         this.privileges = privileges;
     }
 }

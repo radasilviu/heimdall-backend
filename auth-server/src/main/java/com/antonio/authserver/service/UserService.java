@@ -118,7 +118,7 @@ public class UserService {
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
         if(roleOptional.getName().equals("ROLE_ADMIN"))
-            adminAlreadyExists(username);
+            adminAlreadyExists();
         appUser.getRoles().add(roleOptional);
         appUserRepository.save(appUser);
 
@@ -240,9 +240,9 @@ public class UserService {
         return appUserMapper.toAppUserDto(userOptional.get());
     }
 
-    public void adminAlreadyExists(String username){
-        List<AppUser> byUsername = appUserRepository.findAllByUsername(username);
-        byUsername.forEach(appUser -> {
+    public void adminAlreadyExists(){
+        List<AppUser> users = appUserRepository.findAll();
+        users.forEach(appUser -> {
             boolean isAdmin = false;
             for (Role role : appUser.getRoles()) {
                 if (role.getName().equals("ROLE_ADMIN")) {
@@ -251,7 +251,7 @@ public class UserService {
                 }
             }
             if(isAdmin)
-                throw new CustomException("Admin with the name " + username +" already exists!",HttpStatus.CONFLICT);
+                throw new CustomException("There already is a SUPER ADMIN!",HttpStatus.CONFLICT);
         });
     }
 }
