@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -110,11 +111,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         Set<GrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
         for(Role role : authorities){
             simpleGrantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-            for (Resource resource : role.getRoleResources()){
+/*            for (Resource resource : role.getRoleResources()){
                 for(Privilege privilege : resource.getPrivileges()){
                     simpleGrantedAuthorities.add(new SimpleGrantedAuthority(privilege.getName()));
                 }
-            }
+            }*/
         }
         return simpleGrantedAuthorities;
     }
