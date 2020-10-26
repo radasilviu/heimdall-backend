@@ -11,13 +11,12 @@ public class ResourceDto {
 
     private String name;
     private Set<Privilege> privileges;
-    private String roleName;
 
     public ResourceDto() {
     }
-    public ResourceDto(String name, Set<Privilege> privileges,String roleName) {
+    public ResourceDto(String name, Set<Privilege> privileges) {
         this.name = name;
         this.privileges = privileges;
-        this.roleName=roleName;
+;
     }
 }

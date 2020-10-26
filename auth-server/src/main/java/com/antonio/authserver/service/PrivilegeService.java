@@ -25,16 +25,14 @@ public class PrivilegeService {
     private final PrivilegeRepository privilegeRepository;
     private final PrivilegeMapper privilegeMapper;
     private final RoleRepository roleRepository;
-    private final RoleService roleService;
     private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;
     private final RoleMapper roleMapper;
     @Autowired
-    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, RoleService roleService, ResourceService resourceService, ResourceRepository resourceRepository, RoleMapper roleMapper) {
+    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, ResourceService resourceService, ResourceRepository resourceRepository, RoleMapper roleMapper) {
         this.privilegeRepository = privilegeRepository;
         this.privilegeMapper = privilegeMapper;
         this.roleRepository = roleRepository;
-        this.roleService = roleService;
         this.resourceService = resourceService;
         this.resourceRepository = resourceRepository;
         this.roleMapper = roleMapper;
@@ -105,6 +103,7 @@ public class PrivilegeService {
     public void generatePrivileges(){
         createPrivileges();
     }
+
     public Resource getResourceFromRoles(AppUserDto appUserDto,String resourceName){
         Optional<Resource> foundResource = Optional.empty();
         for (Role role: appUserDto.getRoles()){

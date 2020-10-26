@@ -75,12 +75,12 @@ public class ResourceService {
 
     public Set<Resource> getBasicResources(){
         Set<Resource> resources = new HashSet<>();
-        resources.add(resourceRepository.findByName("COMPANIES").get());
-        resources.add(resourceRepository.findByName("BOOKS").get());
+        resources.add(resourceRepository.findByNameAndRoleName("COMPANIES","ROLE_USER").get());
+        resources.add(resourceRepository.findByNameAndRoleName("BOOKS","ROLE_USER").get());
         return resources;
     }
 
-    public void assignPrivilegesToResources(){
+    public void assignAllPrivilegesToAllResources(){
         List<Resource> resources = resourceRepository.findAll();
         List<Privilege> privileges = privilegeRepository.findAll();
         for (Resource resource : resources){
@@ -90,23 +90,29 @@ public class ResourceService {
             resourceRepository.save(resource);
         }
     }
-    public void createResourceForRole(ResourceDto resourceDto){
-        Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(),resourceDto.getRoleName());
-        if (!byName.isPresent())
-            resourceRepository.save(resourceMapper.toResourceDao(resourceDto));
-
+    public void createResourceForRole(ResourceDto resourceDto,RoleDto roleDto){
+        Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(),roleDto.getName());
+        if (!byName.isPresent()) {
+            Resource resource = resourceMapper.toResourceDao(resourceDto);
+            resource.setRoleName(roleDto.getName());
+            resourceRepository.save(resource);
+        }
     }
-    public void createResourcesForAllRoles(ResourceDto resourceDto){
+    public void createResourceForAllRoles(ResourceDto resourceDto){
         List<Role> all = roleRepository.findAll();
         for (Role role : all){
-            if(!role.getName().equals("ROLE_ADMIN")){
-                resourceDto.setRoleName(role.getName());
-                createResourceForRole(resourceDto);
+            if(!role.getName().equals("ROLE_ADMIN")) {
+                Optional<Resource> byName = resourceRepository.findByNameAndRoleName(resourceDto.getName(), role.getName());
+                if (!byName.isPresent()) {
+                    Resource resource = resourceMapper.toResourceDao(resourceDto);
+                    resource.setRoleName(role.getName());
+                    resourceRepository.save(resource);
+                }
             }
         }
     }
-    public void deleteResourceForRole(ResourceDto resourceDto){
-        Resource resource = resourceRepository.findByNameAndRoleName(resourceDto.getName(),resourceDto.getRoleName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceDto.getName() + "] could not be found!", HttpStatus.NOT_FOUND));
+    public void deleteResourceForRole(String resourceName,RoleDto roleDto){
+        Resource resource = resourceRepository.findByNameAndRoleName(resourceName,roleDto.getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
         resourceRepository.delete(resource);
     }
 }

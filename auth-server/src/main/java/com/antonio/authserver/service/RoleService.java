@@ -45,7 +45,8 @@ public class RoleService {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
 			role.setRealm(realmRepository.findByName(realmName).get());
-			roleRepository.save(roleMapper.toRoleDao(role));
+			Role mappedRole = roleMapper.toRoleDao(role);
+			roleRepository.save(mappedRole);
 		}
 	}
 
@@ -101,14 +102,4 @@ public class RoleService {
 						HttpStatus.NOT_FOUND));
 	}
 
-	public Boolean checkIfUserHasDesiredRole(AppUserDto appUserDto,String roleName){
-		boolean hasRole = false;
-		Set<Role> roles = appUserDto.getRoles();
-		for (Role role:roles)
-			if (role.getName().equals(roleName)) {
-				hasRole = true;
-				break;
-			}
-		return hasRole;
-	}
 }

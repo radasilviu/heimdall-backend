@@ -53,11 +53,6 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
-        String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
-        resourceHeader = resourceHeader.toUpperCase();
-        String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
-        requestTypeHeader = requestTypeHeader.toUpperCase();
-
         if (Strings.isNullOrEmpty(authorizationHeader)) {
             throw new CustomException("The user is not authorized to do this.", HttpStatus.UNAUTHORIZED);
         }
@@ -68,9 +63,15 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final AppUserDto user = extractUserFromToken(token);
 
             verifyToken(token, user.getToken());
-            checkIfUserHasNecessaryAuthorities(user,resourceHeader,requestTypeHeader);
-
+            if(!httpServletRequest.getServletPath().contains("/api/admin")) {
+                String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
+                resourceHeader = resourceHeader.toUpperCase();
+                String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
+                requestTypeHeader = requestTypeHeader.toUpperCase();
+                checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
+            }
         }
+
 
         if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
 

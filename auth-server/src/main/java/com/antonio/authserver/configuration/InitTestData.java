@@ -1,7 +1,6 @@
 package com.antonio.authserver.configuration;
 
 import com.antonio.authserver.dto.ResourceDto;
-import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.*;
 import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.repository.*;
@@ -21,23 +20,18 @@ import java.util.*;
 @Transactional
 public class InitTestData implements ApplicationListener<ApplicationContextEvent> {
 
-    private AppUserRepository appUserRepository;
-    private RoleRepository roleRepository;
-    private ClientRepository clientRepository;
-    private BCryptPasswordEncoder passwordEncoder;
-    private RealmRepository realmRepository;
-    private IdentityProviderRepository identityProviderRepository;
-    private GroupRepository groupRepository;
-    private PrivilegeService privilegeService;
-    private PrivilegeRepository privilegeRepository;
-    private ResourceService resourceService;
-    private ResourceRepository resourceRepository;
+    private final AppUserRepository appUserRepository;
+    private final RoleRepository roleRepository;
+    private final ClientRepository clientRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final RealmRepository realmRepository;
+    private final IdentityProviderRepository identityProviderRepository;
+    private final GroupRepository groupRepository;
+    private final PrivilegeService privilegeService;
+    private final ResourceService resourceService;
 
     @Autowired
-    private RoleMapper roleMapper;
-
-    @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, PrivilegeRepository privilegeRepository, ResourceService resourceService, ResourceRepository resourceRepository) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, ResourceService resourceService) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -46,9 +40,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.identityProviderRepository = identityProviderRepository;
         this.groupRepository = groupRepository;
         this.privilegeService = privilegeService;
-        this.privilegeRepository = privilegeRepository;
         this.resourceService = resourceService;
-        this.resourceRepository = resourceRepository;
     }
 
     @Override
@@ -76,7 +68,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
 
     private void initResources(){
         resourceService.generateCompaniesAndBooksResourcesForUserRole();
-        resourceService.assignPrivilegesToResources();}
+        resourceService.assignAllPrivilegesToAllResources();}
 
     private void initClients(List<Realm> realms) {
         Client client = new Client("myClient", "clientPass", realms.get(0));
@@ -101,27 +93,10 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private void initRoles(List<Realm> realms) {
         Role admin = new Role("ROLE_ADMIN", realms.get(0), null);
         Role user = new Role("ROLE_USER", realms.get(0), new HashSet<>());
-        Role test = new Role("ROLE_TEST", realms.get(0), new HashSet<>());
-        List<Role> roleList = Arrays.asList(admin, user, test);
+        List<Role> roleList = Arrays.asList(admin, user);
         user.getRoleResources().addAll(resourceService.getBasicResources());
         roleRepository.saveAll(roleList);
 
-        ResourceDto resourceDto = new ResourceDto("FILME",new HashSet<>(),"");
-        resourceService.createResourcesForAllRoles(resourceDto);
-        resourceService.addResourceToRole(user.getRealm().getName(), user.getName(), "FILME");
-        resourceService.addResourceToRole(test.getRealm().getName(), test.getName(), "FILME");
-
-        RoleDto roleDto = roleMapper.toRoleDto(test);
-        privilegeService.addPrivilegeToResourceForRole("READ_PRIVILEGE", "FILME", roleDto);
-        privilegeService.addPrivilegeToResourceForRole("EDIT_PRIVILEGE","FILME",roleDto);
-        for (Resource resource : user.getRoleResources()) {
-            if (resource.getName().equals("FILME"))
-            System.out.println(resource.getPrivileges());
-        }
-        for (Resource resource : test.getRoleResources()) {
-            if (resource.getName().equals("FILME"))
-            System.out.println(resource.getPrivileges());
-        }
     }
 
     private List<Realm> initRealms() {
