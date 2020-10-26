@@ -54,7 +54,7 @@ public class ResourceController {
         ResponseMessage responseMessage = new ResponseMessage("Resource removed successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
-    @DeleteMapping("/{resourceName}")
+    @DeleteMapping("/{resourceName}/removeAll")
     public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@PathVariable String resourceName){
         resourceService.deleteResourceForAllRoles(resourceName);
         ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully!");

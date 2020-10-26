@@ -64,13 +64,13 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final AppUserDto user = extractUserFromToken(token);
 
             verifyToken(token, user.getToken());
-            if(!httpServletRequest.getServletPath().contains("/api/admin")) {
+
                 String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
                 resourceHeader = resourceHeader.toUpperCase();
                 String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
                 requestTypeHeader = requestTypeHeader.toUpperCase();
                 checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
-            }
+
         }
 
 
