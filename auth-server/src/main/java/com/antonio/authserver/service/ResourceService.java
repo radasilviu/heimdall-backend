@@ -85,11 +85,12 @@ public class ResourceService {
             resourceRepository.save(resource);
         }
     }
-    public void createResourceForRole(ResourceDto resourceDto, RoleDto roleDto) {
-        Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), roleDto.getName(), roleDto.getRealm().getName());
+    public void createResourceForRole(ResourceDto resourceDto, Role role) {
+        Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(), role.getRealm().getName());
         if (!byName.isPresent()) {
             Resource resource = resourceMapper.toResourceDao(resourceDto);
-            resource.setRoleName(roleDto.getName());
+            resource.setRoleName(role.getName());
+            resource.setRealmName(role.getRealm().getName());
             resourceRepository.save(resource);
         }
     }
@@ -97,12 +98,7 @@ public class ResourceService {
         List<Role> all = roleRepository.findAll();
         for (Role role : all) {
             if (!role.getName().equals("ROLE_ADMIN")) {
-                Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(), role.getRealm().getName());
-                if (!byName.isPresent()) {
-                    Resource resource = resourceMapper.toResourceDao(resourceDto);
-                    resource.setRoleName(role.getName());
-                    resourceRepository.save(resource);
-                }
+               createResourceForRole(resourceDto,role);
             }
         }
     }
