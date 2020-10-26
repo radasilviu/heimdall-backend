@@ -37,8 +37,8 @@ public class ResourceController {
         return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName,roleDto));
     }
     @PostMapping
-    public ResponseEntity<ResponseMessage> addResourceToDatabase(@RequestBody ResourceDto resourceDto,@RequestBody RoleDto roleDto){
-        resourceService.createResourceForRole(resourceDto,roleDto);
+    public ResponseEntity<ResponseMessage> addResourceToDatabase(@RequestBody ResourceDto resourceDto){
+        resourceService.createResourceForAllRoles(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource created successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
@@ -55,9 +55,15 @@ public class ResourceController {
         return ResponseEntity.ok().body(responseMessage);
     }
     @DeleteMapping("/{resourceName}")
-    public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@PathVariable String resourceName,@RequestBody RoleDto roleDto){
-        resourceService.deleteResourceForRole(resourceName,roleDto);
+    public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@PathVariable String resourceName){
+        resourceService.deleteResourceForAllRoles(resourceName);
         ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully!");
+        return ResponseEntity.ok().body(responseMessage);
+    }
+    @DeleteMapping("/{resourceName}")
+    public ResponseEntity<ResponseMessage> removeResourceFromUser(@PathVariable String resourceName,@RequestBody RoleDto roleDto){
+        resourceService.deleteResourceForRole(resourceName,roleDto);
+        ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully for role!");
         return ResponseEntity.ok().body(responseMessage);
     }
 }
