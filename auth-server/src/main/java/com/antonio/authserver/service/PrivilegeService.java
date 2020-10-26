@@ -91,7 +91,7 @@ public class PrivilegeService {
     }
 
     public List<PrivilegeDto> getPrivilegesForResource(String resourceName,RoleDto role){
-        Resource resource = resourceService.getResourceByNameAndRole(resourceName, roleMapper.toRoleDao(role));
+        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, role.getName(), role.getRealm().getName()).orElseThrow(() -> new CustomException("The resource could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDtoList(transferPrivilegesFromSetToList(resource.getPrivileges()));
     }
     public void createPrivileges(){
