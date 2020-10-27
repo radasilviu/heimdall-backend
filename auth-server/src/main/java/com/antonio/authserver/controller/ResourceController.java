@@ -33,7 +33,7 @@ public class ResourceController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseMessage> addResourceToDatabase(@RequestBody ResourceDto resourceDto){
+    public ResponseEntity<ResponseMessage> createResource(@RequestBody ResourceDto resourceDto){
         resourceService.createResourceForAllRoles(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource created successfully!");
         return ResponseEntity.ok().body(responseMessage);
@@ -41,16 +41,16 @@ public class ResourceController {
 
     // This could just as well be a GET, we don't use the body
     @PutMapping("/{resourceName}/add")
-    public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody Rol){
-        resourceService.addResourceToRole(realmName,roleName,resourceName);
+    public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
+        resourceService.addResourceToRole(role.getRealm().getName(), role.getName(), resourceName);
         ResponseMessage responseMessage = new ResponseMessage("Resource added successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
 
     // This could just as well be a GET, we don't use the body; See removeResourceFromRole
-    @PutMapping("/{realmName}/{roleName}/{resourceName}/remove")
-    public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String realmName,@PathVariable String roleName, @PathVariable String resourceName){
-        resourceService.removeResourceFromRole(realmName,roleName,resourceName);
+    @PutMapping("/{resourceName}/remove")
+    public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
+        resourceService.removeResourceFromRole(role.getRealm().getName(), role.getName(), resourceName);
         ResponseMessage responseMessage = new ResponseMessage("Resource removed successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
