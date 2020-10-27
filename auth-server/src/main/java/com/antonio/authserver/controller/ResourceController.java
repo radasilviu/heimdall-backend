@@ -39,21 +39,21 @@ public class ResourceController {
         return ResponseEntity.ok().body(responseMessage);
     }
 
-//    // This could just as well be a GET, we don't use the body
-//    @PutMapping("/{resourceName}/add")
-//    public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody Rol){
-//        resourceService.addResourceToRole(realmName,roleName,resourceName);
-//        ResponseMessage responseMessage = new ResponseMessage("Resource added successfully!");
-//        return ResponseEntity.ok().body(responseMessage);
-//    }
-//
-//    // This could just as well be a GET, we don't use the body; See removeResourceFromRole
-//    @PutMapping("/{realmName}/{roleName}/{resourceName}/remove")
-//    public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String realmName,@PathVariable String roleName, @PathVariable String resourceName){
-//        resourceService.removeResourceFromRole(realmName,roleName,resourceName);
-//        ResponseMessage responseMessage = new ResponseMessage("Resource removed successfully!");
-//        return ResponseEntity.ok().body(responseMessage);
-//    }
+    // This could just as well be a GET, we don't use the body
+    @PutMapping("/{resourceName}/add")
+    public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody Rol){
+        resourceService.addResourceToRole(realmName,roleName,resourceName);
+        ResponseMessage responseMessage = new ResponseMessage("Resource added successfully!");
+        return ResponseEntity.ok().body(responseMessage);
+    }
+
+    // This could just as well be a GET, we don't use the body; See removeResourceFromRole
+    @PutMapping("/{realmName}/{roleName}/{resourceName}/remove")
+    public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String realmName,@PathVariable String roleName, @PathVariable String resourceName){
+        resourceService.removeResourceFromRole(realmName,roleName,resourceName);
+        ResponseMessage responseMessage = new ResponseMessage("Resource removed successfully!");
+        return ResponseEntity.ok().body(responseMessage);
+    }
 
     @DeleteMapping("/{resourceName}/removeAll")
     public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@PathVariable String resourceName){
@@ -63,7 +63,7 @@ public class ResourceController {
     }
 
     @DeleteMapping("/{resourceName}")
-    public ResponseEntity<ResponseMessage> removeResourceFromRole(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
+    public ResponseEntity<ResponseMessage> deleteResourceForRole(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
         resourceService.deleteResourceForRole(resourceName, roleDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully for role!");
         return ResponseEntity.ok().body(responseMessage);
