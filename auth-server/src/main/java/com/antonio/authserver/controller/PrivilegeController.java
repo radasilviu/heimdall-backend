@@ -30,6 +30,11 @@ public class PrivilegeController {
         return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName,roleDto));
     }
 
+    @PostMapping("/{resourceName}")
+    public ResponseEntity<List<PrivilegeDto>> getPrivilegesForResource(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
+        return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName, roleDto));
+    }
+
     @PutMapping("/{privilegeName}/{resourceName}/add")
     public ResponseEntity<ResponseMessage> addPrivilegeToRole(@PathVariable String privilegeName, @PathVariable String resourceName, @RequestBody RoleDto role){
         privilegeService.addPrivilegeToResourceForRole(privilegeName, resourceName, role);

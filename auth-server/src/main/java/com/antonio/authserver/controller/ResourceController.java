@@ -16,12 +16,10 @@ import java.util.List;
 public class ResourceController {
 
     private final ResourceService resourceService;
-    private final PrivilegeService privilegeService;
 
     @Autowired
-    public ResourceController(ResourceService resourceService, PrivilegeService privilegeService) {
+    public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
-        this.privilegeService = privilegeService;
     }
 
     @GetMapping("/all")
@@ -32,11 +30,6 @@ public class ResourceController {
     @PostMapping("/getResources")
     public ResponseEntity<List<ResourceDto>> getAllResourcesForRoleDto(@RequestBody RoleDto roleDto){
         return ResponseEntity.ok().body(resourceService.getAllResourcesForRole(roleDto));
-    }
-
-    @PostMapping("/{resourceName}")
-    public ResponseEntity<List<PrivilegeDto>> getPrivilegesForResource(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
-        return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName, roleDto));
     }
 
     @PostMapping
