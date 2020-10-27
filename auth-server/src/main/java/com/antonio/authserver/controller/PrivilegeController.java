@@ -25,11 +25,6 @@ public class PrivilegeController {
         return ResponseEntity.ok().body(privilegeService.getAllPrivileges());
     }
 
-    @PostMapping("/{resourceName}/privileges")
-    public ResponseEntity<List<PrivilegeDto>> getPrivilegesForRole(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
-        return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName,roleDto));
-    }
-
     @PostMapping("/{resourceName}")
     public ResponseEntity<List<PrivilegeDto>> getPrivilegesForResource(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
         return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName, roleDto));
