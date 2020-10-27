@@ -41,10 +41,12 @@ public class PrivilegeService {
     public List<PrivilegeDto> getAllPrivileges(){
         return privilegeMapper.toPrivilegeDtoList(privilegeRepository.findAll());
     }
+
     public PrivilegeDto getPrivilegeByName(String name){
         Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDto(privilege);
     }
+
     public void addPrivilegeToResourceForRole(String privilegeName, String resourceName, RoleDto role){
         Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
         Optional<Role> byNameAndRealmName = roleRepository.findByNameAndRealmName(role.getName(), role.getRealm().getName());
@@ -76,6 +78,7 @@ public class PrivilegeService {
             }
         }
     }
+
     @Transactional
     public Privilege createPrivilegeIfNotFound(String name) {
 
@@ -94,12 +97,14 @@ public class PrivilegeService {
         Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, role.getName(), role.getRealm().getName()).orElseThrow(() -> new CustomException("The resource could not be found!", HttpStatus.NOT_FOUND));
         return privilegeMapper.toPrivilegeDtoList(transferPrivilegesFromSetToList(resource.getPrivileges()));
     }
+
     public void createPrivileges(){
         createPrivilegeIfNotFound(PrivilegeType.READ.getMessage());
         createPrivilegeIfNotFound(PrivilegeType.WRITE.getMessage());
         createPrivilegeIfNotFound(PrivilegeType.EDIT.getMessage());
         createPrivilegeIfNotFound(PrivilegeType.DELETE.getMessage());
     }
+
     public void generatePrivileges(){
         createPrivileges();
     }
@@ -112,8 +117,9 @@ public class PrivilegeService {
         if(foundResource.isPresent())
             return foundResource.get();
         else
-            throw new CustomException("The user does not have access to this resource!",HttpStatus.NOT_FOUND);
+            throw new CustomException("The user does not have access to this resource!", HttpStatus.NOT_FOUND);
     }
+
     public void checkIfUserHasPrivilegeForResource(AppUserDto appUserDto, String resourceName,String requestType){
         String privilegeName = "";
         Set<Privilege> userPrivileges = getResourceFromRoles(appUserDto,resourceName).getPrivileges();
@@ -126,8 +132,9 @@ public class PrivilegeService {
             }
         }
             if (privilegeName.equals(""))
-                throw new CustomException("The user does not have the privilege to do this!",HttpStatus.UNAUTHORIZED);
+                throw new CustomException("The user does not have the privilege to do this!", HttpStatus.UNAUTHORIZED);
     }
+
     private String getPrivilegeTypeByRequestType(String requestType){
         switch (requestType) {
             case "GET":
