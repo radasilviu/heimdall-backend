@@ -15,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 @Service
 @Transactional
 public class ResourceService {
@@ -26,15 +23,13 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final PrivilegeRepository privilegeRepository;
     private final RoleRepository roleRepository;
-    private final RoleService roleService;
     private final RoleMapper roleMapper;
     @Autowired
-    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository, RoleService roleService, RoleMapper roleMapper) {
+    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository, RoleMapper roleMapper) {
         this.resourceRepository = resourceRepository;
         this.resourceMapper = resourceMapper;
         this.privilegeRepository = privilegeRepository;
         this.roleRepository = roleRepository;
-        this.roleService = roleService;
         this.roleMapper = roleMapper;
     }
     public List<ResourceDto> getAllResources() {
@@ -46,20 +41,7 @@ public class ResourceService {
     public Resource getResourceByNameAndRole(String resourceName, Role role) {
         return findResourceByNameAndRole(resourceName, role);
     }
-    public void addResourceToRole(String realmName, String roleName, String resourceName) {
-        Role role = roleService.findRoleByNameDaoAndRealmName(roleName, realmName);
-        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, roleName, realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
-        Set<Resource> roleResources = role.getRoleResources();
-        roleResources.add(resource);
-        roleRepository.save(role);
-    }
-    public void removeResourceFromRole(String realmName, String roleName, String resourceName) {
-        Role role = roleService.findRoleByNameDaoAndRealmName(roleName, realmName);
-        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, roleName, realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
-        Set<Resource> roleResources = role.getRoleResources();
-        roleResources.remove(resource);
-        roleRepository.save(role);
-    }
+
     private Resource findResourceByNameAndRole(String resourceName, Role role) {
         return resourceRepository.findByNameAndRolesContains(resourceName, role).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + " ] could not be found!", HttpStatus.NOT_FOUND));
     }
@@ -115,4 +97,23 @@ public class ResourceService {
             }
         }
     }
+    public Set<ResourceDto> getResourceDtosFromDatabaseForNewRole(){
+        List<Resource> all = resourceRepository.findAll();
+        Set<String> uniqueResourceNames = new HashSet<>();
+        for (Resource resource : all) {
+            uniqueResourceNames.add(resource.getName());
+        }
+        Set<ResourceDto> finalResources = new HashSet<>();
+        for (String resourceName : uniqueResourceNames){
+            finalResources.add(new ResourceDto(resourceName,new HashSet<>()));
+        }
+        return finalResources;
+    }
+
+    public void generateResourcesForNewRole(Role role){
+        for (ResourceDto resourceDto : getResourceDtosFromDatabaseForNewRole()){
+            createResourceForRole(resourceDto,role);
+        }
+    }
+
 }
