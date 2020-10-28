@@ -1,25 +1,25 @@
 package com.antonio.authserver.controller;
-import com.antonio.authserver.dto.PrivilegeDto;
 import com.antonio.authserver.dto.ResourceDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.model.ResponseMessage;
-import com.antonio.authserver.service.PrivilegeService;
 import com.antonio.authserver.service.ResourceService;
+import com.antonio.authserver.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.util.List;
 @RestController
 @RequestMapping("api/resources")
 public class ResourceController {
 
     private final ResourceService resourceService;
+    private final RoleService roleService;
 
     @Autowired
-    public ResourceController(ResourceService resourceService) {
+    public ResourceController(ResourceService resourceService, RoleService roleService) {
         this.resourceService = resourceService;
+        this.roleService = roleService;
     }
 
     @GetMapping("/all")
@@ -34,7 +34,7 @@ public class ResourceController {
 
     @PostMapping
     public ResponseEntity<ResponseMessage> createResource(@RequestBody ResourceDto resourceDto){
-        resourceService.createResourceForAllRoles(resourceDto);
+        roleService.createResourceForAllRoles(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource created successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }

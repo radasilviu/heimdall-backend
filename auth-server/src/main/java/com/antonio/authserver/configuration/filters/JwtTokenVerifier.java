@@ -111,11 +111,6 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         Set<GrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
         for(Role role : authorities){
             simpleGrantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-/*            for (Resource resource : role.getRoleResources()){
-                for(Privilege privilege : resource.getPrivileges()){
-                    simpleGrantedAuthorities.add(new SimpleGrantedAuthority(privilege.getName()));
-                }
-            }*/
         }
         return simpleGrantedAuthorities;
     }

@@ -3,6 +3,7 @@ import java.util.*;
 
 import com.antonio.authserver.dto.ResourceDto;
 import com.antonio.authserver.entity.Resource;
+import com.antonio.authserver.mapper.ResourceMapper;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.repository.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +26,17 @@ public class RoleService {
 	private final AppUserRepository appUserRepository;
 	private final RoleMapper roleMapper;
 	private final RealmRepository realmRepository;
-	private final ResourceService resourceService;
 	private final ResourceRepository resourceRepository;
+	private final ResourceMapper resourceMapper;
 
 	@Autowired
-	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository, ResourceService resourceService, ResourceRepository resourceRepository) {
+	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository, ResourceRepository resourceRepository, ResourceMapper resourceMapper) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
 		this.roleMapper = roleMapper;
 		this.realmRepository = realmRepository;
-		this.resourceService = resourceService;
 		this.resourceRepository = resourceRepository;
+		this.resourceMapper = resourceMapper;
 	}
 
 	public void saveRole(String realmName,RoleDto role) throws CustomException {
@@ -49,9 +50,10 @@ public class RoleService {
 			throw new CustomException("The inserted Role cannot be null!", HttpStatus.BAD_REQUEST);
 		} else {
 			role.setRealm(realmRepository.findByName(realmName).get());
+			role.setRoleResources(new HashSet<>());
 			Role mappedRole = roleMapper.toRoleDao(role);
-			resourceService.generateResourcesForNewRole(mappedRole);
 			roleRepository.save(mappedRole);
+			generateAndAddResourcesForNewRole(mappedRole);
 		}
 	}
 
@@ -120,6 +122,42 @@ public class RoleService {
 		Set<Resource> roleResources = role.getRoleResources();
 		roleResources.remove(resource);
 		roleRepository.save(role);
+	}
+	public Set<ResourceDto> getResourceDtosFromDatabaseForNewRole(){
+		List<Resource> all = resourceRepository.findAll();
+		Set<String> uniqueResourceNames = new HashSet<>();
+		for (Resource resource : all) {
+			uniqueResourceNames.add(resource.getName());
+		}
+		Set<ResourceDto> finalResources = new HashSet<>();
+		for (String resourceName : uniqueResourceNames){
+			finalResources.add(new ResourceDto(resourceName,new HashSet<>()));
+		}
+		return finalResources;
+	}
+
+	public void generateAndAddResourcesForNewRole(Role role){
+		for (ResourceDto resourceDto : getResourceDtosFromDatabaseForNewRole()){
+			createResourceForRole(resourceDto,role);
+			addResourceToRole(role.getRealm().getName(),role.getName(),resourceDto.getName());
+		}
+	}
+	public void createResourceForRole(ResourceDto resourceDto, Role role) {
+		Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(), role.getRealm().getName());
+		if (!byName.isPresent()) {
+			Resource resource = resourceMapper.toResourceDao(resourceDto);
+			resource.setRoleName(role.getName());
+			resource.setRealmName(role.getRealm().getName());
+			resourceRepository.save(resource);
+		}
+	}
+	public void createResourceForAllRoles(ResourceDto resourceDto) {
+		List<Role> all = roleRepository.findAll();
+		for (Role role : all) {
+			if (!role.getName().equals("ROLE_ADMIN")) {
+				createResourceForRole(resourceDto,role);
+			}
+		}
 	}
 
 }

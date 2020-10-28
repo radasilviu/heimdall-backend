@@ -67,23 +67,7 @@ public class ResourceService {
             resourceRepository.save(resource);
         }
     }
-    public void createResourceForRole(ResourceDto resourceDto, Role role) {
-        Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(), role.getRealm().getName());
-        if (!byName.isPresent()) {
-            Resource resource = resourceMapper.toResourceDao(resourceDto);
-            resource.setRoleName(role.getName());
-            resource.setRealmName(role.getRealm().getName());
-            resourceRepository.save(resource);
-        }
-    }
-    public void createResourceForAllRoles(ResourceDto resourceDto) {
-        List<Role> all = roleRepository.findAll();
-        for (Role role : all) {
-            if (!role.getName().equals("ROLE_ADMIN")) {
-               createResourceForRole(resourceDto,role);
-            }
-        }
-    }
+
     public void deleteResourceForRole(String resourceName, RoleDto roleDto) {
         Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, roleDto.getName(), roleDto.getRealm().getName()).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
         resourceRepository.delete(resource);
@@ -95,24 +79,6 @@ public class ResourceService {
                 Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, role.getName(), role.getRealm().getName());
                 byName.ifPresent(resourceRepository::delete);
             }
-        }
-    }
-    public Set<ResourceDto> getResourceDtosFromDatabaseForNewRole(){
-        List<Resource> all = resourceRepository.findAll();
-        Set<String> uniqueResourceNames = new HashSet<>();
-        for (Resource resource : all) {
-            uniqueResourceNames.add(resource.getName());
-        }
-        Set<ResourceDto> finalResources = new HashSet<>();
-        for (String resourceName : uniqueResourceNames){
-            finalResources.add(new ResourceDto(resourceName,new HashSet<>()));
-        }
-        return finalResources;
-    }
-
-    public void generateResourcesForNewRole(Role role){
-        for (ResourceDto resourceDto : getResourceDtosFromDatabaseForNewRole()){
-            createResourceForRole(resourceDto,role);
         }
     }
 
