@@ -107,8 +107,13 @@ public class UserService {
             throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
         appUser.setUsername(appUserDto.getUsername());
         appUser.setPassword(appUserDto.getPassword());
-        appUser.setToken(appUserDto.getToken());
-        appUser.setRefreshToken(appUserDto.getRefreshToken());
+        if(appUserDto.getToken() != null) {
+            appUser.setToken(appUserDto.getToken());
+        }
+        if(appUserDto.getRefreshToken() != null){
+            appUser.setRefreshToken(appUserDto.getRefreshToken());
+        }
+
         appUserRepository.save(appUser);
     }
 
