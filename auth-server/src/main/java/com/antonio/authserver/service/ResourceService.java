@@ -23,20 +23,16 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final PrivilegeRepository privilegeRepository;
     private final RoleRepository roleRepository;
-    private final RoleMapper roleMapper;
     @Autowired
-    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository, RoleMapper roleMapper) {
+    public ResourceService(ResourceRepository resourceRepository, ResourceMapper resourceMapper, PrivilegeRepository privilegeRepository, RoleRepository roleRepository) {
         this.resourceRepository = resourceRepository;
         this.resourceMapper = resourceMapper;
         this.privilegeRepository = privilegeRepository;
         this.roleRepository = roleRepository;
-        this.roleMapper = roleMapper;
     }
-    public List<ResourceDto> getAllResources() {
-        return resourceMapper.toResourceDtoList(resourceRepository.findAll());
-    }
+
     public List<ResourceDto> getAllResourcesForRole(RoleDto role) {
-        return resourceMapper.toResourceDtoList(resourceRepository.findAllByRolesContains(roleMapper.toRoleDao(role)));
+        return resourceMapper.toResourceDtoList(resourceRepository.findAllByRoleNameAndRealmName(role.getName(),role.getRealm().getName()));
     }
     public Resource getResourceByNameAndRole(String resourceName, Role role) {
         return findResourceByNameAndRole(resourceName, role);

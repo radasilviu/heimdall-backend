@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.ResourceDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.RoleService;
@@ -14,7 +15,7 @@ import java.util.List;
 @RequestMapping("api/role")
 public class RoleController {
 
-	private RoleService roleService;
+	private final RoleService roleService;
 
 	@Autowired
 	public RoleController(RoleService roleService) {
@@ -29,6 +30,10 @@ public class RoleController {
 	@GetMapping("/{realmName}/{name}")
 	public ResponseEntity<RoleDto> getRoleByName(@PathVariable String realmName,@PathVariable String name) {
 		return ResponseEntity.ok().body(roleService.getRoleByName(realmName,name));
+	}
+	@GetMapping("/{realmName}/{roleName}")
+	public ResponseEntity<List<ResourceDto>> getAssignedResourcesForRole(@PathVariable String realmName,@PathVariable String roleName){
+		return ResponseEntity.ok().body(roleService.getAssignedResourcesForRole(realmName,roleName));
 	}
 	@PutMapping("/{realmName}/{name}")
 	public ResponseEntity<ResponseMessage> updateRoleByName(@PathVariable String realmName,@PathVariable String name, @RequestBody RoleDto roleDto) {

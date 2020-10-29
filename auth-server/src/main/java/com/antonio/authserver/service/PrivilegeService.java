@@ -25,17 +25,13 @@ public class PrivilegeService {
     private final PrivilegeRepository privilegeRepository;
     private final PrivilegeMapper privilegeMapper;
     private final RoleRepository roleRepository;
-    private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;
-    private final RoleMapper roleMapper;
     @Autowired
-    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, ResourceService resourceService, ResourceRepository resourceRepository, RoleMapper roleMapper) {
+    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, ResourceRepository resourceRepository) {
         this.privilegeRepository = privilegeRepository;
         this.privilegeMapper = privilegeMapper;
         this.roleRepository = roleRepository;
-        this.resourceService = resourceService;
         this.resourceRepository = resourceRepository;
-        this.roleMapper = roleMapper;
     }
 
     public List<PrivilegeDto> getAllPrivileges(){
@@ -80,7 +76,7 @@ public class PrivilegeService {
     }
 
     @Transactional
-    public Privilege createPrivilegeIfNotFound(String name) {
+    public void createPrivilegeIfNotFound(String name) {
 
         Optional<Privilege> privilege = privilegeRepository.findByName(name);
         if(privilege.isPresent()){
@@ -89,7 +85,6 @@ public class PrivilegeService {
         else {
             Privilege newPrivilege = new Privilege(name,null);
             privilegeRepository.save(newPrivilege);
-            return newPrivilege;
         }
     }
 

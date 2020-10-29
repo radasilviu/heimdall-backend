@@ -53,7 +53,7 @@ public class RoleService {
 			role.setRoleResources(new HashSet<>());
 			Role mappedRole = roleMapper.toRoleDao(role);
 			roleRepository.save(mappedRole);
-			generateAndAddResourcesForNewRole(mappedRole);
+			generateAndAddResourcesForNewRole(mappedRole); //generates and assigns resources to new role
 		}
 	}
 
@@ -158,6 +158,13 @@ public class RoleService {
 				createResourceForRole(resourceDto,role);
 			}
 		}
+	}
+
+	public List<ResourceDto> getAssignedResourcesForRole(String realmName, String roleName){
+		Role role = findRoleByNameDaoAndRealmName(roleName, realmName);
+		Set<Resource> roleResources = role.getRoleResources();
+		List<Resource> resources = new ArrayList<>(roleResources);
+		return resourceMapper.toResourceDtoList(resources);
 	}
 
 }

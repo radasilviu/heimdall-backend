@@ -22,11 +22,6 @@ public class ResourceController {
         this.roleService = roleService;
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<ResourceDto>> getAllResources(){
-        return ResponseEntity.ok().body(resourceService.getAllResources());
-    }
-
     @PostMapping("/getResources")
     public ResponseEntity<List<ResourceDto>> getAllResourcesForRoleDto(@RequestBody RoleDto roleDto){
         return ResponseEntity.ok().body(resourceService.getAllResourcesForRole(roleDto));
