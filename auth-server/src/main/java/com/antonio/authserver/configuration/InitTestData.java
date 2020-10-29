@@ -62,7 +62,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
             List<Role> roleList = Arrays.asList(new Role("ROLE_ADMIN",realms.get(0)), new Role("ROLE_USER",realms.get(0)));
             roleRepository.saveAll(roleList);
 
-            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "tonyivinter@gmail.com", true, null, realms.get(0), usernameAndPassword);
+            AppUser user = new AppUser("test", passwordEncoder.encode("test"), roleRepository.findAllByName("ROLE_USER"), "test@gmail.com", true, null, realms.get(0), usernameAndPassword);
             AppUser admin = new AppUser("admin", passwordEncoder.encode("admin"), roleRepository.findAllByName("ROLE_ADMIN"), "test@gmail.com", true, null, realms.get(0), usernameAndPassword);
             appUserRepository.save(user);
             appUserRepository.save(admin);
