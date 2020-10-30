@@ -107,6 +107,11 @@ public class UserService {
             throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
         appUser.setUsername(appUserDto.getUsername());
         appUser.setPassword(appUserDto.getPassword());
+        if(appUserDto.getEmail().equals("") || appUserDto.getEmail()!=null){
+            throw new CustomException("The inserted email cannot be null!", HttpStatus.BAD_REQUEST);
+        }else{
+            appUser.setEmail(appUserDto.getEmail());
+        }
         if(appUserDto.getToken() != null) {
             appUser.setToken(appUserDto.getToken());
         }
