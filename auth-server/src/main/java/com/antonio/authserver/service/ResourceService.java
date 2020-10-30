@@ -34,16 +34,9 @@ public class ResourceService {
     public List<ResourceDto> getAllResourcesForRole(RoleDto role) {
         return resourceMapper.toResourceDtoList(resourceRepository.findAllByRoleNameAndRealmName(role.getName(),role.getRealm().getName()));
     }
-    public Resource getResourceByNameAndRole(String resourceName, Role role) {
-        return findResourceByNameAndRole(resourceName, role);
-    }
-
-    private Resource findResourceByNameAndRole(String resourceName, Role role) {
-        return resourceRepository.findByNameAndRolesContains(resourceName, role).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + " ] could not be found!", HttpStatus.NOT_FOUND));
-    }
     public void generateCompaniesAndBooksResourcesForUserRole() {
-        Resource companies = new Resource("COMPANIES", null, "ROLE_USER", "master0", new HashSet<>());
-        Resource books = new Resource("BOOKS", null, "ROLE_USER", "master0", new HashSet<>());
+        Resource companies = new Resource("COMPANIES", "ROLE_USER", "master0", new HashSet<>());
+        Resource books = new Resource("BOOKS", "ROLE_USER", "master0", new HashSet<>());
         resourceRepository.save(companies);
         resourceRepository.save(books);
     }

@@ -83,7 +83,7 @@ public class PrivilegeService {
             throw new CustomException("The privilege with the name [" + name + " ] already exists!",HttpStatus.CONFLICT);
         }
         else {
-            Privilege newPrivilege = new Privilege(name,null);
+            Privilege newPrivilege = new Privilege(name);
             privilegeRepository.save(newPrivilege);
         }
     }
@@ -107,7 +107,7 @@ public class PrivilegeService {
     public Resource getResourceFromRoles(AppUserDto appUserDto,String resourceName){
         Optional<Resource> foundResource = Optional.empty();
         for (Role role: appUserDto.getRoles()){
-            foundResource = resourceRepository.findByNameAndRolesContains(resourceName, role);
+            foundResource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName,role.getName(),role.getRealm().getName());
         }
         if(foundResource.isPresent())
             return foundResource.get();

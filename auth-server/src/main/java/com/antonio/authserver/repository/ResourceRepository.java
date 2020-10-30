@@ -10,6 +10,5 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
     Optional<Resource> findByName(String name);
     Optional<Resource> findByNameAndRoleNameAndRealmName(String name,String roleName,String realmName);
-    Optional<Resource> findByNameAndRolesContains(String name, Role role);
     List<Resource> findAllByRoleNameAndRealmName(String roleName,String realmName);
 }
