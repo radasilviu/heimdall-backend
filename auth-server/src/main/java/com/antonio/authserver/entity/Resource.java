@@ -17,24 +17,9 @@ public class Resource {
 
     private String name;
 
-    private String roleName;
-    private String realmName;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "resource_privileges",
-            joinColumns = @JoinColumn(
-                    name = "resource_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(
-                    name = "privilege_id", referencedColumnName = "id"))
-    private Set<Privilege> privileges;
-
     public Resource() {
     }
-    public Resource(String name, String roleName, String realmName, Set<Privilege> privileges) {
+    public Resource(String name) {
         this.name = name;
-        this.roleName = roleName;
-        this.realmName = realmName;
-        this.privileges = privileges;
     }
 }

@@ -3,11 +3,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
-import com.antonio.authserver.entity.Privilege;
-import com.antonio.authserver.entity.Resource;
+import com.antonio.authserver.entity.*;
+import com.antonio.authserver.repository.RoleResourcePrivilegeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,8 +14,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import com.antonio.authserver.entity.AppUser;
-import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.AppUserRepository;
 
@@ -24,8 +21,14 @@ import com.antonio.authserver.repository.AppUserRepository;
 @Transactional
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+	private final AppUserRepository appUserRepository;
+	private final RoleResourcePrivilegeRepository roleResourcePrivilegeRepository;
+
 	@Autowired
-	private AppUserRepository appUserRepository;
+	public UserDetailsServiceImpl(AppUserRepository appUserRepository, RoleResourcePrivilegeRepository roleResourcePrivilegeRepository) {
+		this.appUserRepository = appUserRepository;
+		this.roleResourcePrivilegeRepository = roleResourcePrivilegeRepository;
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws CustomException {
@@ -51,7 +54,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		List<Privilege> collection = new ArrayList<>();
 		for (Role role : roles) {
 			for(Resource resource : role.getRoleResources()) {
-				collection.addAll(resource.getPrivileges());
+				RoleResourcePrivilege roleResourcePrivilege = roleResourcePrivilegeRepository.findByRoleAndResource(role, resource).get();
+				collection.addAll(roleResourcePrivilege.getPrivileges());
 			}
 		}
 		for (Privilege item : collection) {

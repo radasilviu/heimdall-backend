@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
+import java.util.Set;
 @RestController
 @RequestMapping("api/privilege")
 public class PrivilegeController {
@@ -25,9 +25,9 @@ public class PrivilegeController {
         return ResponseEntity.ok().body(privilegeService.getAllPrivileges());
     }
 
-    @PostMapping("/{resourceName}")
-    public ResponseEntity<List<PrivilegeDto>> getPrivilegesForResource(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
-        return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(resourceName, roleDto));
+    @PostMapping("/{realmName}/{roleName}/{resourceName}")
+    public ResponseEntity<Set<PrivilegeDto>> getPrivilegesForResource(@PathVariable String realmName,@PathVariable String roleName,@PathVariable String resourceName){
+        return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(realmName,roleName,resourceName));
     }
 
     @PutMapping("/{resourceName}/{privilegeName}/add")

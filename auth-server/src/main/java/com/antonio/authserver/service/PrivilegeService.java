@@ -1,17 +1,17 @@
 package com.antonio.authserver.service;
 import com.antonio.authserver.configuration.constants.PrivilegeType;
-import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.dto.PrivilegeDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.entity.Privilege;
 import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.Role;
+import com.antonio.authserver.entity.RoleResourcePrivilege;
 import com.antonio.authserver.mapper.PrivilegeMapper;
-import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.repository.PrivilegeRepository;
 import com.antonio.authserver.repository.ResourceRepository;
 import com.antonio.authserver.repository.RoleRepository;
+import com.antonio.authserver.repository.RoleResourcePrivilegeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,53 +26,36 @@ public class PrivilegeService {
     private final PrivilegeMapper privilegeMapper;
     private final RoleRepository roleRepository;
     private final ResourceRepository resourceRepository;
+    private final RoleResourcePrivilegeRepository roleResourcePrivilegeRepository;
     @Autowired
-    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, ResourceRepository resourceRepository) {
+    public PrivilegeService(PrivilegeRepository privilegeRepository, PrivilegeMapper privilegeMapper, RoleRepository roleRepository, ResourceRepository resourceRepository, RoleResourcePrivilegeRepository roleResourcePrivilegeRepository) {
         this.privilegeRepository = privilegeRepository;
         this.privilegeMapper = privilegeMapper;
         this.roleRepository = roleRepository;
         this.resourceRepository = resourceRepository;
+        this.roleResourcePrivilegeRepository = roleResourcePrivilegeRepository;
     }
 
     public List<PrivilegeDto> getAllPrivileges(){
         return privilegeMapper.toPrivilegeDtoList(privilegeRepository.findAll());
     }
 
-    public PrivilegeDto getPrivilegeByName(String name){
-        Privilege privilege = privilegeRepository.findByName(name).orElseThrow(() -> new CustomException("The privilege with the name [" + name + " ] could not be found!", HttpStatus.NOT_FOUND));
-        return privilegeMapper.toPrivilegeDto(privilege);
-    }
-
     public void addPrivilegeToResourceForRole(String privilegeName, String resourceName, RoleDto role){
-        Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Optional<Role> byNameAndRealmName = roleRepository.findByNameAndRealmName(role.getName(), role.getRealm().getName());
-        Set<Resource> roleResources = byNameAndRealmName.get().getRoleResources();
-        for(Resource resource : roleResources){
-            if(resource.getName().equals(resourceName)) {
-                resource.getPrivileges().add(privilege);
-                resourceRepository.save(resource); // Need?
-            }
-            else
-            {
-                throw new CustomException("Resource could not be found!",HttpStatus.NOT_FOUND);
-            }
-        }
+        Privilege privilege = getPrivilegeByNameOrThrowNotFoundException(privilegeName);
+        Role foundRole = getRoleByNameAndRealmNameOrThrowNotFoundException(role.getName(),role.getRealm().getName());
+        Resource resource = getResourceByNameOrThrowNotFoundException(resourceName);
+        RoleResourcePrivilege roleResourcePrivilege = getRoleResourcePrivilegeByRoleAndResource(foundRole,resource);
+        roleResourcePrivilege.getPrivileges().add(privilege);
+        roleResourcePrivilegeRepository.save(roleResourcePrivilege);
     }
 
     public void removePrivilegeFromRole(String privilegeName,String resourceName, RoleDto role){
-        Privilege privilege = privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Optional<Role> byNameAndRealmName = roleRepository.findByNameAndRealmName(role.getName(), role.getRealm().getName());
-        Set<Resource> roleResources = byNameAndRealmName.get().getRoleResources();
-        for(Resource resource : roleResources){
-            if(resource.getName().equals(resourceName)) {
-                resource.getPrivileges().remove(privilege);
-                resourceRepository.save(resource); // Need?
-            }
-            else
-            {
-                throw new CustomException("Resource could not be found!",HttpStatus.NOT_FOUND);
-            }
-        }
+        Privilege privilege = getPrivilegeByNameOrThrowNotFoundException(privilegeName);
+        Role foundRole = getRoleByNameAndRealmNameOrThrowNotFoundException(role.getName(),role.getRealm().getName());
+        Resource resource = getResourceByNameOrThrowNotFoundException(resourceName);
+        RoleResourcePrivilege roleResourcePrivilege = getRoleResourcePrivilegeByRoleAndResource(foundRole,resource);
+        roleResourcePrivilege.getPrivileges().remove(privilege);
+        roleResourcePrivilegeRepository.save(roleResourcePrivilege);
     }
 
     @Transactional
@@ -88,9 +71,11 @@ public class PrivilegeService {
         }
     }
 
-    public List<PrivilegeDto> getPrivilegesForResource(String resourceName,RoleDto role){
-        Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, role.getName(), role.getRealm().getName()).orElseThrow(() -> new CustomException("The resource could not be found!", HttpStatus.NOT_FOUND));
-        return privilegeMapper.toPrivilegeDtoList(transferPrivilegesFromSetToList(resource.getPrivileges()));
+    public Set<PrivilegeDto> getPrivilegesForResource(String realmName,String roleName,String resourceName){
+        Resource resource = getResourceByNameOrThrowNotFoundException(resourceName);
+        Role role = getRoleByNameAndRealmNameOrThrowNotFoundException(roleName,realmName);
+        RoleResourcePrivilege roleResourcePrivilege = getRoleResourcePrivilegeByRoleAndResource(role,resource);
+        return privilegeMapper.toPrivilegeDtoSet(roleResourcePrivilege.getPrivileges());
     }
 
     public void createPrivileges(){
@@ -103,31 +88,53 @@ public class PrivilegeService {
     public void generatePrivileges(){
         createPrivileges();
     }
-
-    public Resource getResourceFromRoles(AppUserDto appUserDto,String resourceName){
-        Optional<Resource> foundResource = Optional.empty();
-        for (Role role: appUserDto.getRoles()){
-            foundResource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName,role.getName(),role.getRealm().getName());
-        }
-        if(foundResource.isPresent())
-            return foundResource.get();
+    @Transactional
+    public Resource getResourceFromRole(Role role, String resourceName){
+        Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName());
+        boolean hasResource = false;
+        Resource foundResource = resourceRepository.findByName(resourceName).orElseThrow(() -> new CustomException("The resource could not be found!", HttpStatus.NOT_FOUND));
+            for (Resource resource : resourcesForRole) {
+                if (resource.getName().equals(resourceName)) {
+                    hasResource = true;
+                    break;
+                }
+            }
+        if(hasResource)
+            return foundResource;
+        else
+            return new Resource("");
+    }
+    @Transactional
+    public Role getRoleIfUserHasResource(Role role, String resourceName){
+        Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName());
+        boolean hasResource = false;
+        Role foundRole = new Role();
+            for (Resource resource : resourcesForRole) {
+                if (resource.getName().equals(resourceName)) {
+                    hasResource = true;
+                    foundRole = role;
+                    break;
+                }
+            }
+        if(hasResource)
+            return foundRole;
         else
             throw new CustomException("The user does not have access to this resource!", HttpStatus.NOT_FOUND);
     }
 
-    public void checkIfUserHasPrivilegeForResource(AppUserDto appUserDto, String resourceName,String requestType){
-        String privilegeName = "";
-        Set<Privilege> userPrivileges = getResourceFromRoles(appUserDto,resourceName).getPrivileges();
+    public Boolean checkIfUserHasPrivilegeForResource(Role role, String resourceName,String requestType){
+        boolean hasPrivilege = false;
+        Resource foundResource = getResourceFromRole(role,resourceName);
+        RoleResourcePrivilege roleResourcePrivilege = getRoleResourcePrivilegeByRoleAndResource(role, foundResource);
         String privilegeType = getPrivilegeTypeByRequestType(requestType);
-        Privilege privilege = privilegeRepository.findByName(privilegeType).orElseThrow(() -> new CustomException("Privilege with the name [" + privilegeType + " ] could not be found for the user!", HttpStatus.NOT_FOUND));
-        for (Privilege userPrivilege : userPrivileges) {
+        Privilege privilege = getPrivilegeByNameOrThrowNotFoundException(privilegeType);
+        for (Privilege userPrivilege : roleResourcePrivilege.getPrivileges()) {
             if (userPrivilege.getName().equals(privilege.getName())) {
-                privilegeName = privilege.getName();
+                hasPrivilege=true;
                 break;
             }
         }
-            if (privilegeName.equals(""))
-                throw new CustomException("The user does not have the privilege to do this!", HttpStatus.UNAUTHORIZED);
+            return hasPrivilege;
     }
 
     private String getPrivilegeTypeByRequestType(String requestType){
@@ -145,7 +152,16 @@ public class PrivilegeService {
         }
     }
 
-    public List<Privilege> transferPrivilegesFromSetToList(Set<Privilege> set){
-        return new ArrayList<>(set);
+    private RoleResourcePrivilege getRoleResourcePrivilegeByRoleAndResource(Role role,Resource resource){
+        return roleResourcePrivilegeRepository.findByRoleAndResource(role,resource).orElseThrow(() -> new CustomException("The role does not have the resource assigned to it!",HttpStatus.NOT_FOUND));
+    }
+    private Privilege getPrivilegeByNameOrThrowNotFoundException(String privilegeName){
+        return privilegeRepository.findByName(privilegeName).orElseThrow(() -> new CustomException("The privilege with the name [" + privilegeName + "] could not be found!",HttpStatus.NOT_FOUND));
+    }
+    private Role getRoleByNameAndRealmNameOrThrowNotFoundException(String roleName,String realmName){
+        return roleRepository.findByNameAndRealmName(roleName,realmName).orElseThrow(() -> new CustomException("The role with the name [" + roleName + "] could not be found!",HttpStatus.NOT_FOUND));
+    }
+    private Resource getResourceByNameOrThrowNotFoundException(String resourceName){
+        return resourceRepository.findByName(resourceName).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName +"] could not be found!",HttpStatus.NOT_FOUND));
     }
 }

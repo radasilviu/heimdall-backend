@@ -37,21 +37,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private RestAccessDeniedHandler accessDeniedHandler;
     private RestAuthenticationEntryPoint unauthorizedHandler;
 
-    private UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
-    private Environment environment;
-    private JwtService jwtService;
-    private UserService userService;
-    private PrivilegeService privilegeService;
-    private RoleService roleService;
-
+    private final UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
+    private final Environment environment;
+    private final JwtService jwtService;
+    private final UserService userService;
+    private final PrivilegeService privilegeService;
     @Autowired
-    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, Environment environment, JwtService jwtService, UserService userService, PrivilegeService privilegeService, RoleService roleService) {
+    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, Environment environment, JwtService jwtService, UserService userService, PrivilegeService privilegeService) {
         this.usernameAndPasswordAuthProvider = usernameAndPasswordAuthProvider;
         this.environment = environment;
         this.jwtService = jwtService;
         this.userService = userService;
         this.privilegeService = privilegeService;
-        this.roleService = roleService;
     }
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -63,15 +60,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/client/**").hasRole("ADMIN")
                 .antMatchers("/api/role/**").hasRole("ADMIN")
                 .antMatchers("/api/privilege/**").hasRole("ADMIN")
-                .antMatchers("/api/company/**").hasAnyRole("ADMIN","USER")
-                .antMatchers("/api/book/**").hasAnyRole("ADMIN","USER")
+                .antMatchers("/api/resources/**").hasRole("ADMIN")
                 .antMatchers("/oauth/**", "/admin/**", "/api/**").permitAll()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
-                    .addFilterAfter(new JwtTokenVerifier(jwtService, userService, privilegeService,roleService), UsernamePasswordAuthenticationFilter.class)
+                    .addFilterAfter(new JwtTokenVerifier(jwtService, userService, privilegeService), UsernamePasswordAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         /// @formatter:on
     }

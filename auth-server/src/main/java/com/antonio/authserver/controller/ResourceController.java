@@ -9,42 +9,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 @RestController
 @RequestMapping("api/resources")
 public class ResourceController {
 
     private final ResourceService resourceService;
-    private final RoleService roleService;
-
     @Autowired
-    public ResourceController(ResourceService resourceService, RoleService roleService) {
+    public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
-        this.roleService = roleService;
     }
 
-    @PostMapping("/getResources")
-    public ResponseEntity<List<ResourceDto>> getAllResourcesForRoleDto(@RequestBody RoleDto roleDto){
-        return ResponseEntity.ok().body(resourceService.getAllResourcesForRole(roleDto));
+    @GetMapping("/all")
+    public ResponseEntity<List<ResourceDto>> getAllAvailableResources(){
+        return ResponseEntity.ok().body(resourceService.getAllResourcesFromDb());
     }
-
+    @GetMapping("/{realmName}/{roleName}")
+    public ResponseEntity<Set<ResourceDto>> getAssignedResourcesForRole(@PathVariable String realmName, @PathVariable String roleName){
+        return ResponseEntity.ok().body(resourceService.getAllResourcesForRole(realmName,roleName));
+    }
     @PostMapping
     public ResponseEntity<ResponseMessage> createResource(@RequestBody ResourceDto resourceDto){
-        roleService.createResourceForAllRoles(resourceDto);
+        resourceService.addResourceToDb(resourceDto);
         ResponseMessage responseMessage = new ResponseMessage("Resource created successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
-
     @DeleteMapping("/{resourceName}/removeAll")
     public ResponseEntity<ResponseMessage> removeResourceFromDatabase(@PathVariable String resourceName){
-        resourceService.deleteResourceForAllRoles(resourceName);
+        resourceService.removeResourceFromDb(resourceName);
         ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully!");
         return ResponseEntity.ok().body(responseMessage);
     }
 
-    @DeleteMapping("/{resourceName}")
-    public ResponseEntity<ResponseMessage> deleteResourceForRole(@PathVariable String resourceName, @RequestBody RoleDto roleDto){
-        resourceService.deleteResourceForRole(resourceName, roleDto);
-        ResponseMessage responseMessage = new ResponseMessage("Resource deleted successfully for role!");
-        return ResponseEntity.ok().body(responseMessage);
-    }
 }

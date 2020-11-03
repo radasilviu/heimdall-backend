@@ -1,11 +1,9 @@
 package com.antonio.authserver.service;
 import java.util.*;
 
-import com.antonio.authserver.dto.ResourceDto;
 import com.antonio.authserver.entity.Resource;
-import com.antonio.authserver.mapper.ResourceMapper;
-import com.antonio.authserver.repository.RealmRepository;
-import com.antonio.authserver.repository.ResourceRepository;
+import com.antonio.authserver.entity.RoleResourcePrivilege;
+import com.antonio.authserver.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,8 +12,6 @@ import com.antonio.authserver.entity.AppUser;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.mapper.RoleMapper;
 import com.antonio.authserver.model.CustomException;
-import com.antonio.authserver.repository.AppUserRepository;
-import com.antonio.authserver.repository.RoleRepository;
 
 import javax.transaction.Transactional;
 @Service
@@ -27,16 +23,15 @@ public class RoleService {
 	private final RoleMapper roleMapper;
 	private final RealmRepository realmRepository;
 	private final ResourceRepository resourceRepository;
-	private final ResourceMapper resourceMapper;
-
+	private final RoleResourcePrivilegeRepository roleResourcePrivilegeRepository;
 	@Autowired
-	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository, ResourceRepository resourceRepository, ResourceMapper resourceMapper) {
+	public RoleService(RoleRepository roleRepository, AppUserRepository appUserRepository, RoleMapper roleMapper, RealmRepository realmRepository, ResourceRepository resourceRepository, RoleResourcePrivilegeRepository roleResourcePrivilegeRepository) {
 		this.roleRepository = roleRepository;
 		this.appUserRepository = appUserRepository;
 		this.roleMapper = roleMapper;
 		this.realmRepository = realmRepository;
 		this.resourceRepository = resourceRepository;
-		this.resourceMapper = resourceMapper;
+		this.roleResourcePrivilegeRepository = roleResourcePrivilegeRepository;
 	}
 
 	public void saveRole(String realmName,RoleDto role) throws CustomException {
@@ -53,7 +48,7 @@ public class RoleService {
 			role.setRoleResources(new HashSet<>());
 			Role mappedRole = roleMapper.toRoleDao(role);
 			roleRepository.save(mappedRole);
-			generateAndAddResourcesForNewRole(mappedRole); //generates and assigns resources to new role
+			addAllResourcesForNewRole(mappedRole);
 		}
 	}
 
@@ -109,62 +104,44 @@ public class RoleService {
 						HttpStatus.NOT_FOUND));
 	}
 
-	public void addResourceToRole(String realmName, String roleName, String resourceName) {
-		Role role = findRoleByNameDaoAndRealmName(roleName, realmName);
-		Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, roleName, realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
+	public void addResourceToRole(String realmName,String roleName,String resourceName){
+		Role role = getRoleByRealmNameAndNameOrThrowExceptionIfNotFound(realmName, roleName);
+		Resource resource = getResourceByNameOrThrowExceptionIfNotFound(resourceName);
 		Set<Resource> roleResources = role.getRoleResources();
 		roleResources.add(resource);
 		roleRepository.save(role);
+		if(getRoleResourcePrivilegeByRoleAndResource(role,resource).isPresent())
+			throw new CustomException("The role [" + roleName + "] already has this resource assigned!",HttpStatus.CONFLICT);
+		else{
+			RoleResourcePrivilege roleResourcePrivilege = new RoleResourcePrivilege(role,resource,new HashSet<>());
+			roleResourcePrivilegeRepository.save(roleResourcePrivilege);
+		}
 	}
-	public void removeResourceFromRole(String realmName, String roleName, String resourceName) {
-		Role role = findRoleByNameDaoAndRealmName(roleName, realmName);
-		Resource resource = resourceRepository.findByNameAndRoleNameAndRealmName(resourceName, roleName, realmName).orElseThrow(() -> new CustomException("Resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
+	public void removeResourceFromRole(String realmName,String roleName,String resourceName){
+		Role role = getRoleByRealmNameAndNameOrThrowExceptionIfNotFound(realmName, roleName);
+		Resource resource = getResourceByNameOrThrowExceptionIfNotFound(resourceName);
 		Set<Resource> roleResources = role.getRoleResources();
-		roleResources.remove(resource);
+		roleResources.add(resource);
 		roleRepository.save(role);
+		if(!getRoleResourcePrivilegeByRoleAndResource(role,resource).isPresent())
+			throw new CustomException("The role [" + roleName + "] does not have this resource assigned!",HttpStatus.CONFLICT);
+		else{
+			roleResourcePrivilegeRepository.delete(getRoleResourcePrivilegeByRoleAndResource(role,resource).get());
+		}
 	}
-	public Set<ResourceDto> getResourceDtosFromDatabaseForNewRole(){
+	public void addAllResourcesForNewRole(Role role){
 		List<Resource> all = resourceRepository.findAll();
-		Set<String> uniqueResourceNames = new HashSet<>();
-		for (Resource resource : all) {
-			uniqueResourceNames.add(resource.getName());
-		}
-		Set<ResourceDto> finalResources = new HashSet<>();
-		for (String resourceName : uniqueResourceNames){
-			finalResources.add(new ResourceDto(resourceName,new HashSet<>()));
-		}
-		return finalResources;
-	}
-
-	public void generateAndAddResourcesForNewRole(Role role){
-		for (ResourceDto resourceDto : getResourceDtosFromDatabaseForNewRole()){
-			createResourceForRole(resourceDto,role);
-			addResourceToRole(role.getRealm().getName(),role.getName(),resourceDto.getName());
+		for(Resource resource : all){
+			addResourceToRole(role.getRealm().getName(),role.getName(),resource.getName());
 		}
 	}
-	public void createResourceForRole(ResourceDto resourceDto, Role role) {
-		Optional<Resource> byName = resourceRepository.findByNameAndRoleNameAndRealmName(resourceDto.getName(), role.getName(), role.getRealm().getName());
-		if (!byName.isPresent()) {
-			Resource resource = resourceMapper.toResourceDao(resourceDto);
-			resource.setRoleName(role.getName());
-			resource.setRealmName(role.getRealm().getName());
-			resourceRepository.save(resource);
-		}
+	private Resource getResourceByNameOrThrowExceptionIfNotFound(String resourceName){
+		return resourceRepository.findByName(resourceName).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
 	}
-	public void createResourceForAllRoles(ResourceDto resourceDto) {
-		List<Role> all = roleRepository.findAll();
-		for (Role role : all) {
-			if (!role.getName().equals("ROLE_ADMIN")) {
-				createResourceForRole(resourceDto,role);
-			}
-		}
+	private Role getRoleByRealmNameAndNameOrThrowExceptionIfNotFound(String realmName,String roleName){
+		return roleRepository.findByNameAndRealmName(roleName,realmName).orElseThrow(() -> new CustomException("Role with the name [" + roleName +"] could not be found!",HttpStatus.NOT_FOUND));
 	}
-
-	public List<ResourceDto> getAssignedResourcesForRole(String realmName, String roleName){
-		Role role = findRoleByNameDaoAndRealmName(roleName, realmName);
-		Set<Resource> roleResources = role.getRoleResources();
-		List<Resource> resources = new ArrayList<>(roleResources);
-		return resourceMapper.toResourceDtoList(resources);
+	private Optional<RoleResourcePrivilege> getRoleResourcePrivilegeByRoleAndResource(Role role,Resource resource){
+		return roleResourcePrivilegeRepository.findByRoleAndResource(role, resource);
 	}
-
 }

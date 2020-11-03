@@ -31,10 +31,6 @@ public class RoleController {
 	public ResponseEntity<RoleDto> getRoleByName(@PathVariable String realmName,@PathVariable String name) {
 		return ResponseEntity.ok().body(roleService.getRoleByName(realmName,name));
 	}
-	@GetMapping("/{realmName}/{roleName}")
-	public ResponseEntity<List<ResourceDto>> getAssignedResourcesForRole(@PathVariable String realmName,@PathVariable String roleName){
-		return ResponseEntity.ok().body(roleService.getAssignedResourcesForRole(realmName,roleName));
-	}
 	@PutMapping("/{realmName}/{name}")
 	public ResponseEntity<ResponseMessage> updateRoleByName(@PathVariable String realmName,@PathVariable String name, @RequestBody RoleDto roleDto) {
 		roleService.updateRoleByName(realmName,name, roleDto);
@@ -55,15 +51,12 @@ public class RoleController {
 		return ResponseEntity.ok().body(responseMessage);
 
 	}
-	// This could just as well be a GET, we don't use the body
 	@PutMapping("/{resourceName}/add")
 	public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
 		roleService.addResourceToRole(role.getRealm().getName(), role.getName(), resourceName);
 		ResponseMessage responseMessage = new ResponseMessage("Resource added successfully!");
 		return ResponseEntity.ok().body(responseMessage);
 	}
-
-	// This could just as well be a GET, we don't use the body; See removeResourceFromRole
 	@PutMapping("/{resourceName}/remove")
 	public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
 		roleService.removeResourceFromRole(role.getRealm().getName(), role.getName(), resourceName);

@@ -1,18 +1,14 @@
 package com.antonio.authserver.configuration.filters;
 
 import com.antonio.authserver.dto.AppUserDto;
-import com.antonio.authserver.entity.Privilege;
-import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.PrivilegeService;
-import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
-import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,26 +25,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
 
     private final JwtService jwtService;
     private final UserService userService;
     private final PrivilegeService  privilegeService;
-    private final RoleService roleService;
-
     @Autowired
-    public JwtTokenVerifier(JwtService jwtService, UserService userService,PrivilegeService privilegeService,RoleService roleService) {
+    public JwtTokenVerifier(JwtService jwtService, UserService userService,PrivilegeService privilegeService) {
         this.jwtService = jwtService;
         this.userService = userService;
         this.privilegeService = privilegeService;
-        this.roleService = roleService;
     }
 
     @Override
@@ -69,6 +57,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                 resourceHeader = resourceHeader.toUpperCase();
                 String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
                 requestTypeHeader = requestTypeHeader.toUpperCase();
+                if(!resourceHeader.equals("PUBLIC"))
                 checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
 
         }
@@ -137,17 +126,20 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         return shouldNotFilter;
     }
 
-    private void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader) {
+    @Transactional
+    public void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader) {
+        boolean hasPrivilegeForResource = false;
         for (Role role : user.getRoles()) {
             if (role.getName().equals("ROLE_ADMIN"))
                 return;
             else {
-                if (!resourceHeader.equals("PUBLIC")) {
-                    if (!privilegeService.getResourceFromRoles(user, resourceHeader).getName().equals("")) {
-                        privilegeService.checkIfUserHasPrivilegeForResource(user, resourceHeader, requestTypeHeader);
+                    if (!privilegeService.getResourceFromRole(role, resourceHeader).getName().equals("")) {
+                        if(privilegeService.checkIfUserHasPrivilegeForResource(role, resourceHeader, requestTypeHeader))
+                            hasPrivilegeForResource = true;
                     }
                 }
             }
-        }
+        if(!hasPrivilegeForResource)
+            throw new CustomException("The user does not have the necessary authorities!",HttpStatus.BAD_REQUEST);
     }
 }

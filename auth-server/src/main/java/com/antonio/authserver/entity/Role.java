@@ -3,10 +3,13 @@ import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Getter
 @Setter
@@ -22,7 +25,7 @@ public class Role {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Realm realm;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
             name = "role_resources",
             joinColumns = @JoinColumn(
