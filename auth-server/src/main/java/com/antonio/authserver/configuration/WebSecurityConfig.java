@@ -1,19 +1,14 @@
 package com.antonio.authserver.configuration;
-
 import com.antonio.authserver.configuration.auth_providers.UsernameAndPasswordAuthProvider;
 import com.antonio.authserver.configuration.filters.JwtTokenVerifier;
 import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
 import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
-import com.antonio.authserver.service.ClientService;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.PrivilegeService;
-import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,16 +20,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-
 @Configuration
 @EnableWebSecurity
 @EnableSwagger2
@@ -46,14 +36,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(Collections.singletonList("*"));
 
     private final UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider;
-    private final Environment environment;
     private final JwtService jwtService;
     private final UserService userService;
     private final PrivilegeService privilegeService;
     @Autowired
-    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, Environment environment, JwtService jwtService, UserService userService, PrivilegeService privilegeService) {
+    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, JwtService jwtService, UserService userService, PrivilegeService privilegeService) {
         this.usernameAndPasswordAuthProvider = usernameAndPasswordAuthProvider;
-        this.environment = environment;
         this.jwtService = jwtService;
         this.userService = userService;
         this.privilegeService = privilegeService;
