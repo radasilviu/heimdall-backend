@@ -104,23 +104,6 @@ public class PrivilegeService {
         else
             return new Resource("");
     }
-    @Transactional
-    public Role getRoleIfUserHasResource(Role role, String resourceName){
-        Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName());
-        boolean hasResource = false;
-        Role foundRole = new Role();
-            for (Resource resource : resourcesForRole) {
-                if (resource.getName().equals(resourceName)) {
-                    hasResource = true;
-                    foundRole = role;
-                    break;
-                }
-            }
-        if(hasResource)
-            return foundRole;
-        else
-            throw new CustomException("The user does not have access to this resource!", HttpStatus.NOT_FOUND);
-    }
 
     public Boolean checkIfUserHasPrivilegeForResource(Role role, String resourceName,String requestType){
         boolean hasPrivilege = false;

@@ -1,6 +1,7 @@
 package com.antonio.authserver.service;
 import java.util.*;
 
+import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Resource;
 import com.antonio.authserver.entity.RoleResourcePrivilege;
 import com.antonio.authserver.repository.*;
@@ -121,7 +122,7 @@ public class RoleService {
 		Role role = getRoleByRealmNameAndNameOrThrowExceptionIfNotFound(realmName, roleName);
 		Resource resource = getResourceByNameOrThrowExceptionIfNotFound(resourceName);
 		Set<Resource> roleResources = role.getRoleResources();
-		roleResources.add(resource);
+		roleResources.remove(resource);
 		roleRepository.save(role);
 		if(!getRoleResourcePrivilegeByRoleAndResource(role,resource).isPresent())
 			throw new CustomException("The role [" + roleName + "] does not have this resource assigned!",HttpStatus.CONFLICT);
@@ -134,6 +135,15 @@ public class RoleService {
 		for(Resource resource : all){
 			addResourceToRole(role.getRealm().getName(),role.getName(),resource.getName());
 		}
+	}
+	public Boolean checkFfUserIsAdmin(AppUserDto appUserDto){
+		boolean isAdmin = false;
+		for (Role role : appUserDto.getRoles())
+			if (role.getName().equals("ROLE_ADMIN")) {
+				isAdmin = true;
+				break;
+			}
+		return isAdmin;
 	}
 	private Resource getResourceByNameOrThrowExceptionIfNotFound(String resourceName){
 		return resourceRepository.findByName(resourceName).orElseThrow(() -> new CustomException("The resource with the name [" + resourceName + "] could not be found!", HttpStatus.NOT_FOUND));
