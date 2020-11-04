@@ -28,6 +28,7 @@ public class RoleResourcePrivilege {
                     name = "roleResourcePrivilege_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
                     name = "privilege_id", referencedColumnName = "id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Privilege> privileges;
 
     public RoleResourcePrivilege() {

@@ -134,15 +134,11 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     public void checkIfUserHasNecessaryAuthorities(AppUserDto user,String resourceHeader, String requestTypeHeader) {
         boolean hasPrivilegeForResource = false;
         for (Role role : user.getRoles()) {
-            if (role.getName().equals("ROLE_ADMIN"))
-                return;
-            else {
                     if (!privilegeService.getResourceFromRole(role, resourceHeader).getName().equals("")) {
                         if(privilegeService.checkIfUserHasPrivilegeForResource(role, resourceHeader, requestTypeHeader))
                             hasPrivilegeForResource = true;
                     }
                 }
-            }
         if(!hasPrivilegeForResource)
             throw new CustomException("The user does not have the necessary authorities!",HttpStatus.BAD_REQUEST);
     }
