@@ -138,11 +138,12 @@ public class RoleService {
 	}
 	public Boolean checkFfUserIsAdmin(AppUserDto appUserDto){
 		boolean isAdmin = false;
-		for (Role role : appUserDto.getRoles())
+		for (Role role : appUserDto.getRoles()) {
 			if (role.getName().equals("ROLE_ADMIN")) {
 				isAdmin = true;
 				break;
 			}
+		}
 		return isAdmin;
 	}
 	private Resource getResourceByNameOrThrowExceptionIfNotFound(String resourceName){

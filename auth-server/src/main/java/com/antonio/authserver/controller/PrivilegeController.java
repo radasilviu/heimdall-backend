@@ -25,7 +25,7 @@ public class PrivilegeController {
         return ResponseEntity.ok().body(privilegeService.getAllPrivileges());
     }
 
-    @PostMapping("/{realmName}/{roleName}/{resourceName}")
+    @GetMapping("/{realmName}/{roleName}/{resourceName}")
     public ResponseEntity<Set<PrivilegeDto>> getPrivilegesForResource(@PathVariable String realmName,@PathVariable String roleName,@PathVariable String resourceName){
         return ResponseEntity.ok().body(privilegeService.getPrivilegesForResource(realmName,roleName,resourceName));
     }
