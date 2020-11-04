@@ -28,6 +28,12 @@ public class ResourceController {
     public ResponseEntity<Set<ResourceDto>> getAssignedResourcesForRole(@PathVariable String realmName, @PathVariable String roleName){
         return ResponseEntity.ok().body(resourceService.getAllResourcesForRole(realmName,roleName));
     }
+    @PutMapping("/{resourceName}")
+    public ResponseEntity<ResponseMessage> updateResourceByName(@PathVariable String resourceName,@RequestBody String newName){
+        resourceService.updateResourceByName(resourceName,newName);
+        ResponseMessage responseMessage = new ResponseMessage("Resource updated successfully!");
+        return ResponseEntity.ok().body(responseMessage);
+    }
     @PostMapping
     public ResponseEntity<ResponseMessage> createResource(@RequestBody ResourceDto resourceDto){
         resourceService.addResourceToDb(resourceDto);
