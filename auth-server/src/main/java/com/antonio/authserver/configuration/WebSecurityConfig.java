@@ -5,6 +5,7 @@ import com.antonio.authserver.model.exceptions.RestAccessDeniedHandler;
 import com.antonio.authserver.model.exceptions.RestAuthenticationEntryPoint;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.PrivilegeService;
+import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,12 +40,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtService jwtService;
     private final UserService userService;
     private final PrivilegeService privilegeService;
+    private final RoleService roleService;
     @Autowired
-    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, JwtService jwtService, UserService userService, PrivilegeService privilegeService) {
+    public WebSecurityConfig(UsernameAndPasswordAuthProvider usernameAndPasswordAuthProvider, JwtService jwtService, UserService userService, PrivilegeService privilegeService, RoleService roleService) {
         this.usernameAndPasswordAuthProvider = usernameAndPasswordAuthProvider;
         this.jwtService = jwtService;
         this.userService = userService;
         this.privilegeService = privilegeService;
+        this.roleService = roleService;
     }
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -52,18 +55,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().configurationSource(corsConfigurationSource())
                 .and().csrf().disable().
                 authorizeRequests()
-                .antMatchers("/api/user/**").hasRole("ADMIN")
-                .antMatchers("/api/client/**").hasRole("ADMIN")
-                .antMatchers("/api/role/**").hasRole("ADMIN")
-                .antMatchers("/api/privilege/**").hasRole("ADMIN")
-                .antMatchers("/api/resources/**").hasRole("ADMIN")
                 .antMatchers("/oauth/**", "/admin/**", "/api/**").permitAll()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(unauthorizedHandler)
                 .and()
-                    .addFilterAfter(new JwtTokenVerifier(jwtService, userService, privilegeService), UsernamePasswordAuthenticationFilter.class)
+                    .addFilterAfter(new JwtTokenVerifier(jwtService, userService, privilegeService,roleService), UsernamePasswordAuthenticationFilter.class)
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         /// @formatter:on
     }

@@ -5,6 +5,7 @@ import com.antonio.authserver.entity.Role;
 import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.service.JwtService;
 import com.antonio.authserver.service.PrivilegeService;
+import com.antonio.authserver.service.RoleService;
 import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.SecurityConstants;
 import com.google.common.base.Strings;
@@ -32,11 +33,13 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserService userService;
     private final PrivilegeService  privilegeService;
+    private final RoleService roleService;
     @Autowired
-    public JwtTokenVerifier(JwtService jwtService, UserService userService,PrivilegeService privilegeService) {
+    public JwtTokenVerifier(JwtService jwtService, UserService userService,PrivilegeService privilegeService,RoleService roleService) {
         this.jwtService = jwtService;
         this.userService = userService;
         this.privilegeService = privilegeService;
+        this.roleService = roleService;
     }
 
     @Override
@@ -53,13 +56,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             verifyToken(token, user.getToken());
 
+            if(!roleService.checkFfUserIsAdmin(user)) {
                 String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
                 resourceHeader = resourceHeader.toUpperCase();
                 String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
                 requestTypeHeader = requestTypeHeader.toUpperCase();
-                if(!resourceHeader.equals("PUBLIC"))
-                checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
-
+                if (!resourceHeader.equals("PUBLIC"))
+                    checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
+            }
         }
 
 
