@@ -71,9 +71,9 @@ public class ResourceService {
         name = name.trim();
         if(name.equals(""))
             throw new CustomException("The inserted name cannot be null!", HttpStatus.BAD_REQUEST);
-        Optional<Resource> foundResource = resourceRepository.findByName(resourceDto.getName());
+        Optional<Resource> foundResource = resourceRepository.findByName(name);
         if(foundResource.isPresent())
-            throw new CustomException("The resource with the name [" + resourceDto.getName() + "] already exists!",HttpStatus.CONFLICT);
+            throw new CustomException("The resource with the name [" + name + "] already exists!",HttpStatus.CONFLICT);
         else{
             Resource resource = resourceMapper.toResourceDao(resourceDto);
             resourceRepository.save(resource);
