@@ -44,18 +44,14 @@ public class ResourceService {
         resource.setName(newName);
         resourceRepository.save(resource);
     }
-    public void generateCompaniesAndBooksResources() {
-        Resource companies = new Resource("COMPANIES");
-        Resource books = new Resource("BOOKS");
-        resourceRepository.save(companies);
-        resourceRepository.save(books);
-    }
+    //for basic role_user with all privileges
     public Set<Resource> getBasicResourcesForRoleUserDemo() {
         Set<Resource> resources = new HashSet<>();
         resources.add(resourceRepository.findByName("COMPANIES").get());
         resources.add(resourceRepository.findByName("BOOKS").get());
         return resources;
     }
+    //for basic role_user with all privileges
     public void assignAllPrivilegesForRoleUser(Role role) {
         Set<Resource> basicResources = getBasicResourcesForRoleUserDemo();
         List<Privilege> privileges = privilegeRepository.findAll();

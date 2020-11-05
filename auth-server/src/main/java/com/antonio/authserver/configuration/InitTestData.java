@@ -29,9 +29,10 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private final PrivilegeService privilegeService;
     private final ResourceService resourceService;
     private final RoleService roleService;
+    private final ResourceRepository resourceRepository;
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, ResourceService resourceService, RoleService roleService) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, ResourceService resourceService, RoleService roleService, ResourceRepository resourceRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -42,6 +43,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.privilegeService = privilegeService;
         this.resourceService = resourceService;
         this.roleService = roleService;
+        this.resourceRepository = resourceRepository;
     }
 
     @Override
@@ -64,11 +66,14 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initPrivileges(){
-        privilegeService.generatePrivileges();
+        privilegeService.createPrivileges();
     }
 
     private void initResources(){
-        resourceService.generateCompaniesAndBooksResources();
+            Resource companies = new Resource("COMPANIES");
+            Resource books = new Resource("BOOKS");
+            resourceRepository.save(companies);
+            resourceRepository.save(books);
 }
 
     private void initClients(List<Realm> realms) {

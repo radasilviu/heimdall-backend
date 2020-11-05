@@ -85,9 +85,6 @@ public class PrivilegeService {
         createPrivilegeIfNotFound(PrivilegeType.DELETE.getMessage());
     }
 
-    public void generatePrivileges(){
-        createPrivileges();
-    }
     @Transactional
     public Resource getResourceFromRole(Role role, String resourceName){
         Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName(),role.getRealm().getName());
