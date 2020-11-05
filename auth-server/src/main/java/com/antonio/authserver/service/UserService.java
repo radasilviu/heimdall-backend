@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class UserService {
@@ -54,21 +55,20 @@ public class UserService {
         return appUserMapper.toAppUserDto(appUser);
     }
 
-    public AppUserDto getUserByUsernameAndRealmName(String realmName,String username) throws CustomException {
-        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
+    public AppUserDto getUserByUsernameAndRealmName(String realmName, String username) throws CustomException {
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
         return appUserMapper.toAppUserDto(appUser);
     }
 
-    public void create(String realmName,AppUserDto appUserDto) throws CustomException {
+    public void create(String realmName, AppUserDto appUserDto) throws CustomException {
         appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-        if (appUserRepository.findByUsernameAndRealmName(appUserDto.getUsername(),realmName).isPresent())
+        if (appUserRepository.findByUsernameAndRealmName(appUserDto.getUsername(), realmName).isPresent())
             throw new CustomException("User with the username [ " + appUserDto.getUsername() + " ] already exists!",
                     HttpStatus.CONFLICT);
         else if (appUserDto.getUsername().equals("")) {
             throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
-        }
-            else {
+        } else {
             String randomCode = RandomString.make(64);
             appUserDto.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
             appUserDto.setEmailCode(randomCode);
@@ -99,37 +99,44 @@ public class UserService {
         return appUserDto;
     }
 
-    public void updateUserByUsername(String realmName,String username, AppUserDto appUserDto) {
+    public void updateUserByUsername(String realmName, String username, AppUserDto appUserDto) {
         appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
-        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        if (appUserDto.getUsername().equals(""))
-            throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
-        appUser.setUsername(appUserDto.getUsername());
-        appUser.setPassword(appUserDto.getPassword());
-        if(appUserDto.getEmail().equals("")){
+
+        if (appUserDto.getUsername().equals("")) {
+            throw new CustomException("The inserted username cannot be null!", HttpStatus.BAD_REQUEST);
+        } else {
+            appUser.setUsername(appUserDto.getUsername());
+        }
+        if (appUserDto.getEmail().equals("")) {
             throw new CustomException("The inserted email cannot be null!", HttpStatus.BAD_REQUEST);
-        }else{
+        } else {
             appUser.setEmail(appUserDto.getEmail());
         }
-        if(appUserDto.getToken().equals("")) {
+        if (appUserDto.getToken().equals("")) {
             appUser.setToken(appUserDto.getToken());
         }
-        if(appUserDto.getRefreshToken().equals("")){
+        if (appUserDto.getRefreshToken().equals("")) {
             appUser.setRefreshToken(appUserDto.getRefreshToken());
+        }
+        if (appUserDto.getPassword().equals("")) {
+            appUser.setPassword(appUserDto.getPassword());
+        } else {
+            throw new CustomException("The inserted password cannot be null!", HttpStatus.BAD_REQUEST);
         }
 
         appUserRepository.save(appUser);
     }
 
-    public AppUser addRole(String realmName,String username, Role role) throws CustomException {
-        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
+    public AppUser addRole(String realmName, String username, Role role) throws CustomException {
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(),realmName)
+        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(), realmName)
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
-        if(roleOptional.getName().equals("ROLE_ADMIN"))
+        if (roleOptional.getName().equals("ROLE_ADMIN"))
             adminAlreadyExists(username);
         appUser.getRoles().add(roleOptional);
         appUserRepository.save(appUser);
@@ -137,10 +144,10 @@ public class UserService {
         return appUser;
     }
 
-    public void removeRole(String realmName,String username, Role role) throws CustomException {
-        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
+    public void removeRole(String realmName, String username, Role role) throws CustomException {
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(),realmName)
+        Role roleOptional = roleRepository.findByNameAndAndRealmName(role.getName(), realmName)
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
@@ -149,8 +156,8 @@ public class UserService {
 
     }
 
-    public void deleteUser(String realmName,String username) throws CustomException {
-        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username,realmName).orElseThrow(() -> new CustomException(
+    public void deleteUser(String realmName, String username) throws CustomException {
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
         appUserRepository.delete(appUser);
 
@@ -252,18 +259,18 @@ public class UserService {
         return appUserMapper.toAppUserDto(userOptional.get());
     }
 
-    public void adminAlreadyExists(String username){
+    public void adminAlreadyExists(String username) {
         List<AppUser> byUsername = appUserRepository.findAllByUsername(username);
         byUsername.forEach(appUser -> {
             boolean isAdmin = false;
             for (Role role : appUser.getRoles()) {
                 if (role.getName().equals("ROLE_ADMIN")) {
-                    isAdmin=true;
+                    isAdmin = true;
                     break;
                 }
             }
-            if(isAdmin)
-                throw new CustomException("Admin with the name " + username +" already exists!",HttpStatus.CONFLICT);
+            if (isAdmin)
+                throw new CustomException("Admin with the name " + username + " already exists!", HttpStatus.CONFLICT);
         });
     }
 }
