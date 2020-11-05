@@ -90,7 +90,7 @@ public class PrivilegeService {
     }
     @Transactional
     public Resource getResourceFromRole(Role role, String resourceName){
-        Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName());
+        Set<Resource> resourcesForRole = resourceRepository.getResourcesForRole(role.getName(),role.getRealm().getName());
         boolean hasResource = false;
         Resource foundResource = resourceRepository.findByName(resourceName).orElseThrow(() -> new CustomException("The resource could not be found!", HttpStatus.NOT_FOUND));
             for (Resource resource : resourcesForRole) {

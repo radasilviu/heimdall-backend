@@ -11,6 +11,6 @@ import java.util.Set;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource,Long> {
     Optional<Resource> findByName(String name);
-    @Query("SELECT rr from Role r left join r.roleResources rr where r.name=?1")
-    Set<Resource> getResourcesForRole(String roleName);
+    @Query("SELECT rr from Role r left join r.roleResources rr where r.name=?1 and r.realm.name=?2")
+    Set<Resource> getResourcesForRole(String roleName,String realmName);
 }
