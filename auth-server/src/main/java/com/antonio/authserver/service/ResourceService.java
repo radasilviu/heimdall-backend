@@ -37,6 +37,9 @@ public class ResourceService {
         return resourceMapper.toResourceDtoList(resourceRepository.findAll());
     }
     public void updateResourceByName(String oldName,String newName){
+        if(newName.equals(""))
+            throw new CustomException("The inserted name cannot be null!", HttpStatus.BAD_REQUEST);
+        newName = newName.trim();
         Resource resource = getResourceByNameOrThrowExceptionIfNotFound(oldName);
         resource.setName(newName);
         resourceRepository.save(resource);
