@@ -37,9 +37,9 @@ public class ResourceService {
         return resourceMapper.toResourceDtoList(resourceRepository.findAll());
     }
     public void updateResourceByName(String oldName,String newName){
+        newName = newName.trim();
         if(newName.equals(""))
             throw new CustomException("The inserted name cannot be null!", HttpStatus.BAD_REQUEST);
-        newName = newName.trim();
         Resource resource = getResourceByNameOrThrowExceptionIfNotFound(oldName);
         resource.setName(newName);
         resourceRepository.save(resource);
@@ -67,9 +67,13 @@ public class ResourceService {
     }
 
     public void addResourceToDb(ResourceDto resourceDto){
-        Optional<Resource> foundResource = resourceRepository.findByName(resourceDto.getName());
+        String name = resourceDto.getName();
+        name = name.trim();
+        if(name.equals(""))
+            throw new CustomException("The inserted name cannot be null!", HttpStatus.BAD_REQUEST);
+        Optional<Resource> foundResource = resourceRepository.findByName(name);
         if(foundResource.isPresent())
-            throw new CustomException("The resource with the name [" + resourceDto.getName() + "] already exists!",HttpStatus.CONFLICT);
+            throw new CustomException("The resource with the name [" + name + "] already exists!",HttpStatus.CONFLICT);
         else{
             Resource resource = resourceMapper.toResourceDao(resourceDto);
             resourceRepository.save(resource);
