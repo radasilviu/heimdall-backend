@@ -10,7 +10,6 @@ import com.antonio.authserver.repository.AppUserRepository;
 import com.antonio.authserver.repository.IdentityProviderRepository;
 import com.antonio.authserver.repository.RealmRepository;
 import com.antonio.authserver.repository.RoleRepository;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -127,6 +126,15 @@ public class UserService {
         }
 
         appUserRepository.save(appUser);
+    }
+
+    public List<AppUserDto> getUsersWithoutAdmins(String realmName) {
+        Role amdinRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
+        List<AppUser> users = appUserRepository.findAll()
+                .stream()
+                .filter(u -> !u.getRoles().contains(amdinRole))
+                .collect(Collectors.toList());
+        return appUserMapper.toAppUserDtoList(users);
     }
 
     public AppUser addRole(String realmName, String username, Role role) throws CustomException {
