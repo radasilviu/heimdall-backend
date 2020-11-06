@@ -20,6 +20,7 @@ public class AppUser {
 
     private String username;
     private String password;
+    @Column(unique=true)
     private String email;
     private Boolean isActivated = false;
     @Column(updatable = false)
