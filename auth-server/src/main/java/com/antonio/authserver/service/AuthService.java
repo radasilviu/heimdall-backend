@@ -23,19 +23,13 @@ import java.util.*;
 @Transactional
 public class AuthService {
 
-    private BCryptPasswordEncoder passwordEncoder;
-
-    private ClientService clientService;
-
-    private UserService userService;
-
-    private JwtService jwtService;
-
-    private Environment env;
-
-    private AppUserRepository appUserRepository;
-
-    private EmailService emailService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final ClientService clientService;
+    private final UserService userService;
+    private final JwtService jwtService;
+    private final Environment env;
+    private final AppUserRepository appUserRepository;
+    private final EmailService emailService;
 
     @Autowired
     public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
