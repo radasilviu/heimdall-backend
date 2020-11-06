@@ -108,31 +108,30 @@ public class UserService {
         } else {
             appUser.setUsername(appUserDto.getUsername());
         }
+
         if (appUserDto.getEmail().equals("")) {
             throw new CustomException("The inserted email cannot be null!", HttpStatus.BAD_REQUEST);
         } else {
             appUser.setEmail(appUserDto.getEmail());
         }
-        if (appUserDto.getToken().equals("")) {
-            appUser.setToken(appUserDto.getToken());
-        }
-        if (appUserDto.getRefreshToken().equals("")) {
-            appUser.setRefreshToken(appUserDto.getRefreshToken());
-        }
+
+        appUser.setToken(appUserDto.getToken());
+        appUser.setRefreshToken(appUserDto.getRefreshToken());
+
         if (appUserDto.getPassword().equals("")) {
-            appUser.setPassword(appUserDto.getPassword());
-        } else {
             throw new CustomException("The inserted password cannot be null!", HttpStatus.BAD_REQUEST);
+        } else {
+            appUser.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
         }
 
         appUserRepository.save(appUser);
     }
 
     public List<AppUserDto> getUsersWithoutAdmins(String realmName) {
-        Role amdinRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
         List<AppUser> users = appUserRepository.findAll()
                 .stream()
-                .filter(u -> !u.getRoles().contains(amdinRole))
+                .filter(u -> !u.getRoles().contains(adminRole))
                 .collect(Collectors.toList());
         return appUserMapper.toAppUserDtoList(users);
     }
