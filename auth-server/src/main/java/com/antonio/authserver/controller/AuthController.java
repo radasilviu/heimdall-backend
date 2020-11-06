@@ -26,21 +26,19 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/oauth")
 public class AuthController {
+    private final AuthService authService;
+    private final UserService userService;
+    private final EmailService emailService;
+    private final RealmRepository realmRepository;
 
     @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private EmailService emailService;
-
-    private RealmRepository realmRepository;
-    @Autowired
-    public AuthController(RealmRepository realmRepository) {
+    public AuthController(AuthService authService, UserService userService, EmailService emailService, RealmRepository realmRepository) {
+        this.authService = authService;
+        this.userService = userService;
+        this.emailService = emailService;
         this.realmRepository = realmRepository;
     }
+
     @PostMapping(path = "/client-login")
     public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
@@ -50,6 +48,7 @@ public class AuthController {
         final ResponseMessage responseMessage = new ResponseMessage("Failed to generate JWT Code");
         return ResponseEntity.unprocessableEntity().body(responseMessage);
     }
+
     @PostMapping(path = "/token")
     public ResponseEntity<?> getToken(@RequestBody LoginCredential loginCredential) {
         JwtObject jwtObject = authService.login(loginCredential);
