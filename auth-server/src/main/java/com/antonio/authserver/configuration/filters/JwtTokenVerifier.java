@@ -55,15 +55,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             final AppUserDto user = extractUserFromToken(token);
 
             verifyToken(token, user.getToken());
-
-            if(!roleService.checkFfUserIsAdmin(user)) {
-                String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE);
-                resourceHeader = resourceHeader.toUpperCase();
-                String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST);
-                requestTypeHeader = requestTypeHeader.toUpperCase();
-                if (!resourceHeader.equals("PUBLIC"))
-                    checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
-            }
+            checkUserPrivileges(httpServletRequest,user);
         }
 
 
@@ -141,5 +133,13 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                 }
         if(!hasPrivilegeForResource)
             throw new CustomException("The user does not have the necessary authorities!",HttpStatus.BAD_REQUEST);
+    }
+    private void checkUserPrivileges(HttpServletRequest httpServletRequest,AppUserDto user) {
+        if (!roleService.checkFfUserIsAdmin(user)) {
+            String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE).toUpperCase();
+            String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST).toUpperCase();
+            if (!resourceHeader.equals("PUBLIC"))
+                checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
+        }
     }
 }
