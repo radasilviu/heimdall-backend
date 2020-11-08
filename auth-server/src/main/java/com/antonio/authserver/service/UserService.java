@@ -113,6 +113,7 @@ public class UserService {
         appUserRepository.save(appUser);
     }
 
+    // method not used
     public List<AppUserDto> getUsersWithoutAdmins(String realmName) {
         Role amdinRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
         List<AppUser> users = appUserRepository.findAll()
@@ -202,6 +203,7 @@ public class UserService {
         return appUserMapper.toAppUserDto(userOptional.get());
     }
 
+    // unused method
     public AppUserDto findUserByToken(String token) {
         AppUser appUser = appUserRepository.findByToken(token).orElseThrow(
                 () -> new CustomException("Token [ " + token + " ] could not be found!", HttpStatus.NOT_FOUND));

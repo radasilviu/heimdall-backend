@@ -13,12 +13,14 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
 	Optional<AppUser> findByUsername(String name);
 
+	// this is never used, why is it still here?
 	Optional<AppUser> findByUsernameAndPassword(String username, String password);
 
 	Optional<AppUser> findByCode(String code);
 
 	List<AppUser> findAllByRolesIn(Set<Role> roles);
 
+	// this is also never used, why is it still here?
 	void deleteByUsername(String username);
 
 	Optional<AppUser> findByEmailCode(String emailCode);
