@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -44,23 +46,16 @@ public class AuthService {
         this.emailService = emailService;
     }
 
-
     public Code getCode(ClientLoginRequest clientLoginRequest) {
-        clientService.getClientBySecretAndNameWithRealm(clientLoginRequest.getRealm(),clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
-        final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getIdentifier(),
-                clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
-
-
+        // why are we doing this?
+        clientService.getClientBySecretAndNameWithRealm(clientLoginRequest.getRealm(),
+                                                        clientLoginRequest.getClientId(),
+                                                        clientLoginRequest.getClientSecret());
+        final AppUserDto user = getUser(clientLoginRequest);
         Code code = clientService.generateCode(user);
         saveUserWithNewCodeValue(user, code);
 
         return code;
-    }
-
-    private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
-        user.setCode(code.getCode());
-        userService.update(user);
-
     }
 
     public JwtObject login(LoginCredential loginCredential) {
@@ -84,16 +79,6 @@ public class AuthService {
         return jwtObject;
     }
 
-    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
-        userDto.setToken(token);
-        userDto.setRefreshToken(refreshToken);
-        userService.update(userDto);
-    }
-
-    private void verifyClientCode(String clientCode) {
-        userService.verifyUserCode(clientCode);
-    }
-
     public void logout(JwtObject jwtObject) {
 
         // if log out has been called, token need to be updated even on error occurs
@@ -106,12 +91,6 @@ public class AuthService {
 
     }
 
-    private boolean verifyIfUserSessionExpired(long accessTokenExpirationTime, long refreshTokenExpirationTime) {
-
-        final long currentTime = System.currentTimeMillis();
-        return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
-    }
-
     public JwtObject generateNewAccessToken(JwtObject refreshToken) {
         final AppUserDto appUserDto = userService.findUserByRefreshToken(refreshToken.getRefresh_token());
 
@@ -120,6 +99,83 @@ public class AuthService {
 
         return jwtObject;
 
+    }
+
+    public void sendForgotPasswordEmail(String email) {
+        Optional<AppUser> user = appUserRepository.findByEmail(email);
+
+        if (user != null) {
+            String forgotPasswordCode = generateRandomString();
+            user.get().setForgotPasswordCode(forgotPasswordCode);
+            appUserRepository.save(user.get());
+
+            Map<String, Object> model = new HashMap<>();
+            model.put("email", user.get().getEmail());
+            model.put("forgotPasswordCode", user.get().getForgotPasswordCode());
+            model.put("clientFrontedURL", env.getProperty("clientFrontedURL"));
+
+            emailService.sendEmail("forgot_password.ftl", model, user.get().getEmail(), "Forgot password",
+                    this.env.getProperty("mail.from"));
+        }
+    }
+
+    public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
+        if (!password.equals(confirmPassword)) {
+            throw new CustomException("Passwords do not match", HttpStatus.BAD_REQUEST);
+        }
+        Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
+
+        if (!user.isPresent()) {
+            throw new CustomException("Code invalid or wrong code for user", HttpStatus.BAD_REQUEST);
+        }
+
+        user.get().setPassword(passwordEncoder.encode(password));
+        appUserRepository.save(user.get());
+    }
+
+    public JwtObject profileLogin(String username, String password, String realm) {
+        AppUserDto user = userService.findByUsernameAndRealmName(username, realm);
+        JwtObject jwtObject = createNewJWtObject(user);
+
+        return jwtObject;
+    }
+
+    private AppUserDto getUser(ClientLoginRequest clientLoginRequest) {
+        if(identifierIsEmail(clientLoginRequest.getIdentifier()))
+            return userService.findByEmailAndPasswordAndRealm(clientLoginRequest.getIdentifier(),
+                    clientLoginRequest.getPassword(),
+                    clientLoginRequest.getRealm());
+        else
+            return userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getIdentifier(),
+                    clientLoginRequest.getPassword(),
+                    clientLoginRequest.getRealm());
+    }
+
+    private boolean identifierIsEmail(String identifier) {
+        Pattern pattern = Pattern.compile("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}");
+        Matcher mat = pattern.matcher(identifier);
+        return mat.matches();
+    }
+
+    private void saveUserWithNewCodeValue(AppUserDto user, Code code) {
+        user.setCode(code.getCode());
+        userService.update(user);
+    }
+
+    private void setJwtToUserAndSave(AppUserDto userDto, String token, String refreshToken) {
+        userDto.setToken(token);
+        userDto.setRefreshToken(refreshToken);
+        userService.update(userDto);
+    }
+
+    private void verifyClientCode(String clientCode) {
+        userService.verifyUserCode(clientCode);
+    }
+
+    private boolean verifyIfUserSessionExpired(long accessTokenExpirationTime, long refreshTokenExpirationTime) {
+
+        final long currentTime = System.currentTimeMillis();
+        return (currentTime > accessTokenExpirationTime && currentTime > refreshTokenExpirationTime);
     }
 
     private void updateNewTokensToUser(AppUserDto appUserDto, String accessToken, String refreshToken) {
@@ -160,26 +216,6 @@ public class AuthService {
         return accessToken;
     }
 
-
-
-    public void sendForgotPasswordEmail(String email) {
-        Optional<AppUser> user = appUserRepository.findByEmail(email);
-
-        if (user != null) {
-            String forgotPasswordCode = generateRandomString();
-            user.get().setForgotPasswordCode(forgotPasswordCode);
-            appUserRepository.save(user.get());
-
-            Map<String, Object> model = new HashMap<>();
-            model.put("email", user.get().getEmail());
-            model.put("forgotPasswordCode", user.get().getForgotPasswordCode());
-            model.put("clientFrontedURL", env.getProperty("clientFrontedURL"));
-
-            emailService.sendEmail("forgot_password.ftl", model, user.get().getEmail(), "Forgot password",
-                    this.env.getProperty("mail.from"));
-        }
-    }
-
     private String generateRandomString() {
         int leftLimit = 48; // numeral '0'
         int rightLimit = 122; // letter 'z'
@@ -192,25 +228,4 @@ public class AuthService {
 
         return generatedString;
     }
-
-    public void changePassword(String password, String confirmPassword, String email, String forgotPasswordCode) {
-        if (!password.equals(confirmPassword)) {
-            throw new CustomException("Passwords do not match", HttpStatus.BAD_REQUEST);
-        }
-        Optional<AppUser> user = appUserRepository.findByEmailAndForgotPasswordCode(email, forgotPasswordCode);
-
-        if (!user.isPresent()) {
-            throw new CustomException("Code invalid or wrong code for user", HttpStatus.BAD_REQUEST);
-        }
-
-        user.get().setPassword(passwordEncoder.encode(password));
-        appUserRepository.save(user.get());
-    }
-
-	public JwtObject profileLogin(String username, String password, String realm) {
-		AppUserDto user = userService.findByUsernameAndRealmName(username, realm);
-        JwtObject jwtObject = createNewJWtObject(user);
-
-		return jwtObject;
-	}
 }
