@@ -36,4 +36,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     List<AppUser> findAllByRealmName(String realmName);
 
     List<AppUser> findAllByUsername(String username);
+
+    Optional<AppUser> findByEmailAndRealmName(String email, String realmName);
 }
