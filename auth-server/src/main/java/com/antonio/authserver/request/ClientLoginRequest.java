@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ClientLoginRequest {
-    private String username;
+    private String identifier;
     private String password;
     private String clientId;
     private String clientSecret;

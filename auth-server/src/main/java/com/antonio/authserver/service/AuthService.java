@@ -47,7 +47,7 @@ public class AuthService {
 
     public Code getCode(ClientLoginRequest clientLoginRequest) {
         clientService.getClientBySecretAndNameWithRealm(clientLoginRequest.getRealm(),clientLoginRequest.getClientId(), clientLoginRequest.getClientSecret());
-        final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getUsername(),
+        final AppUserDto user = userService.findByUsernameAndPasswordAndRealm(clientLoginRequest.getIdentifier(),
                 clientLoginRequest.getPassword(), clientLoginRequest.getRealm());
 
 

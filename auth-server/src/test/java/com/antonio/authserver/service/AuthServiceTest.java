@@ -44,7 +44,7 @@ public class AuthServiceTest {
     @Test
     public Code successfulLogin() throws Exception {
         ClientLoginRequest loginRequest = new ClientLoginRequest();
-        loginRequest.setUsername("test");
+        loginRequest.setIdentifier("test");
         loginRequest.setPassword("test");
         loginRequest.setClientId("myclient");
         loginRequest.setClientSecret("clientPass");
