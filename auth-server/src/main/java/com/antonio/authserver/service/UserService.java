@@ -43,7 +43,6 @@ public class UserService {
         this.realmRepository = realmRepository;
     }
 
-
     public List<AppUserDto> getAllUsers(String realmName) {
         return appUserMapper.toAppUserDtoList(appUserRepository.findAllByRealmName(realmName));
     }
@@ -163,33 +162,25 @@ public class UserService {
         if (!user.isPresent()) {
             throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        AppUserDto userDto = appUserMapper.toAppUserDto(user.get());
-        return userDto;
+        return appUserMapper.toAppUserDto(user.get());
     }
 
     public AppUserDto findByUsernameAndPasswordAndRealm(String username, String password, String realmName) {
         Optional<AppUser> userOptional = appUserRepository.findByUsernameAndRealmName(username, realmName);
+        return checkAndReturnUser(password, userOptional);
+    }
 
-        if (!userOptional.isPresent()) {
-            throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        AppUserDto userDto = appUserMapper.toAppUserDto(userOptional.get());
-
-        if (!passwordEncoder.matches(password, userDto.getPassword())) {
-            throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
-        }
-
-        return userDto;
+    public AppUserDto findByEmailAndPasswordAndRealm(String email, String password, String realmName) {
+        Optional<AppUser> userOptional = appUserRepository.findByEmailAndRealmName(email, realmName);
+        return checkAndReturnUser(password, userOptional);
     }
 
     public void verifyUserCode(String code) {
-
         AppUser appUser = appUserRepository.findByCode(code).orElseThrow(
                 () -> new CustomException("Code [ " + code + " ] could not be found!", HttpStatus.NOT_FOUND));
         appUser.setCode(null);
 
         appUserRepository.save(appUser);
-
     }
 
     public AppUserDto findByUsername(String username) {
@@ -267,5 +258,16 @@ public class UserService {
             if (isAdmin)
                 throw new CustomException("Admin with the name " + username + " already exists!", HttpStatus.CONFLICT);
         });
+    }
+
+    private AppUserDto checkAndReturnUser(String password, Optional<AppUser> userOptional) {
+        if (!userOptional.isPresent()) {
+            throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        AppUserDto userDto = appUserMapper.toAppUserDto(userOptional.get());
+        if (!passwordEncoder.matches(password, userDto.getPassword())) {
+            throw new CustomException(ErrorMessage.INVALID_CREDENTIALS.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        return userDto;
     }
 }
