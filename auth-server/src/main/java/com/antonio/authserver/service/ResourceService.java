@@ -40,6 +40,8 @@ public class ResourceService {
         newName = newName.trim();
         if(newName.equals(""))
             throw new CustomException("The inserted name cannot be null!", HttpStatus.BAD_REQUEST);
+        if(resourceRepository.findByName(newName).isPresent())
+            throw new CustomException("There already is a resource with that name!",HttpStatus.CONFLICT);
         Resource resource = getResourceByNameOrThrowExceptionIfNotFound(oldName);
         resource.setName(newName);
         resourceRepository.save(resource);
