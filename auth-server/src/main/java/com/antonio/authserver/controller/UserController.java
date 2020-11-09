@@ -9,13 +9,19 @@ import com.antonio.authserver.service.UserService;
 import com.antonio.authserver.utils.EmailUtility;
 import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/user")
@@ -34,9 +40,10 @@ public class UserController {
     }
 
     @GetMapping("/{realmName}")
-    public ResponseEntity<List<AppUserDto>> getUsers(@PathVariable String realmName) {
+    public ResponseEntity<List<AppUserDto>> getUsers(@PathVariable String realmName, HttpServletResponse response) {
         return ResponseEntity.ok().body(userService.getAllUsers(realmName));
     }
+
 
     @GetMapping("/{realmName}/{username}")
     public ResponseEntity<AppUserDto> getUserByUsername(@PathVariable String realmName, @PathVariable String username) {

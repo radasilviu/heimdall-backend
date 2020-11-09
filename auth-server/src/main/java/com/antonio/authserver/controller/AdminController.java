@@ -6,9 +6,21 @@ import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.AdminService;
 import com.antonio.authserver.service.AuthService;
+import lombok.var;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("admin")
@@ -42,6 +54,36 @@ public class AdminController {
         JwtObject jwtObject = authService.generateNewAccessToken(refreshToken);
         return ResponseEntity.ok().body(jwtObject);
     }
+
+
+    @GetMapping("/setCredentials/{username}")
+    public void setCookie(HttpServletResponse response, @PathVariable String username) {
+        // create a cookie for username
+        Cookie cookieUsername = new Cookie("username", username);
+        cookieUsername.setDomain("localhost");
+        cookieUsername.setPath("/");
+//        Cookie cookiePassword = new Cookie("password", password);
+//        response.addCookie(cookiePassword);
+//        cookiePassword.setDomain("localhost");
+//        cookiePassword.setPath("/");
+        System.out.println(response.getHeader("Set-Cookie"));
+    }
+
+
+//    @GetMapping("/all-cookies")
+//    public String readAllCookies(HttpServletRequest request) {
+//
+//        System.out.println(request.getHeader( "Cookie" ));
+//        System.out.println(request.getCookies());
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            return Arrays.stream(cookies)
+//                    .map(c -> c.getName() + "=" + c.getValue()).collect(Collectors.joining(", "));
+//        }
+//
+//        return "No cookies";
+//    }
+
 
 
 }
