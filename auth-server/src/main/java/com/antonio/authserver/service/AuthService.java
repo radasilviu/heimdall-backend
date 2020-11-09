@@ -23,19 +23,13 @@ import java.util.*;
 @Transactional
 public class AuthService {
 
-    private BCryptPasswordEncoder passwordEncoder;
-
-    private ClientService clientService;
-
-    private UserService userService;
-
-    private JwtService jwtService;
-
-    private Environment env;
-
-    private AppUserRepository appUserRepository;
-
-    private EmailService emailService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final ClientService clientService;
+    private final UserService userService;
+    private final JwtService jwtService;
+    private final Environment env;
+    private final AppUserRepository appUserRepository;
+    private final EmailService emailService;
 
     @Autowired
     public AuthService(BCryptPasswordEncoder passwordEncoder, ClientService clientService, UserService userService,
@@ -61,6 +55,11 @@ public class AuthService {
         saveUserWithNewCodeValue(user, code);
 
         return code;
+    }
+    public void checkIfAccountIsActivated(ClientLoginRequest clientLoginRequest){
+        AppUser appUser = appUserRepository.findByUsernameAndRealmName(clientLoginRequest.getUsername(), clientLoginRequest.getRealm()).orElseThrow(() -> new CustomException("The username could not be found!", HttpStatus.NOT_FOUND));
+        if(!appUser.getIsActivated())
+            throw new CustomException("The account is not activated!",HttpStatus.BAD_REQUEST);
     }
 
     private void saveUserWithNewCodeValue(AppUserDto user, Code code) {

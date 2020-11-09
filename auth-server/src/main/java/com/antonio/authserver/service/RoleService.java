@@ -76,6 +76,9 @@ public class RoleService {
 		roleDto.setName(roleDto.getName().replaceAll("\\s+", ""));
 		if(roleDto.getName().equals("ROLE_ADMIN"))
 			throw new CustomException("You are not allowed to create additional ADMIN roles.",HttpStatus.BAD_REQUEST);
+		Optional<Role> duplicateRole = roleRepository.findByNameAndRealmName(roleDto.getName(), realmName);
+		if (duplicateRole.isPresent())
+			throw new CustomException("There already is a role with that name!",HttpStatus.CONFLICT);
 		Role role = roleRepository.findByNameAndRealmName(name,realmName)
 				.orElseThrow(() -> new CustomException("Role with the name [" + name + "] could not be found!",
 						HttpStatus.NOT_FOUND));

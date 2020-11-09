@@ -24,9 +24,9 @@ import freemarker.template.TemplateException;
 @Service
 public class EmailService{
 
-	private AppUserRepository appUserRepository;
-	private EmailProperties emailProperties;
-	private AppUserMapper appUserMapper;
+	private final AppUserRepository appUserRepository;
+	private final EmailProperties emailProperties;
+	private final AppUserMapper appUserMapper;
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;
 
@@ -54,14 +54,11 @@ public class EmailService{
 	public AppUserDto verifyAndActivateEmailCode(String emailCode) throws CustomException {
 		AppUser appUser = appUserRepository.findByEmailCode(emailCode).orElseThrow(() -> new CustomException(
 				"User with the emailCode [ " + emailCode + " ] could not be found!", HttpStatus.NOT_FOUND));
-		if (appUser.getIsActivated()) {
-			throw new CustomException(
-					"User account with the username " + appUser.getUsername() + " has been already activated.",
-					HttpStatus.CONFLICT);
-		} else {
+		if (!appUser.getIsActivated()) {
 			appUser.setIsActivated(true);
-			return appUserMapper.toAppUserDto(appUser);
+			appUserRepository.save(appUser);
 		}
+		return appUserMapper.toAppUserDto(appUser);
 	}
 
 	public void sendEmail(String template, Object model, String to, String subject, String from) {

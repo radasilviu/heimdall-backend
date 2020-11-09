@@ -6,6 +6,7 @@ import com.antonio.authserver.request.ChangePasswordRequest;
 import com.antonio.authserver.request.ProfileLoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.model.Code;
@@ -44,6 +45,7 @@ public class AuthController {
     @PostMapping(path = "/client-login")
     public ResponseEntity<?> clientLogin(@RequestBody ClientLoginRequest loginRequest) {
         Code code = authService.getCode(loginRequest);
+        authService.checkIfAccountIsActivated(loginRequest);
         if (code != null) {
             return ResponseEntity.ok().body(code);
         }

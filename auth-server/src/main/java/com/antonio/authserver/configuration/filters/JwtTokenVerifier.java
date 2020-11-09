@@ -45,37 +45,27 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = httpServletRequest.getHeader(SecurityConstants.HEADER_AUTHORIZATION);
-        if (Strings.isNullOrEmpty(authorizationHeader)) {
-            throw new CustomException("The user is not authorized to do this.", HttpStatus.UNAUTHORIZED);
+        if (httpServletRequest.getHeader("Referer") == null || !httpServletRequest.getHeader("Referer").contains("emailCode")) {
+            if (Strings.isNullOrEmpty(authorizationHeader)) {
+                throw new CustomException("The user is not authorized to do this.", HttpStatus.UNAUTHORIZED);
+            }
+            if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
+                final String token = extractToken(authorizationHeader, SecurityConstants.BEARER_TOKEN_PREFIX);
+                final AppUserDto user = extractUserFromToken(token);
+                verifyToken(token, user.getToken());
+                checkUserPrivileges(httpServletRequest, user);
+            }
+            if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
+                final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
+                final AppUserDto user = extractUserFromToken(token);
+                verifyToken(token, user.getToken());
+                final Set<Role> authorities = user.getRoles();
+                final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
+                setAuthentication(user.getUsername(), grantedAuthorities);
+            }
         }
-
-        if (authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)) {
-
-            final String token = extractToken(authorizationHeader, SecurityConstants.BEARER_TOKEN_PREFIX);
-            final AppUserDto user = extractUserFromToken(token);
-
-            verifyToken(token, user.getToken());
-            checkUserPrivileges(httpServletRequest,user);
-        }
-
-
-        if (authorizationHeader.startsWith(SecurityConstants.BASIC_TOKEN_PREFIX)) {
-
-            final String token = authorizationHeader.replace(SecurityConstants.BASIC_TOKEN_PREFIX, "");
-
-
-            final AppUserDto user = extractUserFromToken(token);
-            verifyToken(token, user.getToken());
-
-            final Set<Role> authorities = user.getRoles();
-            final Set<GrantedAuthority> grantedAuthorities = getGrantedAuthoritySet(authorities);
-            setAuthentication(user.getUsername(), grantedAuthorities);
-
-        }
-
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
-
     private String extractToken(String authorizationHeader, String key) {
         return authorizationHeader.replace(key, "");
     }

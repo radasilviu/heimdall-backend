@@ -8,7 +8,7 @@ import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.service.EmailService;
 @Controller
 public class EmailController {
-	private EmailService emailService;
+	private final EmailService emailService;
 	@Autowired
 	public EmailController(EmailService emailService) {
 		this.emailService = emailService;
