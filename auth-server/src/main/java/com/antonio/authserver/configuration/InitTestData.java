@@ -27,11 +27,13 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     private final IdentityProviderRepository identityProviderRepository;
     private final GroupRepository groupRepository;
     private final PrivilegeService privilegeService;
-    private final ResourceService resourceService;
     private final RoleService roleService;
+    private final ResourceRepository resourceRepository;
+    private final PrivilegeRepository privilegeRepository;
+    private final RoleResourcePrivilegeRepository roleResourcePrivilegeRepository;
 
     @Autowired
-    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, ResourceService resourceService, RoleService roleService) {
+    public InitTestData(AppUserRepository appUserRepository, RoleRepository roleRepository, ClientRepository clientRepository, BCryptPasswordEncoder passwordEncoder, RealmRepository realmRepository, IdentityProviderRepository identityProviderRepository, GroupRepository groupRepository, PrivilegeService privilegeService, RoleService roleService, ResourceRepository resourceRepository, PrivilegeRepository privilegeRepository, RoleResourcePrivilegeRepository roleResourcePrivilegeRepository) {
         this.appUserRepository = appUserRepository;
         this.roleRepository = roleRepository;
         this.clientRepository = clientRepository;
@@ -40,8 +42,10 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         this.identityProviderRepository = identityProviderRepository;
         this.groupRepository = groupRepository;
         this.privilegeService = privilegeService;
-        this.resourceService = resourceService;
         this.roleService = roleService;
+        this.resourceRepository = resourceRepository;
+        this.privilegeRepository = privilegeRepository;
+        this.roleResourcePrivilegeRepository = roleResourcePrivilegeRepository;
     }
 
     @Override
@@ -64,11 +68,14 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
     }
 
     private void initPrivileges(){
-        privilegeService.generatePrivileges();
+        privilegeService.createPrivileges();
     }
 
     private void initResources(){
-        resourceService.generateCompaniesAndBooksResources();
+            Resource companies = new Resource("COMPANIES");
+            Resource books = new Resource("BOOKS");
+            resourceRepository.save(companies);
+            resourceRepository.save(books);
 }
 
     private void initClients(List<Realm> realms) {
@@ -98,7 +105,7 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         roleRepository.saveAll(roleList);
         roleService.addResourceToRole(user.getRealm().getName(), user.getName(), "COMPANIES");
         roleService.addResourceToRole(user.getRealm().getName(), user.getName(), "BOOKS");
-        resourceService.assignAllPrivilegesForRoleUser(roleRepository.findByNameAndRealmName("ROLE_USER","master0").get());
+        assignAllPrivilegesForRoleUser(roleRepository.findByNameAndRealmName("ROLE_USER","master0").get());
     }
 
     private List<Realm> initRealms() {
@@ -112,5 +119,25 @@ public class InitTestData implements ApplicationListener<ApplicationContextEvent
         }
         realms = realmRepository.saveAll(realms);
         return realms;
+    }
+    //for basic role_user with all privileges
+    private Set<Resource> getBasicResourcesForRoleUserDemo() {
+        Set<Resource> resources = new HashSet<>();
+        resources.add(resourceRepository.findByName("COMPANIES").get());
+        resources.add(resourceRepository.findByName("BOOKS").get());
+        return resources;
+    }
+    //for basic role_user with all privileges
+    private void assignAllPrivilegesForRoleUser(Role role) {
+        Set<Resource> basicResources = getBasicResourcesForRoleUserDemo();
+        List<Privilege> privileges = privilegeRepository.findAll();
+        for (Resource resource : basicResources){
+            RoleResourcePrivilege roleResourcePrivilege = getRoleResourcePrivilegeByRoleAndResource(role, resource).get();
+            roleResourcePrivilege.getPrivileges().addAll(privileges);
+            roleResourcePrivilegeRepository.save(roleResourcePrivilege);
+        }
+    }
+    private Optional<RoleResourcePrivilege> getRoleResourcePrivilegeByRoleAndResource(Role role,Resource resource){
+        return roleResourcePrivilegeRepository.findByRoleAndResource(role, resource);
     }
 }

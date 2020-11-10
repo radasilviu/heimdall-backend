@@ -65,11 +65,11 @@ public class RealmService {
         return realmMapper.toRealmDto(temp);
     }
 
-    public RealmRelationsDto getRealmByName(String realmName) {
+    public RealmDto getRealmByName(String realmName) {
 
         Realm realm = realmRepository.findByName(realmName).orElseThrow(() -> new CustomException("Realm with the name [" + realmName +" ] could not be found!",HttpStatus.NOT_FOUND));
         RealmDto realmDto = realmMapper.toRealmDto(realm);
-        return transferDataToRealmRelationsDto(realmName,realmDto);
+        return realmDto;
     }
 
     public List<RealmDto> getAllRealms() {
@@ -105,19 +105,5 @@ public class RealmService {
         Realm realm = realmRepository.findByName(name).orElseThrow(() -> new CustomException(
                 "Realm with the name [ " + name + " ] could not be found!", HttpStatus.NOT_FOUND));
         realmRepository.delete(realm);
-    }
-
-    public RealmRelationsDto transferDataToRealmRelationsDto(String realmName,RealmDto realmDto){
-        RealmRelationsDto realmRelationsDto = new RealmRelationsDto();
-        List<ClientDto> clients = clientMapper.toClientDtoList(clientRepository.findAllByRealmName(realmName));
-        List<AppUserDto> users = appUserMapper.toAppUserDtoList(appUserRepository.findAllByRealmName(realmName));
-        List<RoleDto> roles = roleMapper.toRoleDtoList(roleRepository.findAllByRealmName(realmName));
-        List<GroupDto> groups = groupMapper.toGroupDtoList(groupRepository.findAllByRealmName(realmName));
-        realmRelationsDto.setClients(clients);
-        realmRelationsDto.setGroups(groups);
-        realmRelationsDto.setRealm(realmDto);
-        realmRelationsDto.setUsers(users);
-        realmRelationsDto.setRoles(roles);
-        return  realmRelationsDto;
     }
 }

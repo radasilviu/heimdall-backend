@@ -50,18 +50,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	private List<String> getPrivileges(Set<Role> roles) {
 
-		List<String> privileges = new ArrayList<>();
-		List<Privilege> collection = new ArrayList<>();
+		List<String> privilegeNames = new ArrayList<>();
+		List<Privilege> privileges = new ArrayList<>();
 		for (Role role : roles) {
 			for(Resource resource : role.getRoleResources()) {
 				RoleResourcePrivilege roleResourcePrivilege = roleResourcePrivilegeRepository.findByRoleAndResource(role, resource).get();
-				collection.addAll(roleResourcePrivilege.getPrivileges());
+				privileges.addAll(roleResourcePrivilege.getPrivileges());
 			}
 		}
-		for (Privilege item : collection) {
-			privileges.add(item.getName());
+		for (Privilege item : privileges) {
+			privilegeNames.add(item.getName());
 		}
-		return privileges;
+		return privilegeNames;
 	}
 
 	private static List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {
