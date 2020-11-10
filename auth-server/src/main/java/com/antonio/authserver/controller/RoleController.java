@@ -1,5 +1,6 @@
 package com.antonio.authserver.controller;
 
+import com.antonio.authserver.dto.ResourceDto;
 import com.antonio.authserver.dto.RoleDto;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.service.RoleService;
@@ -7,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @RestController
 @RequestMapping("api/role")
 public class RoleController {
 
-	private RoleService roleService;
+	private final RoleService roleService;
 
 	@Autowired
 	public RoleController(RoleService roleService) {
@@ -49,6 +51,17 @@ public class RoleController {
 		return ResponseEntity.ok().body(responseMessage);
 
 	}
-
+	@PutMapping("/{resourceName}/add")
+	public ResponseEntity<ResponseMessage> addResourceToRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
+		roleService.addResourceToRole(role.getRealm().getName(), role.getName(), resourceName);
+		ResponseMessage responseMessage = new ResponseMessage("Resource added successfully!");
+		return ResponseEntity.ok().body(responseMessage);
+	}
+	@PutMapping("/{resourceName}/remove")
+	public ResponseEntity<ResponseMessage> removeResourceFromRoleDto(@PathVariable String resourceName, @RequestBody RoleDto role){
+		roleService.removeResourceFromRole(role.getRealm().getName(), role.getName(), resourceName);
+		ResponseMessage responseMessage = new ResponseMessage("Resource removed successfully!");
+		return ResponseEntity.ok().body(responseMessage);
+	}
 
 }
