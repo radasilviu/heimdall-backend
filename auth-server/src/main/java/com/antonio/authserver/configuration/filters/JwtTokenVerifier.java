@@ -128,7 +128,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
         if (!roleService.checkFfUserIsAdmin(user)) {
             String resourceHeader = httpServletRequest.getHeader(SecurityConstants.RESOURCE).toUpperCase();
             String requestTypeHeader = httpServletRequest.getHeader(SecurityConstants.REQUEST).toUpperCase();
-            if (!resourceHeader.equals("PUBLIC"))
+            if (!resourceHeader.equals("DASHBOARD"))
                 checkIfUserHasNecessaryAuthorities(user, resourceHeader, requestTypeHeader);
         }
     }

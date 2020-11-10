@@ -102,22 +102,36 @@ public class UserService {
         appUserDto.setUsername(appUserDto.getUsername().replaceAll("\\s+", ""));
         AppUser appUser = appUserRepository.findByUsernameAndRealmName(username, realmName).orElseThrow(() -> new CustomException(
                 "User with the username [ " + username + " ] could not be found!", HttpStatus.NOT_FOUND));
-        if (appUserDto.getUsername().equals(""))
-            throw new CustomException("The inserted User cannot be null!", HttpStatus.BAD_REQUEST);
-        appUser.setUsername(appUserDto.getUsername());
-        appUser.setPassword(appUserDto.getPassword());
+
+        if (appUserDto.getUsername().equals("")) {
+            throw new CustomException("The inserted username cannot be null!", HttpStatus.BAD_REQUEST);
+        } else {
+            appUser.setUsername(appUserDto.getUsername());
+        }
+
+        if (appUserDto.getEmail().equals("")) {
+            throw new CustomException("The inserted email cannot be null!", HttpStatus.BAD_REQUEST);
+        } else {
+            appUser.setEmail(appUserDto.getEmail());
+        }
+
         appUser.setToken(appUserDto.getToken());
         appUser.setRefreshToken(appUserDto.getRefreshToken());
 
+        if (appUserDto.getPassword().equals("")) {
+            throw new CustomException("The inserted password cannot be null!", HttpStatus.BAD_REQUEST);
+        } else {
+            appUser.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
+        }
 
         appUserRepository.save(appUser);
     }
 
     public List<AppUserDto> getUsersWithoutAdmins(String realmName) {
-        Role amdinRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow(() -> new CustomException("Role not found", HttpStatus.BAD_REQUEST));
         List<AppUser> users = appUserRepository.findAll()
                 .stream()
-                .filter(u -> !u.getRoles().contains(amdinRole))
+                .filter(u -> !u.getRoles().contains(adminRole))
                 .collect(Collectors.toList());
         return appUserMapper.toAppUserDtoList(users);
     }
@@ -129,7 +143,7 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(
                         "Cannot add the role [ " + role.getName() + " ] to the user. It needs to be created first.",
                         HttpStatus.BAD_REQUEST));
-        if(roleOptional.getName().equals("ROLE_ADMIN"))
+        if (roleOptional.getName().equals("ROLE_ADMIN"))
             adminAlreadyExists();
         appUser.getRoles().add(roleOptional);
         appUserRepository.save(appUser);
@@ -252,7 +266,7 @@ public class UserService {
         return appUserMapper.toAppUserDto(userOptional.get());
     }
 
-    public void adminAlreadyExists(){
+    public void adminAlreadyExists() {
         List<AppUser> users = appUserRepository.findAll();
         users.forEach(appUser -> {
             boolean isAdmin = false;
@@ -262,8 +276,8 @@ public class UserService {
                     break;
                 }
             }
-            if(isAdmin)
-                throw new CustomException("There already is a SUPER ADMIN!",HttpStatus.CONFLICT);
+            if (isAdmin)
+                throw new CustomException("There already is a SUPER ADMIN!", HttpStatus.CONFLICT);
         });
     }
 }

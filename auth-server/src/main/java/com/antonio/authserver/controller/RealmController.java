@@ -1,23 +1,21 @@
 package com.antonio.authserver.controller;
+import java.util.List;
 
-import com.antonio.authserver.dto.RealmRelationsDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.RealmDto;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.request.RealmGeneralSettingRequest;
 import com.antonio.authserver.request.RealmLoginSettingRequest;
 import com.antonio.authserver.service.RealmService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api")
 @CrossOrigin
 public class RealmController {
 
-    private RealmService realmService;
+    private final RealmService realmService;
 
     @Autowired
     public RealmController(RealmService realmService) {
@@ -30,7 +28,7 @@ public class RealmController {
     }
 
     @GetMapping("/admin/realm/{name}")
-    public ResponseEntity<RealmRelationsDto> getRealmByName(@PathVariable String name) {
+    public ResponseEntity<RealmDto> getRealmByName(@PathVariable String name) {
         return ResponseEntity.ok().body(realmService.getRealmByName(name));
     }
 
@@ -66,7 +64,7 @@ public class RealmController {
     }
 
     @GetMapping("/realm/check/{realm}")
-    public RealmRelationsDto checkRealmExists(@PathVariable final String realm) {
+    public RealmDto checkRealmExists(@PathVariable final String realm) {
         return realmService.getRealmByName(realm);
     }
 }
