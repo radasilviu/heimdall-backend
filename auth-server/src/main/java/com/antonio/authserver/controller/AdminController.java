@@ -63,7 +63,7 @@ public class AdminController {
         cookieUsername.setDomain("localhost");
         cookieUsername.setPath("/");
 //        Cookie cookiePassword = new Cookie("password", password);
-//        response.addCookie(cookiePassword);
+        response.addCookie(cookieUsername);
 //        cookiePassword.setDomain("localhost");
 //        cookiePassword.setPath("/");
         System.out.println(response.getHeader("Set-Cookie"));
