@@ -1,23 +1,21 @@
 package com.antonio.authserver.controller;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.antonio.authserver.dto.RealmDto;
 import com.antonio.authserver.model.ResponseMessage;
 import com.antonio.authserver.request.RealmGeneralSettingRequest;
 import com.antonio.authserver.request.RealmLoginSettingRequest;
 import com.antonio.authserver.service.RealmService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import sun.security.krb5.Realm;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api")
 @CrossOrigin
 public class RealmController {
 
-    private RealmService realmService;
+    private final RealmService realmService;
 
     @Autowired
     public RealmController(RealmService realmService) {
