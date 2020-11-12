@@ -58,17 +58,8 @@ public class AdminController {
 
     @GetMapping("/setCredentials/{username}")
     public void setCookie(HttpServletResponse response, @PathVariable String username) {
-        // create a cookie for username
-        Cookie cookieUsername = new Cookie("username", username);
-        cookieUsername.setDomain("localhost");
-        cookieUsername.setPath("/");
-//        Cookie cookiePassword = new Cookie("password", password);
-        response.addCookie(cookieUsername);
-//        cookiePassword.setDomain("localhost");
-//        cookiePassword.setPath("/");
-        System.out.println(response.getHeader("Set-Cookie"));
+        adminService.setCookie(response, username);
     }
-
 
 //    @GetMapping("/all-cookies")
 //    public String readAllCookies(HttpServletRequest request) {

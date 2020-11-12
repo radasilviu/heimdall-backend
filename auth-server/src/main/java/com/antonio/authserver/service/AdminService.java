@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.antonio.authserver.dto.AppUserDto;
 import com.antonio.authserver.entity.Role;
@@ -19,18 +20,23 @@ import com.antonio.authserver.model.CustomException;
 import com.antonio.authserver.model.JwtObject;
 import com.antonio.authserver.utils.SecurityConstants;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @Service
 public class AdminService {
 
     private UserService userService;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
+    private BCryptPasswordEncoder encoder;
 
     @Autowired
-    public AdminService(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AdminService(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService, BCryptPasswordEncoder encoder) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.encoder = encoder;
     }
 
     public JwtObject adminLogin(AdminCredential adminCredential) {
@@ -89,4 +95,15 @@ public class AdminService {
                 adminCredential.getUsername(), adminCredential.getPassword(), new ArrayList<>()));
         return authentication;
     }
+
+    public void setCookie(HttpServletResponse response, String data) {
+
+        Cookie cookie = new Cookie("user", data);
+        cookie.setDomain("localhost");
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        System.out.println(response.getHeader("Set-Cookie"));
+    }
+
+
 }

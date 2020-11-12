@@ -73,4 +73,6 @@ public class AppUser {
         this.realm = realm;
         this.identityProvider = identityProvider;
     }
+
+
 }

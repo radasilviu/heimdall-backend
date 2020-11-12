@@ -91,4 +91,10 @@ public class UserController {
         return userService.getUsersWithoutAdmins(realmName);
     }
 
+
+    @GetMapping("/{rememberMe}")
+    public void getRememberMeCookie(@PathVariable String rememberMe){
+        rememberMe = "true";
+    }
+
 }

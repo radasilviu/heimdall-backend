@@ -43,4 +43,6 @@ public class AppUserDto implements Serializable {
         this.isActivated = isActivated;
         this.emailCode = emailCode;
     }
+
+
 }
